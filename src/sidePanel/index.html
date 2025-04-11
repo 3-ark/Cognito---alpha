@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Bruside</title>
+
+    <base href="/" />
+
+    <meta content="light" name="color-scheme" />
+    <meta
+            content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+            name="viewport"
+    />
+    <meta content="telephone=no" name="format-detection" />
+    <meta content="no" name="msapplication-tap-highlight" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<style>
+:root {
+    --bg: rgb(235, 216, 171);
+    --active: #78896c;
+    --text: black;
+    font-family: monospace;
+}
+
+body {
+    margin: 0;
+    position: relative;
+    background-color: var(--bg);
+}
+
+/* Add paper texture overlay */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('assets/images/paper-texture.png');
+    background-size: 512px;
+    opacity: 0.5;
+    pointer-events: none; /* Makes it non-interactive */
+    mix-blend-mode: multiply; /* Blends with background color */
+    z-index: 100; /* Places behind content */
+}
+
+#root {
+    position: relative;
+    z-index: 1; /* Ensures content stays on top */
+}
+
+/* Keep existing scrollbar and other styles */
+::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: monospace;
+}
+</style>
+<div id="root" style="background-color: var(--bg);"></div>
+</body>
+
+
+</html>
