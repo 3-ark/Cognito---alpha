@@ -4,10 +4,10 @@
 
 All-around tiny browser-augmented chat client for open-source language models.
 
-##Plan
+## Plan
 
-- Add https://www.google.com/search?q= as searching engine
-- Inject code from chat
+- [ ] Add https://www.google.com/search?q= as searching engine
+- [ ] Inject code from chat
 
 ## installation
 
