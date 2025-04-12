@@ -358,7 +358,7 @@ export const Header = ({ ...props }) => {
                 fontSize="md"
                 fontWeight={600}
               >
-                Come, Bruce, come! The game is afoot!
+                Bruce! The game is afoot!
               </Text>
               <Docs />
             </Box>
