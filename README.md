@@ -12,6 +12,7 @@ All-around tiny browser-augmented chat client for open-source language models.
 - [ ] Migrate webext-redux to 4
 - [ ] Migrate Chakra-ui to 3
 - [ ] toolkit to 2 webpack-plugin 13 framer-motion to 12
+- [ ] Picture
 
 ## installation
 
