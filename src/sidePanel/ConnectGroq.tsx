@@ -2,7 +2,6 @@ import React from 'react';
 import { useState } from 'react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { Box, Button, IconButton, Input } from '@chakra-ui/react';
-
 import { useConfig } from './ConfigContext';
 import { GROQ_URL } from './constants';
 import toast from 'react-hot-toast';
@@ -17,11 +16,9 @@ export const ConnectGroq = () => {
       .then(data => {
         if (data?.error) {
           toast.error(`${data?.error?.message}`)
-
           updateConfig({ groqError: data?.error?.message, groqConnected: false });
         } else {
           toast.success('connected to groq');
-
           updateConfig({
             groqApiKey: apiKey,
             groqConnected: true,
@@ -100,7 +97,6 @@ export const ConnectGroq = () => {
         onClick={() => setVisibleApiKeys(!visibleApiKeys)}
       />
       )}
-
     </Box>
   );
 };

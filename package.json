@@ -1,11 +1,16 @@
 {
   "name": "Bruside",
-  "version": "2.0",
+  "version": "3.0",
   "description": "Bruside",
   "main": "index.js",
   "scripts": {
     "start": "npm run clear && webpack -w --config config/webpack.config.js",
     "clear": "rimraf dist && rimraf node_modules/.cache"
+  },
+  "overrides": {
+    "rimraf": {
+      "glob": "11.0.1"
+    }
   },
   "repository": {
     "type": "git",
@@ -44,10 +49,12 @@
     "fetch-event-stream": "^0.1.5",
     "framer-motion": "^11.1.7",
     "generate-json-from-js-webpack-plugin": "^0.1.1",
+    "glob": "^11.0.1",
     "globals": "^15.1.0",
     "html-to-image": "^1.11.11",
     "html-webpack-plugin": "^5.5.3",
     "localforage": "^1.10.0",
+    "lru-cache": "^11.1.0",
     "mini-css-extract-plugin": "^2.7.6",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
@@ -74,6 +81,7 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.1.4",
+    "npm-force-resolutions": "^0.0.10",
     "redux-logger": "^3.0.6",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",

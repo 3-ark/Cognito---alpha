@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ViewIcon, ViewOffIcon, CheckIcon } from '@chakra-ui/icons';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { Box, Button, IconButton, Input } from '@chakra-ui/react';
 import { useConfig } from './ConfigContext';
 import toast from 'react-hot-toast';
@@ -11,12 +11,7 @@ export const ConnectGemini = () => {
   const [visibleApiKeys, setVisibleApiKeys] = useState(false);
   const onConnect = () => {
     fetch(GEMINI_URL, { headers: { Authorization: `Bearer ${apiKey}` } })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
         if (data?.error) {
           toast.error(`${data?.error?.message}`);
@@ -53,6 +48,7 @@ export const ConnectGemini = () => {
         size="sm"
         type={!visibleApiKeys ? 'password' : 'text'}
         value={apiKey}
+        variant='outline'
         onChange={e => setApiKey(e.target.value)}
       />
       {!isConnected && (
@@ -76,7 +72,7 @@ export const ConnectGemini = () => {
             background: 'var(--active)',
             border: '2px solid var(--text)'
           }}
-          aria-label="Toggle visibility"
+          aria-label="Done"
           background="var(--active)"
           border="2px solid var(--text)"
           color="var(--text)"
