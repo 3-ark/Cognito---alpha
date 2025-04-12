@@ -148,11 +148,11 @@ const ThinkingBlock = ({ content }: { content: string }) => {
           borderRadius='md'
           p={3}
         >
-          {/* Render the thinking content, potentially also with Markdown */}
-          {/* Pass the refined components here as well */}
-          <Markdown components={{
-            ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A
-          }}>{content}</Markdown>
+          <div className="markdown-body">
+            <Markdown components={{
+              ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A
+            }}>{content}</Markdown>
+          </div>
         </Box>
       </Collapse>
     </Box>
@@ -219,18 +219,24 @@ export const Message = ({ m = '', i = 0 }) => {
         }
       }}
     >
-      {/* Render parts sequentially */}
-      {parts.map((part, index) => {
-        const match = part.match(thinkRegex);
+      <div className="message-markdown">
+        {/* Render parts sequentially */}
+        {parts.map((part, index) => {
+          const match = part.match(thinkRegex);
 
-        if (match && match[1]) {
-          // Render thinking block
-          return <ThinkingBlock key={index} content={match[1]} />;
-        } else {
-          // Render normal markdown content
-          return <Markdown key={index} components={markdownComponents}>{part}</Markdown>;
-        }
-      })}
+          if (match && match[1]) {
+            // Render thinking block
+            return <ThinkingBlock key={index} content={match[1]} />;
+          } else {
+            // Render normal markdown content
+            return (
+              <div className="message-content">
+                <Markdown components={markdownComponents}>{part}</Markdown>
+              </div>
+            );
+          }
+        })}
+      </div>
     </Box>
   );
 };
