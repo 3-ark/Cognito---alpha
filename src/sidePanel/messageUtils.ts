@@ -51,7 +51,14 @@ export const downloadJson = (messages: string[]) => {
 export const downloadImage = (messages: string[]) => {
   if (!messages.length) return;
 
-  const nodes = document.querySelectorAll('.chatMessage');
+  const nodes = document.querySelectorAll<HTMLElement>('.chatMessage');
+  
+  if (!nodes || nodes.length === 0) { // Check if nodes exist and the list is not empty
+    console.warn('No chat messages found to generate image.');
+    
+    return; // Exit early if no nodes found
+  }
+
   const wrapper = document.createElement('div');
 
   wrapper.style.display = 'flex';
@@ -63,19 +70,28 @@ export const downloadImage = (messages: string[]) => {
   nodes.forEach(n => {
     const cloned = n.cloneNode(true);
 
+    if (cloned instanceof HTMLElement) {
     cloned.style.marginTop = '1rem';
     wrapper.appendChild(cloned);
-  });
+  } else {
+    // Handle cases where a node might not be an HTMLElement, though unlikely here
+    console.warn('Cloned node is not an HTMLElement:', cloned);
+}
+});
 
-  function filter(node) {
-    const isIcon = node?.className?.includes?.('chakra-button');
-
-    return (!isIcon);
+function filter(node: Node): boolean {
+  // Add type check for safety, although className is usually on Element/HTMLElement
+  if (node instanceof Element) {
+      const isIcon = node.className?.includes?.('chakra-button');
+      
+      return !isIcon;
   }
+  
+  return true; // Keep nodes that aren't Elements (like text nodes) if needed by html-to-image
+}
 
   document.body.appendChild(wrapper);
 
-  if (nodes && nodes.length > 0) { // Check if nodes exist and the list is not empty
     toPng(wrapper, {
       filter,
       pixelRatio: 4,
@@ -84,15 +100,16 @@ export const downloadImage = (messages: string[]) => {
     })
       .then(dataUrl => {
         const img = new Image();
-
+        
         img.src = dataUrl;
         const element = document.createElement('a');
-
+        
         element.setAttribute('href', dataUrl);
         const filename = `chat_${(new Date().toJSON().slice(0,10))}.png`;
-
+        
         element.setAttribute('download', filename);
         element.style.display = 'none';
+
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
@@ -106,12 +123,4 @@ export const downloadImage = (messages: string[]) => {
             document.body.removeChild(wrapper);
          }
       });
-  } else {
-    // Handle the case where no nodes were found, and remove the wrapper
-    console.warn('No chat messages found to generate image.');
-
-    if (document.body.contains(wrapper)) {
-       document.body.removeChild(wrapper);
-    }
   }
-};

@@ -1,12 +1,14 @@
 
-import React from 'react';
-import { AccordionButton, AccordionItem, AccordionPanel, Button, Grid, Text } from '@chakra-ui/react';
+import {
+   AccordionButton, AccordionItem, AccordionPanel, Grid, Text 
+  } from '@chakra-ui/react';
 
 import { useConfig } from './ConfigContext';
 import { SettingTitle } from './SettingsTitle';
 
 export const Automation = () => {
   const { config } = useConfig();
+  
   return (
     <AccordionItem
       border="2px solid var(--text)"
