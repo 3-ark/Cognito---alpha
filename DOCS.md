@@ -66,7 +66,7 @@ Basic web-augmentation for your chats. Enter your web search query, and Bruside 
 
 - you can choose `duckduckgo` or `brave` as your web source
 - adjust `char limit` to control the maximum amount of characters you want to share in your conversation. decrease this amount if you have limited context window.
-
+- Google added. Note: Sometimes you should visit yourself for the first search to gain access.
 ## File Structure
 
 Key project structure with implementation details:

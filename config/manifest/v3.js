@@ -25,7 +25,7 @@ module.exports = {
   "host_permissions": ["<all_urls>"],
   content_security_policy: {
     extension_pages: `
-      default-src 'self' 'unsafe-eval' http://localhost:* http://127.0.0.1:* https://api.groq.com https://html.duckduckgo.com https://generativelanguage.googleapis.com https://search.brave.com https://api.openai.com;
+      default-src 'self' 'unsafe-eval' http://localhost:* http://127.0.0.1:* https://api.groq.com https://*.duckduckgo.com https://generativelanguage.googleapis.com https://*.brave.com https://api.openai.com https://*.google.com;
       script-src 'self'; 
       style-src 'self' 'unsafe-inline'
         https://fonts.googleapis.com

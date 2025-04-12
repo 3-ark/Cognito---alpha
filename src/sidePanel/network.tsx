@@ -53,7 +53,11 @@ export const urlRewriteRuntime = async function (
 };
 
 export const webSearch = async (query: string, webMode: string) => {
-  const baseUrl = webMode === 'brave' ? `https://search.brave.com/search?q=${query}` : 'https://html.duckduckgo.com/html/';
+  const baseUrl = webMode === 'brave' 
+    ? `https://search.brave.com/search?q=${query}`
+    : webMode === 'google' // Added google case
+      ? `https://www.google.com/search?q=${query}`
+      : 'https://html.duckduckgo.com/html/';
 
   await urlRewriteRuntime(cleanUrl(`${baseUrl}${query}`));
 
@@ -67,8 +71,10 @@ export const webSearch = async (query: string, webMode: string) => {
   const htmlString = await fetch(
     `${baseUrl}`,
     {
- signal: abortController.signal, method: webMode === 'brave' ? 'GET' : 'POST', body: webMode === 'brave' ? undefined : formData 
-}
+      signal: abortController.signal,
+      method: webMode === 'brave' || webMode === 'google' ? 'GET' : 'POST', // Added google
+      body: webMode === 'brave' || webMode === 'google' ? undefined : formData
+    }
   )
     .then(response => response.text())
     .catch();

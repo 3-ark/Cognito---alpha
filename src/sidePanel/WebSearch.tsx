@@ -38,7 +38,7 @@ const WebSearchButton = ({ size, config }) => (
 
 const WebSearchModeSelector = ({ webMode, updateConfig }) => (
   <Grid width="50%">
-    {['duckduckgo', 'brave'].map(mode => (
+    {['duckduckgo', 'brave', 'google'].map(mode => ( // Added google
       <Grid
         key={mode}
         alignItems="center"
