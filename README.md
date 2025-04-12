@@ -6,7 +6,7 @@ All-around tiny browser-augmented chat client for open-source language models.
 
 ## Plan
 
-- [ ] Add https://www.google.com/search?q= as searching engine
+- [X] Add https://www.google.com/search?q= as searching engine
 - [ ] Inject code from chat
 - [ ] Migrate React to 19
 - [ ] Migrate webext-redux to 4
