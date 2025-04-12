@@ -1,0 +1,26 @@
+# Auto detect text files and ensure they use LF endings in the repo
+* text=auto eol=lf
+
+# Explicitly declare files that should always have LF endings
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+eslint.config.mjs text eol=lf
+
+# Declare files that should always have CRLF endings (if any)
+# *.bat text eol=crlf
+
+# Denote binary files to prevent Git from changing them
+*.png binary
+*.jpg binary
+*.gif binary
+# Add other binary types as needed
