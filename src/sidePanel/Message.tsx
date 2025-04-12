@@ -1,70 +1,126 @@
-import { ReactNode, useState } from 'react';
+import {
+   ClassAttributes,HTMLAttributes, ReactNode, useState 
+  } from 'react'; // Added HTMLAttributes, ClassAttributes
 import Markdown from 'react-markdown';
 import { CopyIcon } from '@chakra-ui/icons';
 import {
- Box, Button, Collapse, IconButton, useDisclosure 
-} from '@chakra-ui/react'; // Added Collapse, useDisclosure
+ Box, Button, Collapse, IconButton, useDisclosure
+} from '@chakra-ui/react';
 
-const Ul = ({ children }: { children: ReactNode }) => (
+// Define a more specific type for list props, making children optional
+// and allowing other standard HTML attributes for ul/ol elements.
+type ListProps = { children?: ReactNode } & HTMLAttributes<HTMLUListElement | HTMLOListElement>;
+
+const Ul = ({ children, ...rest }: ListProps) => (
   <ul style={{
- paddingLeft: '2rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' 
-}}>{children}</ul>
-);
-const P = ({ children }: { children: ReactNode }) => (
-  <p style={{
- paddingTop: 0, paddingBottom: '0.2rem', wordBreak: 'break-word' 
-}}>{children}</p>
-);
-const Pre = ({ children }: { children: ReactNode }) => (
-  <pre style={{
- overflow: 'scroll', paddingLeft: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem', margin: '1rem 0', background: 'var(--text)', color: 'var(--bg)', borderRadius: '16px', maxWidth: '80vw' 
-}}>{children}</pre>
+ paddingLeft: '2rem', paddingTop: '0.5rem', paddingBottom: '0.5rem'
+}}
+{...rest}>{children}</ul>
 );
 
-const Code = ({ children }: { children: ReactNode }) => {
+// Define a more specific type for paragraph props
+type ParagraphProps = { children?: ReactNode } & HTMLAttributes<HTMLParagraphElement>;
+
+const P = ({ children, ...rest }: ParagraphProps) => (
+  <p style={{
+ paddingTop: 0, paddingBottom: '0.2rem', wordBreak: 'break-word'
+}}
+{...rest}>{children}</p>
+);
+
+// Define a more specific type for pre props
+type PreProps = { children?: ReactNode } & HTMLAttributes<HTMLPreElement>;
+
+const Pre = ({ children, ...rest }: PreProps) => (
+  <pre style={{
+ overflow: 'scroll', paddingLeft: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem', margin: '1rem 0', background: 'var(--text)', color: 'var(--bg)', borderRadius: '16px', maxWidth: '80vw'
+}}
+{...rest}>{children}</pre>
+);
+
+// Define a more specific type for code props
+type CodeProps = { children?: ReactNode; className?: string; inline?: boolean } & HTMLAttributes<HTMLElement>;
+
+const Code = ({
+   children, className, inline, ...rest 
+  }: CodeProps) => {
   const [copied, setCopied] = useState(false);
   const copyToClipboard = () => {
-    setCopied(true);
-    navigator.clipboard.writeText(children as string);
+    if (typeof children === 'string') {
+      setCopied(true);
+      navigator.clipboard.writeText(children);
+      setTimeout(() => setCopied(false), 1500); // Reset copied state after 1.5s
+    }
   };
 
-  const inline = (children?.length || 0) > 25;
+  // Determine if it's a block or inline code based on className (react-markdown convention)
+  const match = /language-(\w+)/.exec(className || '');
+  const isBlock = !!match; // True if className contains language-*, indicating a block
 
-  return (
-    <>
-      <code style={{
-        color: 'var(--bg)',
-        background: 'var(--text)',
-        paddingLeft: !inline ? '0.5rem' : 0,
-        paddingRight: !inline ? '0.5rem' : 0,
-        borderRadius: '6px'
-      }}
-      >
-        {children}
-      </code>
-      {inline && (
+  if (isBlock) {
+    return (
+      <Box position="relative" my={4}>
+        <pre style={{
+          overflow: 'auto', // Changed from scroll to auto
+          padding: '1rem', // Consistent padding
+          margin: 0, // Reset margin if Box handles it
+          background: 'var(--text)',
+          color: 'var(--bg)',
+          borderRadius: '8px', // Slightly smaller radius for blocks
+          maxWidth: '100%' // Allow full width within container
+        }}
+{...rest}>
+          <code className={className}>{children}</code>
+        </pre>
         <IconButton
-          aria-label="Copy"
-          background="var(--text)"
-          borderRadius={8}
-          icon={<CopyIcon color="var(--bg)" fontSize="sm" />}
-          marginLeft={2}
-          marginTop={2}
+          _hover={{ background: 'var(--active)' }}
+          aria-label={copied ? "Copied!" : "Copy code"}
+          background="var(--bg)"
+          color="var(--text)"
+          icon={<CopyIcon />}
+          position="absolute"
+          right="0.5rem"
           size="sm"
-          variant="solid"
+          title={copied ? "Copied!" : "Copy code"} // Tooltip for better UX
+          top="0.5rem"
           onClick={copyToClipboard}
         />
-      )}
-    </>
+      </Box>
+    );
+  }
+
+  // Inline code
+  return (
+    <code style={{
+      color: 'var(--bg)',
+      background: 'var(--text)',
+      padding: '0.2rem 0.4rem', // Adjusted padding for inline
+      borderRadius: '4px' // Smaller radius for inline
+    }}
+    className={className}
+    {...rest}
+    >
+      {children}
+    </code>
   );
 };
 
-const A = ({ children, ...props }: { children: ReactNode }) => (
-  <a {...props}
-style={{
- color: 'var(--text)', textDecoration: 'underline', padding: '2px 7px', borderRadius: '6px' 
-}}
-target="_blank">{children}</a>
+// Define a more specific type for anchor props
+type AnchorProps = { children?: ReactNode; href?: string } & HTMLAttributes<HTMLAnchorElement>;
+
+const A = ({
+   children, href, ...rest 
+  }: AnchorProps) => (
+  <a href={href}
+    style={{
+      color: 'var(--text)', textDecoration: 'underline', padding: '2px 7px', borderRadius: '6px'
+    }}
+    target="_blank"
+    rel="noopener noreferrer" // Added for security
+    {...rest}
+  >
+    {children}
+  </a>
 );
 
 // Add this new component
@@ -93,9 +149,10 @@ const ThinkingBlock = ({ content }: { content: string }) => {
           p={3}
         >
           {/* Render the thinking content, potentially also with Markdown */}
+          {/* Pass the refined components here as well */}
           <Markdown components={{
- ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A 
-}}>{content}</Markdown>
+            ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A
+          }}>{content}</Markdown>
         </Box>
       </Collapse>
     </Box>
@@ -107,6 +164,16 @@ export const Message = ({ m = '', i = 0 }) => {
   const parts = m.split(/(<think>[\s\S]*?<\/think>)/g).filter(part => part && part.trim() !== '');
   const thinkRegex = /<think>([\s\S]*?)<\/think>/;
 
+  // Define components object once
+  const markdownComponents = {
+    ul: Ul,
+    ol: Ul, // Assign Ul to ol as well, since its type now allows it
+    p: P,
+    pre: Pre,
+    code: Code,
+    a: A
+  };
+
   return (
     <Box
       background={i % 2 !== 0 ? 'var(--bg)' : 'var(--active)'}
@@ -116,7 +183,7 @@ export const Message = ({ m = '', i = 0 }) => {
       className="chatMessage"
       color={i % 2 !== 0 ? 'var(--text)' : 'var(--text)'}
       fontSize="md"
-      fontStyle="bold"
+      fontStyle={'normal'}
       fontWeight={600}
       maxWidth="calc(100% - 3rem)"
       ml={2}
@@ -161,10 +228,7 @@ export const Message = ({ m = '', i = 0 }) => {
           return <ThinkingBlock key={index} content={match[1]} />;
         } else {
           // Render normal markdown content
-          return <Markdown key={index}
-components={{
- ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A 
-}}>{part}</Markdown>;
+          return <Markdown key={index} components={markdownComponents}>{part}</Markdown>;
         }
       })}
     </Box>
