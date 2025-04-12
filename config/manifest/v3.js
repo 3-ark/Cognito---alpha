@@ -33,7 +33,7 @@ module.exports = {
       font-src 'self'
         https://fonts.googleapis.com
         https://fonts.gstatic.com;
-      img-src 'unsafe-inline' 'self' data: https://upload.wikimedia.org;
+      img-src 'self' data: http://localhost:* http://127.0.0.1:* https:; 
     `
   }
 };

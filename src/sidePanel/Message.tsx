@@ -123,6 +123,31 @@ const A = ({
   </a>
 );
 
+// Add to your component types section
+type HeadingProps = { children?: ReactNode } & HTMLAttributes<HTMLHeadingElement>;
+
+const H1 = ({ children, ...rest }: HeadingProps) => (
+  <h1 style={{
+    fontSize: '1.5rem',
+    fontWeight: 800,
+    margin: '1rem 0 1rem',
+    borderBottom: '2px solid var(--text)',
+    paddingBottom: '0.5rem'
+  }} {...rest}>{children}</h1>
+);
+
+const H2 = ({ children, ...rest }: HeadingProps) => (
+  <h2 style={{
+    fontSize: '1.25rem',
+    fontWeight: 700,
+    margin: '1rem 0 0.75rem',
+    borderBottom: '1px solid var(--text)',
+    paddingBottom: '0.4rem'
+  }} {...rest}>{children}</h2>
+);
+
+// Add similar components for h3-h6 as needed...
+
 // Add this new component
 const ThinkingBlock = ({ content }: { content: string }) => {
   const { isOpen, onToggle } = useDisclosure();
@@ -150,13 +175,28 @@ const ThinkingBlock = ({ content }: { content: string }) => {
         >
           <div className="markdown-body">
             <Markdown components={{
-              ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A
+              ...markdownComponents, // Spread existing components
+              h1: H1,
+              h2: H2
             }}>{content}</Markdown>
           </div>
         </Box>
       </Collapse>
     </Box>
   );
+};
+
+const markdownComponents = {
+  ul: Ul,
+  ol: Ul,
+  p: P,
+  pre: Pre,
+  code: Code,
+  a: A,
+  h1: H1,
+  h2: H2
+  
+  // h3: H3, etc.
 };
 
 export const Message = ({ m = '', i = 0 }) => {
@@ -171,7 +211,11 @@ export const Message = ({ m = '', i = 0 }) => {
     p: P,
     pre: Pre,
     code: Code,
-    a: A
+    a: A,
+    h1: H1,
+    h2: H2
+    
+    // h3: H3, etc.
   };
 
   return (
