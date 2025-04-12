@@ -8,6 +8,10 @@ All-around tiny browser-augmented chat client for open-source language models.
 
 - [ ] Add https://www.google.com/search?q= as searching engine
 - [ ] Inject code from chat
+- [ ] Migrate React to 19
+- [ ] Migrate webext-redux to 4
+- [ ] Migrate Chakra-ui to 3
+- [ ] toolkit to 2 webpack-plugin 13 framer-motion to 12
 
 ## installation
 
