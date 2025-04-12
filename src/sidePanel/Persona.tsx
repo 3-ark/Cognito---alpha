@@ -1,4 +1,6 @@
-import React, { ForwardedRef, forwardRef, useEffect, useState } from 'react';
+import {
+ ForwardedRef, forwardRef, useEffect, useState 
+} from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import {
@@ -26,22 +28,25 @@ import { SettingTitle } from './SettingsTitle';
 
 const AutoResizeTextarea = forwardRef((props, ref) => (
   <Textarea
+    ref={ref as ForwardedRef<HTMLTextAreaElement>}
     as={ResizeTextarea}
     maxRows={8}
     minH="unset"
     minRows={3}
     overflow="scroll"
-    ref={ref as ForwardedRef<HTMLTextAreaElement>}
     resize="none"
     w="100%"
     {...props}
   />
 ));
+
 AutoResizeTextarea.displayName = 'AutoResizeTextarea';
 
 import PropTypes from 'prop-types';
 
-const SaveButtons = ({ hasChange, buttonColor, onSave, onSaveAs, onCancel }) => {
+const SaveButtons = ({
+ hasChange, buttonColor, onSave, onSaveAs, onCancel 
+}) => {
   const commonButtonStyles = {
     _hover: { background: 'var(--active)', border: `2px solid ${buttonColor}` },
     background: 'var(--active)',
@@ -82,12 +87,15 @@ const SaveButtons = ({ hasChange, buttonColor, onSave, onSaveAs, onCancel }) => 
 
 // (Remove this duplicate definition)
 
-const PersonaModal = ({ isOpen, onClose, personaPrompt, personas, updateConfig }) => {
+const PersonaModal = ({
+ isOpen, onClose, personaPrompt, personas, updateConfig 
+}) => {
   const [name, setName] = useState('');
   const buttonColor = name ? 'var(--text)' : 'gray';
 
   const handleCreate = () => {
     if (!name) return;
+
     updateConfig({
       personas: { ...personas, [name]: personaPrompt },
       persona: name
@@ -98,7 +106,7 @@ const PersonaModal = ({ isOpen, onClose, personaPrompt, personas, updateConfig }
   };
 
   return (
-    <Modal isCentered isOpen={isOpen} size="xs" onClose={onClose}>
+    <Modal isOpen={isOpen} size="xs" isCentered onClose={onClose}>
       <ModalOverlay />
       <ModalContent background="var(--active)" borderRadius={16}>
         <ModalHeader color="var(--text)" padding={2} paddingLeft={6}>
@@ -145,9 +153,12 @@ const PersonaModal = ({ isOpen, onClose, personaPrompt, personas, updateConfig }
   );
 };
 
-const DeleteModal = ({ isOpen, onClose, persona, personas, updateConfig }) => {
+const DeleteModal = ({
+ isOpen, onClose, persona, personas, updateConfig 
+}) => {
   const handleDelete = () => {
     const newPersonas = { ...personas };
+
     delete newPersonas[persona];
     updateConfig({
       personas: newPersonas,
@@ -158,7 +169,7 @@ const DeleteModal = ({ isOpen, onClose, persona, personas, updateConfig }) => {
   };
 
   return (
-    <Modal isCentered isOpen={isOpen} size="xs" onClose={onClose}>
+    <Modal isOpen={isOpen} size="xs" isCentered onClose={onClose}>
       <ModalOverlay />
       <ModalContent background="var(--active)" borderRadius={16}>
         <ModalHeader padding={2} paddingLeft={6}>
@@ -187,7 +198,9 @@ const DeleteModal = ({ isOpen, onClose, persona, personas, updateConfig }) => {
   );
 };
 
-const PersonaSelect = ({ personas, persona, updateConfig }) => (
+const PersonaSelect = ({
+ personas, persona, updateConfig 
+}) => (
   <Select
     _focus={{ borderColor: 'var(--text)', boxShadow: 'none !important' }}
     _hover={{ borderColor: 'var(--text)', boxShadow: 'none !important' }}
@@ -215,8 +228,8 @@ const PersonaSelect = ({ personas, persona, updateConfig }) => (
 const PersonaTextarea = ({ personaPrompt, setPersonaPrompt }) => (
   <AutoResizeTextarea
 
-    // @ts-ignore
-    // eslint-disable-next-line react/jsx-props-no-multi-spaces
+    // @ts-expect-error Props are spread to the underlying Textarea component.
+     
     _focus={{ borderColor: 'var(--text)', boxShadow: 'none !important' }}
     _hover={{ borderColor: 'var(--text)', boxShadow: 'none !important' }}
     background="var(--text)"
@@ -233,7 +246,9 @@ const PersonaTextarea = ({ personaPrompt, setPersonaPrompt }) => (
   />
 );
 
-const SaveButtonsWrapper = ({ buttonColor, hasChange, defaultPrompt, setPersonaPrompt, updateConfig, personas, persona, onOpen, personaPrompt }) => (
+const SaveButtonsWrapper = ({
+ buttonColor, hasChange, defaultPrompt, setPersonaPrompt, updateConfig, personas, persona, onOpen, personaPrompt 
+}) => (
   <SaveButtons
     buttonColor={buttonColor}
     hasChange={hasChange}
@@ -243,7 +258,9 @@ const SaveButtonsWrapper = ({ buttonColor, hasChange, defaultPrompt, setPersonaP
   />
 );
 
-const PersonaModalWrapper = ({ isOpen, personaPrompt, personas, updateConfig, onClose }) => (
+const PersonaModalWrapper = ({
+ isOpen, personaPrompt, personas, updateConfig, onClose 
+}) => (
   <PersonaModal
     isOpen={isOpen}
     personaPrompt={personaPrompt}
@@ -253,7 +270,9 @@ const PersonaModalWrapper = ({ isOpen, personaPrompt, personas, updateConfig, on
   />
 );
 
-const DeleteModalWrapper = ({ isDeleteOpen, persona, personas, updateConfig, onDeleteClose }) => (
+const DeleteModalWrapper = ({
+ isDeleteOpen, persona, personas, updateConfig, onDeleteClose 
+}) => (
   <DeleteModal
     isOpen={isDeleteOpen}
     persona={persona}
@@ -264,8 +283,12 @@ const DeleteModalWrapper = ({ isDeleteOpen, persona, personas, updateConfig, onD
 );
 
 const Persona = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
+  const {
+ isOpen, onOpen, onClose 
+} = useDisclosure();
+  const {
+ isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose 
+} = useDisclosure();
   const [name, setName] = useState('');
   const { config, updateConfig } = useConfig();
   const personas = config?.personas || {};
@@ -358,7 +381,7 @@ SaveButtons.propTypes = {
   buttonColor: PropTypes.string.isRequired,
   onSave: PropTypes.func.isRequired,
   onSaveAs: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired
 };
 
 export { AutoResizeTextarea, Persona };

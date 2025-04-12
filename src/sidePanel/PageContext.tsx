@@ -1,6 +1,7 @@
 
-import React from 'react';
-import { AccordionButton, AccordionItem, AccordionPanel, Button, Grid, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text } from '@chakra-ui/react';
+import {
+ AccordionButton, AccordionItem, AccordionPanel, Button, Grid, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text 
+} from '@chakra-ui/react';
 
 import { useConfig } from './ConfigContext';
 import { SettingTitle } from './SettingsTitle';
@@ -9,6 +10,7 @@ export const PageContext = () => {
   const { config, updateConfig } = useConfig();
   const isTextMode = !config?.pageMode || config?.pageMode === 'text';
   const size = config?.contextLimit || 1;
+
   return (
     <AccordionItem
       border="2px solid var(--text)"

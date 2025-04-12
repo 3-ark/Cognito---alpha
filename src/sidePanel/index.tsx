@@ -1,4 +1,3 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { ChakraProvider } from '@chakra-ui/react';
@@ -7,8 +6,8 @@ import { extendTheme, type ThemeConfig } from '@chakra-ui/react';
 import { createStoreProxy } from 'src/state/store';
 import PortNames from 'src/types/PortNames';
 
-import { ConfigProvider } from './ConfigContext';
 import Bruside from './Bruside';
+import { ConfigProvider } from './ConfigContext';
 
 const store = createStoreProxy(PortNames.ContentPort);
 const container = document.getElementById('root');

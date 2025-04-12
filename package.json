@@ -1,17 +1,13 @@
 {
   "name": "Bruside",
-  "version": "3.0",
+  "version": "4.0",
   "description": "Bruside",
   "main": "index.js",
   "scripts": {
     "start": "npm run clear && webpack -w --config config/webpack.config.js",
     "clear": "rimraf dist && rimraf node_modules/.cache"
   },
-  "overrides": {
-    "rimraf": {
-      "glob": "11.0.1"
-    }
-  },
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com.git"
@@ -24,7 +20,7 @@
     "extension"
   ],
   "author": "Bruce",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "bugs": {
     "url": ""
   },
@@ -50,7 +46,6 @@
     "framer-motion": "^11.1.7",
     "generate-json-from-js-webpack-plugin": "^0.1.1",
     "glob": "^11.0.1",
-    "globals": "^15.1.0",
     "html-to-image": "^1.11.11",
     "html-webpack-plugin": "^5.5.3",
     "localforage": "^1.10.0",
@@ -64,27 +59,26 @@
     "react-redux": "^8.1.1",
     "react-textarea-autosize": "^8.5.3",
     "redux-thunk": "^2.4.2",
-    "typescript-eslint": "^7.8.0",
     "webext-redux": "^2.1.9",
     "webpack": "^5.91.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
+    "@stylistic/eslint-plugin-ts": "^4.2.0",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
-    "@typescript-eslint/parser": "^8.29.1",
-    "eslint": "^8.57.0",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-react-app": "^7.0.1",
+    "eslint": "^9.24.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsx-a11y": "^6.8.0",
-    "eslint-plugin-react": "^7.34.1",
-    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.1.4",
+    "globals": "^16.0.0",
     "npm-force-resolutions": "^0.0.10",
     "redux-logger": "^3.0.6",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.29.1",
     "webpack-cli": "^6.0.1"
   }
 }

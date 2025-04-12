@@ -21,27 +21,7 @@ export const Automation = () => {
           icon="🔨"
           widget={(
             <Grid alignItems="center" display="flex">
-              {false
-                    && (
-                      <Button
-                        _hover={{
-                          background: 'var(--active)',
-                          border: '2px solid var(--active)'
-                        }}
-                        background="var(--active)"
-                        border="2px solid var(--text)"
-                        borderRadius={16}
-                        color="var(--text)"
-                        mb={1}
-                        ml={4}
-                        mt="2px"
-                        pl={4}
-                        pr={4}
-                        size="sm"
-                      >
-                        default
-                      </Button>
-                    )}
+              
             </Grid>
               )}
         />

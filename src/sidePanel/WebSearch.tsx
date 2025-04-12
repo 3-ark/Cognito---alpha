@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   AccordionButton,
   AccordionItem,
@@ -41,10 +40,10 @@ const WebSearchModeSelector = ({ webMode, updateConfig }) => (
   <Grid width="50%">
     {['duckduckgo', 'brave'].map(mode => (
       <Grid
+        key={mode}
         alignItems="center"
         cursor="pointer"
         display="flex"
-        key={mode}
         mb={4}
         onClick={() => updateConfig({ webMode: mode })}
       >
@@ -68,9 +67,9 @@ const WebSearchSlider = ({ size, updateConfig }) => (
       fontSize="lg"
       fontWeight={800}
       ml={-4}
+      pb={6}
       pl={2}
       textAlign="left"
-      pb={6}
     >
       char limit:
       {' '}
@@ -114,7 +113,7 @@ export const WebSearch = () => {
       </AccordionButton>
       <AccordionPanel p={4} pt={2}>
         <Grid display="flex">
-          <WebSearchModeSelector webMode={config?.webMode} updateConfig={updateConfig} />
+          <WebSearchModeSelector updateConfig={updateConfig} webMode={config?.webMode} />
           <WebSearchSlider size={size} updateConfig={updateConfig} />
         </Grid>
       </AccordionPanel>

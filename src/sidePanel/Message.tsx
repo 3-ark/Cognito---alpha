@@ -1,16 +1,24 @@
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import Markdown from 'react-markdown';
-import { Box, Button, IconButton, Collapse, useDisclosure } from '@chakra-ui/react'; // Added Collapse, useDisclosure
 import { CopyIcon } from '@chakra-ui/icons';
+import {
+ Box, Button, Collapse, IconButton, useDisclosure 
+} from '@chakra-ui/react'; // Added Collapse, useDisclosure
 
 const Ul = ({ children }: { children: ReactNode }) => (
-  <ul style={{ paddingLeft: '2rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>{children}</ul>
+  <ul style={{
+ paddingLeft: '2rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' 
+}}>{children}</ul>
 );
 const P = ({ children }: { children: ReactNode }) => (
-  <p style={{ paddingTop: 0, paddingBottom: '0.2rem', wordBreak: 'break-word' }}>{children}</p>
+  <p style={{
+ paddingTop: 0, paddingBottom: '0.2rem', wordBreak: 'break-word' 
+}}>{children}</p>
 );
 const Pre = ({ children }: { children: ReactNode }) => (
-  <pre style={{ overflow: 'scroll', paddingLeft: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem', margin: '1rem 0', background: 'var(--text)', color: 'var(--bg)', borderRadius: '16px', maxWidth: '80vw' }}>{children}</pre>
+  <pre style={{
+ overflow: 'scroll', paddingLeft: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem', margin: '1rem 0', background: 'var(--text)', color: 'var(--bg)', borderRadius: '16px', maxWidth: '80vw' 
+}}>{children}</pre>
 );
 
 const Code = ({ children }: { children: ReactNode }) => {
@@ -37,12 +45,12 @@ const Code = ({ children }: { children: ReactNode }) => {
       {inline && (
         <IconButton
           aria-label="Copy"
-          icon={<CopyIcon color="var(--bg)" fontSize="sm" />}
-          size="sm"
           background="var(--text)"
           borderRadius={8}
+          icon={<CopyIcon color="var(--bg)" fontSize="sm" />}
           marginLeft={2}
           marginTop={2}
+          size="sm"
           variant="solid"
           onClick={copyToClipboard}
         />
@@ -52,7 +60,11 @@ const Code = ({ children }: { children: ReactNode }) => {
 };
 
 const A = ({ children, ...props }: { children: ReactNode }) => (
-  <a {...props} style={{ color: 'var(--text)', textDecoration: 'underline', padding: '2px 7px', borderRadius: '6px' }} target="_blank">{children}</a>
+  <a {...props}
+style={{
+ color: 'var(--text)', textDecoration: 'underline', padding: '2px 7px', borderRadius: '6px' 
+}}
+target="_blank">{children}</a>
 );
 
 // Add this new component
@@ -62,26 +74,28 @@ const ThinkingBlock = ({ content }: { content: string }) => {
   return (
     <Box mb={2}>
       <Button
-        size='sm'
-        onClick={onToggle}
-        variant='outline'
+        _hover={{ bg: 'var(--active)' }}
         borderColor='var(--text)'
         color='var(--text)'
-        _hover={{ bg: 'var(--active)' }}
         mb={1}
+        size='sm'
+        variant='outline'
+        onClick={onToggle}
       >
         {isOpen ? 'Hide Thoughts' : 'Show Thoughts'}
       </Button>
       <Collapse in={isOpen} animateOpacity>
         <Box
-          p={3}
+          bg='rgba(0,0,0,0.05)' // Slightly different background for thought block
           border='1px dashed'
           borderColor='var(--text)'
           borderRadius='md'
-          bg='rgba(0,0,0,0.05)' // Slightly different background for thought block
+          p={3}
         >
           {/* Render the thinking content, potentially also with Markdown */}
-          <Markdown components={{ ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A }}>{content}</Markdown>
+          <Markdown components={{
+ ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A 
+}}>{content}</Markdown>
         </Box>
       </Collapse>
     </Box>
@@ -134,19 +148,23 @@ export const Message = ({ m = '', i = 0 }) => {
             0 2px 4px rgba(0, 0, 0, 0.1),
             0 4px 8px rgba(0, 0, 0, 0.1),
             0 8px 16px rgba(0, 0, 0, 0.1)
-          `,
+          `
         }
       }}
     >
       {/* Render parts sequentially */}
       {parts.map((part, index) => {
         const match = part.match(thinkRegex);
+
         if (match && match[1]) {
           // Render thinking block
           return <ThinkingBlock key={index} content={match[1]} />;
         } else {
           // Render normal markdown content
-          return <Markdown key={index} components={{ ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A }}>{part}</Markdown>;
+          return <Markdown key={index}
+components={{
+ ul: Ul, ol: Ul, p: P, pre: Pre, code: Code, a: A 
+}}>{part}</Markdown>;
         }
       })}
     </Box>

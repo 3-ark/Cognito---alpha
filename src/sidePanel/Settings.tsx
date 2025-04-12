@@ -1,5 +1,6 @@
-import React from 'react';  // Add this line
+// Add this line
 import { Accordion, Box } from '@chakra-ui/react';
+
 import { Automation } from './Automation';
 import { useConfig } from './ConfigContext';
 import { Connect } from './Connect';
@@ -12,6 +13,7 @@ import { WebSearch } from './WebSearch';
 export const Settings = () => {
   const { config } = useConfig();
   const defaultIndex = (config?.models || [])?.length === 0 ? 1 : undefined;
+
   return (
     <Box
       alignItems="center"
@@ -29,14 +31,14 @@ export const Settings = () => {
       width="100%"
     >
       <Accordion
-        allowToggle
-        reduceMotion
         defaultIndex={defaultIndex}
         marginTop={4}
         maxWidth="512px"
         ml={2}
         mr={2}
         width="100%"
+        allowToggle
+        reduceMotion
       >
         <Themes />
         <Connect />

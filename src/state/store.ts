@@ -7,7 +7,9 @@ import {
 } from '@reduxjs/toolkit';
 import { logger } from 'redux-logger';
 import thunkMiddleware from 'redux-thunk';
-import { alias, applyMiddleware, Store, wrapStore } from 'webext-redux';
+import {
+ alias, applyMiddleware, Store, wrapStore 
+} from 'webext-redux';
 
 import * as contentSlice from 'src/state/slices/content';
 import * as sidePanelSlice from 'src/state/slices/sidePanel';
@@ -52,6 +54,7 @@ export default buildStoreWithDefaults;
 
 export const createStoreProxy = (portName: string) => {
   const store = new Store<State, AnyAction>({ portName });
+
   applyMiddleware(store, ...middleware);
 
   // Fix for unresolved bug in webext-redux: https://github.com/tshaddix/webext-redux/issues/286

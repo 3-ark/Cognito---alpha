@@ -1,10 +1,11 @@
-import React from 'react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { CheckIcon } from '@chakra-ui/icons';
-import { Box, Button, IconButton, Input } from '@chakra-ui/react';
+import {
+ Box, Button, IconButton, Input 
+} from '@chakra-ui/react';
 
 import { useConfig } from './ConfigContext';
-import toast from 'react-hot-toast';
 
 export const ConnectOllama = () => {
   const { config, updateConfig } = useConfig();
@@ -40,6 +41,7 @@ export const ConnectOllama = () => {
   };
 
   const isConnected = config?.ollamaConnected && config?.ollamaUrl === url;
+
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>
       <Input
@@ -83,7 +85,6 @@ export const ConnectOllama = () => {
       )}
       {isConnected && (
         <IconButton
-          isRound
           _hover={{
             background: 'var(--active)',
             border: '2px solid var(--text)'
@@ -96,6 +97,7 @@ export const ConnectOllama = () => {
           icon={<CheckIcon />}
           size="sm"
           variant="solid"
+          isRound
           onClick={() => updateConfig({ visibleApiKeys: !config?.visibleApiKeys })}
         />
       )}

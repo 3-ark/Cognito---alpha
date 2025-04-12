@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Image } from '@chakra-ui/react';
 
 export const Background = () => (
@@ -7,7 +6,9 @@ export const Background = () => (
     display="flex"
     height="80vh"
     justifyContent="center"
-    style={{ position: 'fixed', width: '100%', top: '10%', pointerEvents: 'none' }}
+    style={{
+ position: 'fixed', width: '100%', top: '10%', pointerEvents: 'none' 
+}}
   >
     <Image
       src="assets/images/Bruside.png"

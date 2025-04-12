@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   AccordionButton,
   AccordionItem,
@@ -24,10 +23,18 @@ type Theme = {
 }
 
 export const themes = [
-  { name: 'paper', active: '#dcc299', bg: '#F5E9D5', text: '#5B4636'},
-  { name: 'smoke', active: '#bab8b8', bg: '#dfdfdf', text: '#333' },
-  { name: 'moss', active: '#a4b086', bg: '#EFD6AC', text: 'black' },
-  { name: 'seasalt', active: '#C2E7B5', bg: '#c2e7b5', text: '#333' },
+  {
+ name: 'paper', active: '#dcc299', bg: '#F5E9D5', text: '#5B4636'
+},
+  {
+ name: 'smoke', active: '#bab8b8', bg: '#dfdfdf', text: '#333' 
+},
+  {
+ name: 'moss', active: '#a4b086', bg: '#EFD6AC', text: 'black' 
+},
+  {
+ name: 'seasalt', active: '#C2E7B5', bg: '#c2e7b5', text: '#333' 
+}
 ];
 
 export const setTheme = (c: Theme) => {
@@ -37,7 +44,9 @@ export const setTheme = (c: Theme) => {
   document.documentElement.style.setProperty('--text', c.text);
 };
 
-const ThemeButton = ({ theme, updateConfig }: { theme: Theme, updateConfig: Function }) => (
+import { Config } from '../types/config'; // Make sure Config type is imported  <Tooltip aria-label={theme.name} background="var(--bg)" color="var(--text)" label={theme.name}>
+    
+const ThemeButton = ({ theme, updateConfig }: { theme: Theme, updateConfig: (newConfig: Partial<Config>) => void }) => (
   <Tooltip aria-label={theme.name} background="var(--bg)" color="var(--text)" label={theme.name}>
     <Button
       _hover={{
@@ -53,11 +62,11 @@ const ThemeButton = ({ theme, updateConfig }: { theme: Theme, updateConfig: Func
       mr={2}
       size="md"
       onClick={() => {
-        updateConfig(theme.name);
+        updateConfig({ theme: theme.name });
         setTheme(theme);
       }}
     />
-  </Tooltip>
+    </Tooltip>
 
 );
 
@@ -72,11 +81,11 @@ export const Themes = () => {
       </AccordionButton>
       <AccordionPanel pb={4}>
         <Box>
-          <Text onClick={() => updateConfig({ generateTitle: !config?.generateTitle })} alignItems="center" color="var(--text)" display="flex" fontSize="lg" fontWeight={800} pb={2} textAlign="left" cursor="pointer">
+          <Text alignItems="center" color="var(--text)" cursor="pointer" display="flex" fontSize="lg" fontWeight={800} pb={2} textAlign="left" onClick={() => updateConfig({ generateTitle: !config?.generateTitle })}>
           <input checked={config?.generateTitle} style={{ marginRight: '0.5rem' }} type="checkbox" onChange={() => updateConfig({ generateTitle: !config?.generateTitle })} />
             create chat title
           </Text>
-          <Text onClick={() => updateConfig({ backgroundImage: !config?.backgroundImage })}  alignItems="center" color="var(--text)" display="flex" fontSize="lg" fontWeight={800} pb={2} textAlign="left" cursor="pointer">
+          <Text alignItems="center"  color="var(--text)" cursor="pointer" display="flex" fontSize="lg" fontWeight={800} pb={2} textAlign="left" onClick={() => updateConfig({ backgroundImage: !config?.backgroundImage })}>
           <input checked={config?.backgroundImage} style={{ marginRight: '0.5rem' }} type="checkbox" onChange={() => updateConfig({ backgroundImage: !config?.backgroundImage })} />
             background illustration
           </Text>

@@ -1,6 +1,7 @@
 import { contentLoaded } from 'src/state/slices/content';
 import { createStoreProxy } from 'src/state/store';
 import PortNames from '../types/PortNames';
+
 import CursorController from './controllers/CursorController';
 
 // Wrap in IIFE to allow early return
@@ -11,6 +12,7 @@ import CursorController from './controllers/CursorController';
         window.location.protocol === 'chrome-extension:' || 
                 window.location.href.includes('chrome.google.com')) {
       console.debug('Skipping restricted URL:', window.location.protocol);
+
       return;
     }
 
@@ -19,6 +21,7 @@ import CursorController from './controllers/CursorController';
     // Add cleanup on port disconnect
     store.port.onDisconnect.addListener(() => {
       console.debug('Store port disconnected');
+
       // Cleanup any registered handlers
       controllers?.forEach(controller => controller.cleanup?.());
     });

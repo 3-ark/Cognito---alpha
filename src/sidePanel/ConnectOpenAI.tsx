@@ -1,11 +1,12 @@
-import React from 'react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { Box, Button, IconButton, Input } from '@chakra-ui/react';
+import {
+ Box, Button, IconButton, Input 
+} from '@chakra-ui/react';
 
 import { useConfig } from './ConfigContext';
 import { OPENAI_URL } from './constants';
-import toast from 'react-hot-toast';
 
 export const ConnectOpenAI = () => {
   const { config, updateConfig } = useConfig();
@@ -84,7 +85,6 @@ export const ConnectOpenAI = () => {
       )}
       {isConnected && (
       <IconButton
-        isRound
         _hover={{
           background: 'var(--active)',
           border: '2px solid var(--text)'
@@ -97,6 +97,7 @@ export const ConnectOpenAI = () => {
         icon={visibleApiKeys ? <ViewOffIcon /> : <ViewIcon />}
         size="sm"
         variant="solid"
+        isRound
         onClick={() => setVisibleApiKeys(!visibleApiKeys)}
       />
       )}

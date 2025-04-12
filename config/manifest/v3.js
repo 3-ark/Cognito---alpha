@@ -1,5 +1,7 @@
 const permissions = require('./permissions');
-const { name, description, version } = require('./app_info');
+const {
+ name, description, version 
+} = require('./app_info');
 
 module.exports = {
   version,

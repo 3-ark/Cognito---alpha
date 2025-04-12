@@ -23,6 +23,7 @@ class CursorController implements ContentProvider {
 
   handleMouseMove = (e:MouseEvent) => {
     const cursorPosition = { x: e.clientX, y: e.clientY };
+
     this.store.dispatch(setCursorPosition(cursorPosition));
   };
 

@@ -61,6 +61,7 @@ const config = {
               switch (key) {
                 case 'extension_pages':
                   return value.replace(/\s+/g, ' ');
+
                 default:
                   return value;
               }

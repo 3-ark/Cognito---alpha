@@ -1,8 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react/prop-types */
-import React from 'react';
-import {
+ import {
   DeleteIcon,
   SettingsIcon,
   SmallCloseIcon
@@ -25,12 +21,14 @@ import {
   useDisclosure
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
+
 import { useConfig } from './ConfigContext';
 import { Docs } from './Docs';
-
-// eslint-disable-next-line react/prop-types
-const WelcomeModal = ({ isOpen, onClose, setSettingsMode }) => (
-  <Modal isCentered isOpen={isOpen} scrollBehavior="inside" size="sm" onClose={onClose}>
+ 
+const WelcomeModal = ({
+ isOpen, onClose, setSettingsMode 
+}) => (
+  <Modal isOpen={isOpen} scrollBehavior="inside" size="sm" isCentered onClose={onClose}>
     <ModalOverlay />
     <ModalContent bg="var(--bg)" border="2px solid var(--text)" borderRadius={16} color="var(--text)" pb={2}>
       <ModalHeader textAlign="center">👋 welcome to Bruside 👋</ModalHeader>
@@ -47,8 +45,8 @@ const WelcomeModal = ({ isOpen, onClose, setSettingsMode }) => (
             color="var(--text)"
             leftIcon={<SettingsIcon />}
             mr={2}
-            size="md"
             position="relative"
+            size="md"
             sx={{
               '&::before': {
                 content: '""',
@@ -75,8 +73,7 @@ const WelcomeModal = ({ isOpen, onClose, setSettingsMode }) => (
     </ModalContent>
   </Modal>
 );
-
-// eslint-disable-next-line react/prop-types
+ 
 const Badge = ({ children }) => (
   <Box
     background="var(--bg)"
@@ -99,8 +96,7 @@ const Badge = ({ children }) => (
     {children}
   </Box>
 );
-
-// eslint-disable-next-line react/prop-types
+ 
 const DrawerHeader = ({ onClose }) => (
   <Box alignItems="center" background="var(--active)" borderBottom="2px solid var(--text)" display="flex" paddingBottom={2} paddingTop={2}>
     <IconButton
@@ -110,7 +106,6 @@ const DrawerHeader = ({ onClose }) => (
       icon={<SmallCloseIcon color="var(--text)" fontSize="3xl" />}
       ml={1}
       mr={1}
-      variant="outlined"
       position="relative"
       sx={{
         '&::before': {
@@ -129,22 +124,21 @@ const DrawerHeader = ({ onClose }) => (
           zIndex: 0
         }
       }}
+      variant="outlined"
       whileHover={{ cursor: 'pointer' }}
       onClick={onClose}
     />
     <Badge>settings</Badge>
   </Box>
 );
-
-// eslint-disable-next-line react/prop-types
+ 
 const DrawerSection = ({ title, children }) => (
   <Box borderBottom="2px solid var(--text)" p={2} pb={4}>
     <Text color="var(--text)" fontSize="xl" fontWeight={600} mb={2}>{title}</Text>
     {children}
   </Box>
 );
-
-// eslint-disable-next-line react/prop-types
+ 
 const DrawerLinkSection = ({ title, onClick }) => (
   <Box _hover={{ background: 'var(--active)' }} borderBottom="2px solid var(--text)">
     <Text
@@ -159,9 +153,10 @@ const DrawerLinkSection = ({ title, onClick }) => (
     </Text>
   </Box>
 );
-
-// eslint-disable-next-line react/prop-types
-const SettingsDrawer = ({ isOpen, onClose, config, updateConfig, availableModelNames, setSettingsMode, downloadText, downloadJson, downloadImage, setHistoryMode }) => (
+ 
+const SettingsDrawer = ({
+ isOpen, onClose, config, updateConfig, availableModelNames, setSettingsMode, downloadText, downloadJson, downloadImage, setHistoryMode 
+}) => (
   <Drawer isOpen={isOpen} placement="left" size="xs" onClose={onClose}>
     <DrawerOverlay />
     <DrawerContent 
@@ -189,8 +184,12 @@ const SettingsDrawer = ({ isOpen, onClose, config, updateConfig, availableModelN
         <DrawerHeader onClose={onClose} />
         <DrawerSection title="persona">
           <Select
-            _focus={{ borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' }}
-            _hover={{ borderColor: 'var(--text)', boxShadow: 'none !important', background: 'var(--active)' }}
+            _focus={{
+ borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' 
+}}
+            _hover={{
+ borderColor: 'var(--text)', boxShadow: 'none !important', background: 'var(--active)' 
+}}
             background="transparent"
             border="2px"
             borderColor="var(--text)"
@@ -210,8 +209,12 @@ const SettingsDrawer = ({ isOpen, onClose, config, updateConfig, availableModelN
         </DrawerSection>
         <DrawerSection title="model">
           <Select
-            _focus={{ borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' }}
-            _hover={{ borderColor: 'var(--text)', boxShadow: 'none !important', background: 'var(--active)' }}
+            _focus={{
+ borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' 
+}}
+            _hover={{
+ borderColor: 'var(--text)', boxShadow: 'none !important', background: 'var(--active)' 
+}}
             background="transparent"
             border="2px"
             borderColor="var(--text)"
@@ -227,9 +230,9 @@ const SettingsDrawer = ({ isOpen, onClose, config, updateConfig, availableModelN
             onChange={e => updateConfig({ selectedModel: e.target.value })}
           >
             {!config?.models?.length ? (
-              <option disabled value="default">loading models...</option>
+              <option value="default" disabled>loading models...</option>
             ) : (
-              config.models.map((model: any) => (
+              config.models.map((model: unknown) => (
                 <option 
                   key={model.id} 
                   disabled={model.active === false}
@@ -265,7 +268,9 @@ const SettingsDrawer = ({ isOpen, onClose, config, updateConfig, availableModelN
 
 export const Header = ({ ...props }) => {
   const { config, updateConfig } = useConfig();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+ isOpen, onOpen, onClose 
+} = useDisclosure();
   const availableModelNames = config?.models?.map(({ id }) => id);
 
   const visibleTitle = props.chatTitle && !props.settingsMode && !props.historyMode;
@@ -275,8 +280,6 @@ export const Header = ({ ...props }) => {
       background="var(--active)"
       pb={0}
       pt={2}
-      textAlign="left"
-      zIndex={3}
       sx={{
         position: 'relative',
         '&::before': {
@@ -293,6 +296,8 @@ export const Header = ({ ...props }) => {
           mixBlendMode: 'multiply'
         }
       }}
+      textAlign="left"
+      zIndex={3}
     >
       <Box
         alignItems="center"
@@ -347,7 +352,7 @@ export const Header = ({ ...props }) => {
           </Badge>
           )}
           {!props.historyMode && props.settingsMode && (
-            <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+            <Box alignItems="center" display="flex" justifyContent="space-between" width="100%">
               <Text
                 color="var(--text)"
                 fontSize="md"
@@ -359,17 +364,17 @@ export const Header = ({ ...props }) => {
             </Box>
           )}
           {props.historyMode && (
-            <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+            <Box alignItems="center" display="flex" justifyContent="space-between" width="100%">
               <Badge>chat history</Badge>
               <IconButton
                 aria-label="Delete all"
                 as={motion.div}
                 borderRadius={16}
                 icon={<DeleteIcon color="var(--text)" fontSize="xl" />}
+                mr={2}
                 variant="outlined"
                 whileHover={{ rotate: '15deg', cursor: 'pointer' }}
                 onClick={props.deleteAll}
-                mr={2}
               />
             </Box>
           )}

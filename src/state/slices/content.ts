@@ -33,7 +33,9 @@ const slice = createSlice({
  */
 export const contentLoaded = (): ThunkType => async (dispatch, getState) => {
   const { isLoaded } = getState().content || {};
+
   if (isLoaded) return;
+
   await dispatch(slice.actions.contentLoaded());
 };
 
@@ -43,4 +45,7 @@ export const setCursorPosition = (position: Position): ThunkType => async dispat
 
 const { actions, reducer } = slice;
 const aliases = {};
-export { actions, aliases, reducer };
+
+export {
+ actions, aliases, reducer 
+};

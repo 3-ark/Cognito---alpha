@@ -3,6 +3,7 @@ export async function getCurrentTab() {
 
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
   const [tab] = await chrome.tabs.query(queryOptions);
+
   return tab;
 }
 
@@ -14,13 +15,15 @@ export async function injectContentScript(tabId: number) {
     // Skip chrome:// URLs early
     if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
       console.debug('Skipping content script injection for restricted URL:', tab.url);
+
       return;
     }
 
     console.log('injecting content script');
 
     await chrome.scripting.executeScript({
-      // @ts-ignore
+
+      // @ts-expect-error - chrome.scripting.Target type might expect frameIds, but tabId alone is valid for executeScript
       target: { tabId },
       files: [
         'assets/vendor.js',
@@ -31,6 +34,7 @@ export async function injectContentScript(tabId: number) {
     });
   } catch (err) {
     console.debug('Tab access failed:', err);
+
     return;
   }
 }

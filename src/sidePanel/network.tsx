@@ -16,6 +16,7 @@ export const urlRewriteRuntime = async function (
 ) {
   try {
     const url = new URL(domain);
+
     // Skip chrome:// URLs
     if (url.protocol === 'chrome:') {
       return;
@@ -41,6 +42,7 @@ export const urlRewriteRuntime = async function (
         }
       }
     ];
+
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: rules.map(r => r.id),
       addRules: rules
@@ -52,23 +54,30 @@ export const urlRewriteRuntime = async function (
 
 export const webSearch = async (query: string, webMode: string) => {
   const baseUrl = webMode === 'brave' ? `https://search.brave.com/search?q=${query}` : 'https://html.duckduckgo.com/html/';
+
   await urlRewriteRuntime(cleanUrl(`${baseUrl}${query}`));
 
   const abortController = new AbortController();
+
   setTimeout(() => abortController.abort(), 15000);
   const formData = new FormData();
+
   formData.append('q', query);
 
   const htmlString = await fetch(
     `${baseUrl}`,
-    { signal: abortController.signal, method: webMode === 'brave' ? 'GET' : 'POST', body: webMode === 'brave' ? undefined : formData }
+    {
+ signal: abortController.signal, method: webMode === 'brave' ? 'GET' : 'POST', body: webMode === 'brave' ? undefined : formData 
+}
   )
     .then(response => response.text())
     .catch();
 
   const parser = new DOMParser();
   const htmlDoc = parser.parseFromString(htmlString, 'text/html');
+
   htmlDoc.querySelectorAll('svg,#header,style,link[rel="stylesheet"],script,input,option,select,form').forEach(item => item.remove());
+
   return htmlDoc.body.innerText.replace(/\s\s+/g, ' ');
 };
 
@@ -102,29 +111,36 @@ export async function fetchDataAsStream(
 
     if (host === "ollama") {
       if (!response.body) return;
+
       const reader = response.body.getReader();
 
       let done;
       let value;
+
       while (!done) {
         ({ value, done } = await reader.read());
+
         if (done) {
           onMessage(str, true);
           break;
         }
+
         const chunk = new TextDecoder().decode(value);
+
         // Handle [DONE] marker
         if (chunk.trim() === '[DONE]') {
           onMessage(str, true);
           break;
         }
+
         try {
           const parsed = JSON.parse(chunk);
+
           if (parsed.message?.content) {
             str += parsed.message.content;
             onMessage(str);
           }
-        } catch (e) {
+        } catch (error) {
           // Ignore JSON parse errors for non-JSON chunks
           console.debug('Skipping invalid JSON chunk:', chunk);
           continue;
@@ -134,18 +150,23 @@ export async function fetchDataAsStream(
 
     if (host === "lmStudio") {
       const stream = events(response);
+
       for await (const event of stream) {
         if (!event.data) continue;
+
         // Handle [DONE] marker
         if (event.data.trim() === '[DONE]') {          onMessage(str, true);
 
           break;
         }
+
         try {
           const received = JSON.parse(event.data || '');
           const err = received?.x_groq?.error;
+
           if (err) {
             onMessage(`Error: ${err}`, true);
+
             return;
           }
 
@@ -161,18 +182,23 @@ export async function fetchDataAsStream(
 
     if (host === "groq") {
       const stream = events(response);
+
       for await (const event of stream) {
         if (!event.data) continue;
+
         // Handle [DONE] marker
         if (event.data.trim() === '[DONE]') {          onMessage(str, true);
 
           break;
         }
+
         try {
           const received = JSON.parse(event.data || '');
           const err = received?.x_groq?.error;
+
           if (err) {
             onMessage(`Error: ${err}`, true);
+
             return;
           }
 
@@ -188,6 +214,7 @@ export async function fetchDataAsStream(
 
     if (host === "gemini") {
       const stream = events(response);
+
       for await (const event of stream) {
         if (!event.data) continue;
 
@@ -202,10 +229,13 @@ export async function fetchDataAsStream(
           if (typeof event.data === 'string' && event.data.startsWith('{')) {
             const received = JSON.parse(event.data);
             const err = received?.x_gemini?.error;
+
             if (err) {
               onMessage(`Error: ${err}`, true);
+
               return;
             }
+
             str += received?.choices?.[0]?.delta?.content || '';
             onMessage(str || '');
           }
@@ -219,13 +249,17 @@ export async function fetchDataAsStream(
 
     if (host === "openai") {
       const stream = events(response);
+
       for await (const event of stream) {
         if (!event.data) continue;
+
         try {
           const received = JSON.parse(event.data || '');
           const err = received?.x_openai?.error;
+
           if (err) {
             onMessage(`Error: ${err}`, true);
+
             return;
           }
 

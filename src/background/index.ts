@@ -9,10 +9,11 @@ storage.setItem('panelOpen', false);
 
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
-  .catch((error: any) => console.error(error));
+  .catch((error: unknown) => console.error(error));
 
-chrome.tabs.onActivated.addListener(async (activeInfo) => {
+chrome.tabs.onActivated.addListener(async activeInfo => {
   const tabId = activeInfo.tabId;
+
   console.log('tab activated: ', tabId);
   injectContentScript(tabId);
 });
@@ -30,7 +31,7 @@ chrome.tabs.onUpdated
   });
 
 chrome.runtime.onConnect.addListener(port => {
-  const handleMessage = async (msg) => {
+  const handleMessage = async msg => {
     try {
       if (port.name === PortNames.SidePanelPort) {
         if (msg.type === 'init') {
@@ -48,6 +49,7 @@ chrome.runtime.onConnect.addListener(port => {
   
           if (!tab?.id) {
             console.error("Couldn't get current tab");
+
             return;
           }
   

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { Box, Button, IconButton, Input } from '@chakra-ui/react';
-import { useConfig } from './ConfigContext';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import {
+ Box, Button, IconButton, Input 
+} from '@chakra-ui/react';
+
+import { useConfig } from './ConfigContext';
 import { GEMINI_URL } from './constants';
 
 export const ConnectGemini = () => {
@@ -18,7 +21,9 @@ export const ConnectGemini = () => {
           updateConfig({ geminiError: data?.error?.message, geminiConnected: false });
         } else {
           toast.success('connected to Gemini');
-          updateConfig({ geminiApiKey: apiKey, geminiConnected: true, geminiError: undefined });
+          updateConfig({
+ geminiApiKey: apiKey, geminiConnected: true, geminiError: undefined 
+});
         }
       })
       .catch(err => {
@@ -67,7 +72,6 @@ export const ConnectGemini = () => {
       )}
       {isConnected && (
         <IconButton
-          isRound
           _hover={{
             background: 'var(--active)',
             border: '2px solid var(--text)'
@@ -80,6 +84,7 @@ export const ConnectGemini = () => {
           icon={visibleApiKeys ? <ViewOffIcon /> : <ViewIcon />}
           size="sm"
           variant="solid"
+          isRound
           onClick={() => setVisibleApiKeys(!visibleApiKeys)}
         />
       )}

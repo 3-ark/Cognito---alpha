@@ -1,11 +1,13 @@
-import React from 'react';
 import { AttachmentIcon } from '@chakra-ui/icons';
-import { Button, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
+import {
+ Button, Menu, MenuButton, MenuItem, MenuList 
+} from '@chakra-ui/react';
 
 import { useConfig } from './ConfigContext';
 
 export const AddToChat = () => {
   const { config, updateConfig } = useConfig();
+
   return (
     <Menu>
       <MenuButton
@@ -14,6 +16,7 @@ export const AddToChat = () => {
         background="var(--bg)"
         border="2px solid var(--text)"
         borderRadius={16}
+        color="var(--text)"
         fontSize="md"
         fontWeight={800}
         m={0}
@@ -24,7 +27,6 @@ export const AddToChat = () => {
         rightIcon={!config?.chatMode ? <AttachmentIcon color="var(--text)" fontSize="xl" marginRight="5px" /> : undefined}
         size="md"
         variant="outlined"
-        color="var(--text)"
         zIndex={2}
       >
         {config?.chatMode}
@@ -37,9 +39,11 @@ export const AddToChat = () => {
         borderTop="2px solid var(--text)"
         marginTop="1px"
         minWidth="110px"
-        zIndex={4}
         p={0}
-        style={{ right: '-5.1rem', bottom: '0.25rem', position: 'absolute' }}
+        style={{
+ right: '-5.1rem', bottom: '0.25rem', position: 'absolute' 
+}}
+        zIndex={4}
       >
         <MenuItem
           _hover={{ background: 'var(--bg)' }}

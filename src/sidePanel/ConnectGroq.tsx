@@ -1,10 +1,12 @@
-import React from 'react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { Box, Button, IconButton, Input } from '@chakra-ui/react';
+import {
+ Box, Button, IconButton, Input 
+} from '@chakra-ui/react';
+
 import { useConfig } from './ConfigContext';
 import { GROQ_URL } from './constants';
-import toast from 'react-hot-toast';
 
 export const ConnectGroq = () => {
   const { config, updateConfig } = useConfig();
@@ -81,7 +83,6 @@ export const ConnectGroq = () => {
       )}
       {isConnected && (
       <IconButton
-        isRound
         _hover={{
           background: 'var(--active)',
           border: '2px solid var(--text)'
@@ -94,6 +95,7 @@ export const ConnectGroq = () => {
         icon={visibleApiKeys ? <ViewOffIcon /> : <ViewIcon />}
         size="sm"
         variant="solid"
+        isRound
         onClick={() => setVisibleApiKeys(!visibleApiKeys)}
       />
       )}

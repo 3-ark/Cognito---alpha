@@ -7,7 +7,9 @@ interface SettingTitleProps {
   icon?: string;
 }
 
-export const SettingTitle = ({ text = '', widget = <></>, padding = 4, icon = '' }: SettingTitleProps) => (
+export const SettingTitle = ({
+ text = '', widget = <></>, padding = 4, icon = '' 
+}: SettingTitleProps) => (
   <Text
     color="var(--text)"
     display="flex"
@@ -19,7 +21,7 @@ export const SettingTitle = ({ text = '', widget = <></>, padding = 4, icon = ''
     width="100%"
   >
     <Box alignItems="center" display="flex" pb={1}>
-      {icon && false && (
+      {icon && (
       <Text
         color="var(--text)"
         display="flex"

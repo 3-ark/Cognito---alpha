@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DeleteIcon } from '@chakra-ui/icons';
-import { Box, IconButton, Text, Button } from '@chakra-ui/react';
+import {
+ Box,IconButton, Text 
+} from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import localforage from 'localforage';
 
@@ -35,6 +37,7 @@ export const ChatHistory = ({ loadChat, onDeleteAll }: ChatHistoryProps) => {
   useEffect(() => {
     localforage.keys().then(async keys => {
       const storedMessages = await Promise.all(keys.map(key => localforage.getItem(key))) as ChatMessage[];
+
       setMessages(storedMessages.sort((a, b) => b.last_updated - a.last_updated));
     });
   }, []);
@@ -43,6 +46,7 @@ export const ChatHistory = ({ loadChat, onDeleteAll }: ChatHistoryProps) => {
     localforage.removeItem(id).then(async () => {
       localforage.keys().then(async keys => {
         const storedMessages = await Promise.all(keys.map(key => localforage.getItem(key))) as ChatMessage[];
+
         setMessages(storedMessages.sort((a, b) => b.last_updated - a.last_updated));
       });
     });
@@ -50,8 +54,10 @@ export const ChatHistory = ({ loadChat, onDeleteAll }: ChatHistoryProps) => {
 
   const deleteAll = async () => {
     const keys = await localforage.keys();
+
     await Promise.all(keys.map(key => localforage.removeItem(key)));
     setMessages([]);
+
     if (onDeleteAll) onDeleteAll();  // Call parent callback if provided
   };
 
@@ -76,8 +82,8 @@ export const ChatHistory = ({ loadChat, onDeleteAll }: ChatHistoryProps) => {
             fontSize="xl"
             fontWeight={800}
             overflow="hidden"
-            pb={1}
             paddingLeft="1rem"
+            pb={1}
             textAlign="left"
             textOverflow="ellipsis"
             whiteSpace="nowrap"

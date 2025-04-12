@@ -1,13 +1,13 @@
-/* eslint-disable no-undef */
-import React from 'react';
+ 
 import { useEffect, useState } from 'react';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast,Toaster } from 'react-hot-toast';
 import {
   Box,
   Container,
   useInterval
 } from '@chakra-ui/react';
 import localforage from 'localforage';
+
 import { useChatTitle } from './hooks/useChatTitle';
 import useSendMessage from './hooks/useSendMessage';
 import { useUpdateModels } from './hooks/useUpdateModels';
@@ -18,7 +18,9 @@ import { useConfig } from './ConfigContext';
 import { Header } from './Header';
 import { Input } from './Input';
 import { Messages } from './Messages';
-import { downloadImage, downloadJson, downloadText } from './messageUtils';
+import {
+ downloadImage, downloadJson, downloadText 
+} from './messageUtils';
 import { Send } from './Send';
 import { Settings } from './Settings';
 import { setTheme, themes } from './Themes';
@@ -29,6 +31,7 @@ function bridge() {
     text: document.body.innerText.replace(/\s\s+/g, ' '),
     html: document.body.innerHTML.replace(/\s\s+/g, ' ')
   });
+
   return response;
 }
 
@@ -40,6 +43,7 @@ async function injectBridge() {
   // Add early return for restricted URLs
   if (!tab?.id || tab.url?.startsWith('chrome://') || tab.url?.startsWith('chrome-extension://')) {
     console.debug('Skipping injection for restricted URL:', tab?.url);
+
     return;
   }
 
@@ -49,6 +53,7 @@ async function injectBridge() {
       func: bridge
     });
     const res = JSON.parse(result?.[0]?.result || '{}');
+
     try {
       localStorage.setItem('pagestring', JSON.stringify(res?.text || ''));
       localStorage.setItem('pagehtml', JSON.stringify(res?.html || ''));
@@ -61,8 +66,7 @@ async function injectBridge() {
 }
 
 const generateChatId = () => `chat_${Math.random().toString(16).slice(2)}`;
-
-// eslint-disable-next-line react/prop-types
+ 
 const MessageTemplate = ({ children, onClick }) => (
   <Box
     background="var(--active)"
@@ -70,17 +74,15 @@ const MessageTemplate = ({ children, onClick }) => (
     borderRadius={14}
     color="var(--text)"
     cursor="pointer"
+    display="grid"
     fontSize="md"
     fontWeight={800}
     mb={2}
     p={0}
     pl={1}
-    pr={1}
-    position="relative"
-    display="grid"
     placeItems="center"
-    width="10ch"
-    textAlign={'center'}
+    position="relative"
+    pr={1}
     sx={{
       '&::before': {
         content: '""',
@@ -98,6 +100,8 @@ const MessageTemplate = ({ children, onClick }) => (
         zIndex: 0
       }
     }}
+    textAlign={'center'}
+    width="10ch"
     onClick={onClick}
   >
     {children}
@@ -150,6 +154,7 @@ const Bruside = () => {
   // load stored theme
   useEffect(() => {
     const theme = localStorage.getItem('theme') || 'moss';
+
     setTheme(themes.find(({ name }) => name === theme) || themes[0]);
     updateConfig({ chatMode: undefined })
   }, []);
@@ -157,6 +162,7 @@ const Bruside = () => {
   useEffect(() => {
     if (response) {
       const [, ...others] = messages;
+
       setMessages([response, ...others]);
     }
   }, [response]);
@@ -176,6 +182,7 @@ const Bruside = () => {
         title: chatTitle || messages[messages.length - 1],
         messages
       };
+
       // Remove the existingChat check and always save the latest chat state
       localforage.setItem(chatId, savedChat);
     }
@@ -183,6 +190,7 @@ const Bruside = () => {
 
   const deleteAll = async () => {
     const keys = await localforage.keys();
+
     await Promise.all(keys.map(key => localforage.removeItem(key)));
     setMessages([]);
     setPageContent('');
@@ -211,6 +219,7 @@ const Bruside = () => {
       >
         <Header
           chatTitle={chatTitle}
+          deleteAll={deleteAll}  // Pass the local deleteAll function
           downloadImage={() => downloadImage(messages)}
           downloadJson={() => downloadJson(messages)}
           downloadText={() => downloadText(messages)}
@@ -219,7 +228,6 @@ const Bruside = () => {
           setHistoryMode={setHistoryMode}
           setSettingsMode={setSettingsMode}
           settingsMode={settingsMode}
-          deleteAll={deleteAll}  // Pass the local deleteAll function
         />
         {settingsMode && <Settings />}
         {!settingsMode && !historyMode && messages.length > 0 && (
@@ -250,20 +258,26 @@ const Bruside = () => {
           <Box bottom="4rem" left="0.5rem" position="absolute">
             <MessageTemplate onClick={async () => {
               const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+
               if (!tab?.url || tab.url.startsWith('chrome')) {
                 toast.error('Cannot access chrome-related pages');
+
                 return;
               }
+
               await onSend('Find Data');
             }}>
               Data
             </MessageTemplate>
             <MessageTemplate onClick={async () => {
               const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+
               if (!tab?.url || tab.url.startsWith('chrome')) {
                 toast.error('Cannot access chrome-related pages');
+
                 return;
               }
+
               await onSend('Get Summary');
             }}>
               Info
@@ -277,18 +291,17 @@ const Bruside = () => {
             display="flex"
             justifyContent="space-between"
             pb={2}
-            pt={2}
             position="relative"  // Add this
+            pt={2}
             style={{ opacity: settingsMode ? 0 : 1 }}
             zIndex={2}
           >
             {/* Add paper texture layer */}
             <Box
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
               bottom={0}
+              left={0}
+              position="absolute"
+              right={0}
               sx={{
                 backgroundImage: 'url(assets/images/paper-texture.png)',
                 backgroundSize: '512px',
@@ -297,6 +310,7 @@ const Bruside = () => {
                 mixBlendMode: 'multiply',
                 zIndex: 0
               }}
+              top={0}
             />
             <Input isLoading={isLoading} message={message} setMessage={setMessage} onSend={onSend} />
             <AddToChat />
@@ -313,7 +327,7 @@ const Bruside = () => {
       </Box>
       <Toaster
         containerStyle={{
-          borderRadius: 16,
+          borderRadius: 16
         }}
         toastOptions={{
           duration: 2000,
@@ -321,7 +335,7 @@ const Bruside = () => {
           style: {
             background: '#363636',
             color: '#fff',
-            fontSize: "1.25rem",
+            fontSize: "1.25rem"
           },
 
           // Default options for specific types
@@ -330,9 +344,9 @@ const Bruside = () => {
             style: {
               background: '#363636',
               color: '#fff',
-              fontSize: "1.25rem",
-            },
-          },
+              fontSize: "1.25rem"
+            }
+          }
         }} />
     </Container>
   );

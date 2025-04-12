@@ -1,5 +1,7 @@
 
-import React, { ForwardedRef, forwardRef, useEffect, useState } from 'react';
+import {
+ ForwardedRef, forwardRef, useEffect, useState 
+} from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
 import {
   AccordionButton, AccordionItem, AccordionPanel, Box,
@@ -12,12 +14,12 @@ import { SettingTitle } from './SettingsTitle';
 
 const AutoResizeTextarea = forwardRef((props, ref) => (
   <Textarea
+    ref={ref as ForwardedRef<HTMLTextAreaElement>}
     as={ResizeTextarea}
     maxRows={8}
     minH="unset"
     minRows={3}
     overflow="scroll"
-    ref={ref as ForwardedRef<HTMLTextAreaElement>}
     resize="none"
     w="100%"
     {...props}
@@ -27,8 +29,8 @@ const AutoResizeTextarea = forwardRef((props, ref) => (
 const ParamsTextArea = ({ params, setParams }) => (
   <AutoResizeTextarea
 
-    // @ts-ignore
-    // eslint-disable-next-line react/jsx-props-no-multi-spaces
+    // @ts-expect-error - ResizeTextarea doesn't support all Textarea props
+     
     _focus={{ borderColor: 'var(--text)', boxShadow: 'none !important' }}
     _hover={{ borderColor: 'var(--text)', boxShadow: 'none !important' }}
     background="var(--text)"
@@ -53,6 +55,7 @@ export const Params = () => {
   useEffect(() => {
     try {
       const paramsObj = JSON.parse(params);
+
       updateConfig({ params: paramsObj });
       setValid(true);
     } catch {

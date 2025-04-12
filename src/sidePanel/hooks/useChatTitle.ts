@@ -17,7 +17,7 @@ export const useChatTitle = (isLoading, messages, message) => {
         role: i % 2 === 1 ? 'assistant' : 'user'
       })).reverse();
 
-      const currentModel = config?.models?.find(({ id }: any) => id === config?.selectedModel);
+      const currentModel = config?.models?.find(({ id }: string) => id === config?.selectedModel);
       const url = {
         groq: 'https://api.groq.com/openai/v1/chat/completions',
         ollama: `${config?.ollamaUrl}/api/chat`,

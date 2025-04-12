@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowRightIcon } from '@chakra-ui/icons';
 import { IconButton, Spinner } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
@@ -19,10 +18,10 @@ export const Send = ({ isLoading, onSend }: { isLoading: boolean, onSend: () => 
       }
     ml={2}
     mr={2}
-    zIndex={2}
     size="md"
     variant="outlined"
     whileHover={{ transform: !isLoading ? 'translateX(2px)' : undefined }}
+    zIndex={2}
     onClick={onSend}
   />
 );

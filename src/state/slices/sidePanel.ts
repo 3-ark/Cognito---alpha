@@ -23,4 +23,7 @@ const slice = createSlice({
 
 const { actions, reducer } = slice;
 const aliases = {};
-export { actions, aliases,reducer };
+
+export {
+ actions, aliases,reducer 
+};
