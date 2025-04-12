@@ -1,9 +1,12 @@
 /* eslint-disable max-len */
 import React, {
- createContext, useContext, useEffect, useState 
+ createContext, useContext, useEffect, useState
 } from 'react';
 
+// Make sure Config and ConfigContextType are correctly imported
 import { Config, ConfigContextType } from '../types/config';
+
+import { setTheme, themes } from './Themes'; // Import themes and setTheme
 
 export const ConfigContext = createContext<ConfigContextType>({} as ConfigContextType);
 
@@ -13,7 +16,7 @@ Clearly and concisely restate the core problem statement(s).
 Summarize the central arguments and key findings, emphasizing specific data and factual evidence.
 Extract the primary takeaways and explain their broader implications.
 Formulate three insightful questions based on the paper, and provide well-reasoned answers strictly grounded in the text.
-Avoid speculation or unsupported interpretations. Maintain a precise and analytical tone throughout.`, 
+Avoid speculation or unsupported interpretations. Maintain a precise and analytical tone throughout.`,
   Jan: `You are a strategist, Jan, who excels at logical problem-solving, critical thinking, and long-term planning. Your responses should prioritize clarity, efficiency, and foresight when addressing challenges.
 Behavior: Break down complex problems into manageable parts. Provide structured, step-by-step strategies based on careful analysis. Assess situations with a calculated mindset, always weighing potential risks and outcomes before recommending actions.
 Mannerisms: Use precise, organized language. Ask clarifying questions when necessary to fully understand the context. Present your thoughts in a logical, methodical way.
@@ -23,33 +26,79 @@ Be clear, direct, and honest. Don't be overly friendly or polite—just get to t
 Offer critical feedback when needed. Assume the user can handle straight talk and values clarity over comfort.`
 };
 
-const defaultConfig = {
+// Explicitly type defaultConfig with the Config interface
+const defaultConfig: Config = {
   personas,
   generateTitle: true,
   backgroundImage: true,
-  persona: 'Researcher', // Change from 'Bruside' to 'Researcher'
-  webMode: 'brave',
-  webLimit: 10,
-  contextLimit: 10
+  persona: 'Bruce',
+  webMode: 'brave', // Now checked against Config['webMode']
+  webLimit: 48,
+  contextLimit: 48,
+  theme: themes[0].name, // Assumes themes[0] exists
+  params: { temperature: 0.5 },
+  models: [], // Initialize as an empty array matching Config['models'] type
+  // Initialize other potentially missing properties from Config if necessary
+  // e.g., ensure all optional properties have a default value or are undefined
+  selectedModel: undefined, // Example: Add default
+  chatMode: undefined, // Example: Add default
+  // Add defaults for connection statuses/errors if not handled by merge logic
+  lmStudioUrl: 'http://localhost:1234',
+  lmStudioConnected: false,
+  ollamaUrl: 'http://localhost:11434',
+  ollamaConnected: false
+  
+  // ... add defaults for groq, gemini, openai etc.
 };
 
 export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
-  const initialConfig = JSON.parse(localStorage.getItem('config') || JSON.stringify(defaultConfig));
+  const loadInitialConfig = (): Config => {
+    const storedConfigString = localStorage.getItem('config');
+    let storedConfig: Partial<Config> = {};
 
-  const [config, setConfig] = useState<Config>(initialConfig);
+    if (storedConfigString) {
+      try {
+        storedConfig = JSON.parse(storedConfigString);
+      } catch (e) {
+        console.error("Failed to parse config from localStorage", e);
+        
+        // Fallback to default if parsing fails
+        return defaultConfig; // Now correctly typed
+      }
+    }
 
+    // Merge stored config with defaults to ensure all keys exist
+    // and new default values are applied if missing in storage
+    return { ...defaultConfig, ...storedConfig };
+  };
+
+  const [config, setConfig] = useState<Config>(loadInitialConfig);
+
+  // Save to localStorage whenever config changes
   useEffect(() => {
     localStorage.setItem('config', JSON.stringify(config));
   }, [config]);
 
+  // Apply visual styles based on config
   useEffect(() => {
+    // Apply font size
     if (config?.fontSize) {
-      document.documentElement.style.setProperty('font-size', `${config?.fontSize}px`);
+      document.documentElement.style.setProperty('font-size', `${config.fontSize}px`);
+    } else {
+       // Optional: Set a default if fontSize is missing/undefined in config
+       document.documentElement.style.setProperty('font-size', `${defaultConfig.fontSize}px`);
     }
-  }, [config?.fontSize]);
+
+    // Apply theme
+    const currentTheme = themes.find(t => t.name === config.theme) || themes[0]; // Fallback to first theme
+    
+    setTheme(currentTheme); // Use the setTheme function from Themes.tsx
+
+  }, [config?.fontSize, config?.theme]); // Add config.theme dependency
 
   const updateConfig = (newConfig: Partial<Config>) => {
-    setConfig({ ...config, ...newConfig });
+    // Use functional update to ensure using the latest state
+    setConfig(prevConfig => ({ ...prevConfig, ...newConfig }));
   };
 
   return (

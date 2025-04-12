@@ -31,10 +31,10 @@ const WelcomeModal = ({
   <Modal isOpen={isOpen} scrollBehavior="inside" size="sm" isCentered onClose={onClose}>
     <ModalOverlay />
     <ModalContent bg="var(--bg)" border="2px solid var(--text)" borderRadius={16} color="var(--text)" pb={2}>
-      <ModalHeader textAlign="center">👋 welcome to Bruside 👋</ModalHeader>
+      <ModalHeader textAlign="center">👋 Welcome Detective 👋</ModalHeader>
       <ModalBody>
         <Text color="var(--text)" fontSize="md" fontWeight={600} textAlign="center">
-          you have no active connection
+          The game is afoot!<br />
         </Text>
         <Box display="flex" justifyContent="center" mt={6}>
           <Button
