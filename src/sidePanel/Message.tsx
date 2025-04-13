@@ -113,7 +113,10 @@ const A = ({
   }: AnchorProps) => (
   <a href={href}
     style={{
-      color: 'var(--text)', textDecoration: 'underline', padding: '2px 7px', borderRadius: '6px'
+      color: 'var(--link)', // Changed from --text to --link
+      textDecoration: 'underline', 
+      padding: '2px 7px', 
+      borderRadius: '6px'
     }}
     target="_blank"
     rel="noopener noreferrer" // Added for security
@@ -147,6 +150,24 @@ const H2 = ({ children, ...rest }: HeadingProps) => (
 );
 
 // Add similar components for h3-h6 as needed...
+
+// Add new components for strong/em
+type StrongProps = { children?: ReactNode } & HTMLAttributes<HTMLElement>;
+const Strong = ({ children, ...rest }: StrongProps) => (
+  <strong style={{ 
+    color: 'var(--bold)',
+    fontWeight: 700, // Keep bold weight
+    fontFamily: 'Poppins, sans-serif' // Explicit font stack
+  }} {...rest}>{children}</strong>
+);
+
+type EmProps = { children?: ReactNode } & HTMLAttributes<HTMLElement>;
+const Em = ({ children, ...rest }: EmProps) => (
+  <em style={{ 
+    color: 'var(--italic)',
+    fontStyle: 'italic' // Keep italic slant
+  }} {...rest}>{children}</em>
+);
 
 // Add this new component
 const ThinkingBlock = ({ content }: { content: string }) => {
@@ -193,6 +214,8 @@ const markdownComponents = {
   pre: Pre,
   code: Code,
   a: A,
+  strong: Strong,  // Add this
+  em: Em,          // Add this
   h1: H1,
   h2: H2
   

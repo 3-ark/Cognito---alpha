@@ -24,13 +24,18 @@
     --bg: rgb(235, 216, 171);
     --active: #78896c;
     --text: black;
-    font-family: monospace;
+    --bold: #821414;
+    --italic: #036426;
+    --link: #032d87;
+    font-family: 'Poppins', sans-serif; /* Changed from Inter to Poppins */
 }
 
 body {
     margin: 0;
     position: relative;
     background-color: var(--bg);
+    font-family: 'Poppins', sans-serif; /* Changed from Inter to Poppins */
+    font-weight: 400; /* Add base weight */
 }
 
 /* Add paper texture overlay */
@@ -64,7 +69,23 @@ body::before {
 
 * {
     box-sizing: border-box;
+    /* Remove font-family from here */
+}
+
+/* Explicitly style code elements */
+code, pre {
     font-family: monospace;
+}
+
+/* Add explicit element targeting */
+strong {
+    color: var(--bold);
+    font-weight: 700;
+}
+
+em {
+    color: var(--italic);
+    font-style: italic;
 }
 </style>
 <div id="root" style="background-color: var(--bg);"></div>
