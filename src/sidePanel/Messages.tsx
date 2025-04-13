@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { CopyIcon, RepeatIcon } from '@chakra-ui/icons';
 import { Box, IconButton } from '@chakra-ui/react';
@@ -16,6 +17,8 @@ interface MessagesProps {
 export const Messages: React.FC<MessagesProps> = ({
  messages = [], isLoading = false, onReload = () => {}, settingsMode = false
 }) => {
+  const [hoveredIndex, setHoveredIndex] = useState(-1);
+
   const copyMessage = (text: string) => {
     navigator.clipboard.writeText(text)
       .then(() => toast.success('Copied to clipboard'))
@@ -52,6 +55,8 @@ export const Messages: React.FC<MessagesProps> = ({
             justifyContent="flex-start"
             mb={0}
             mt={3}
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(-1)}
           >
             <Message i={i} m={m} />
             <Box display="flex" flexDirection="column" gap={1}>
@@ -60,36 +65,26 @@ export const Messages: React.FC<MessagesProps> = ({
                 aria-label="Copy"
                 as={motion.div}
                 borderRadius={16}
-                icon={
-                  !isLoading && i === 0 ? (
-                    <CopyIcon color="var(--text)" fontSize="xl" />
-                  ) : undefined
-                }
+                icon={<CopyIcon color="var(--text)" fontSize="xl" />}
+                opacity={hoveredIndex === i ? 1 : 0}
+                transition="opacity 0.2s"
                 variant="outlined"
                 whileHover={{ scale: 1.1, cursor: 'pointer' }}
                 onClick={() => copyMessage(m)}
               />
-              {/* Sorted props for Repeat IconButton */}
-              <IconButton
-                aria-label="Repeat"
-                as={motion.div}
-                borderRadius={16}
-                icon={
-                  !isLoading && i === 0 ? (
-                    <RepeatIcon
-                      color="var(--text)"
-                      fontSize="2xl"
-                      
-                      // Note: onClick was inside the icon definition, moved it to the IconButton prop
-                      onClick={onReload}
-                    />
-                  ) : undefined
-                }
-                
-                // onClick={onReload} // Moved onClick into the icon definition as it seemed intended there
-                variant="outlined"
-                whileHover={{ rotate: '90deg', cursor: 'pointer' }}
-              />
+              {i === 0 && (
+                <IconButton
+                  aria-label="Repeat"
+                  as={motion.div}
+                  borderRadius={16}
+                  icon={<RepeatIcon color="var(--text" fontSize="2xl" />}
+                  opacity={hoveredIndex === i ? 1 : 0}
+                  transition="opacity 0.2s"
+                  variant="outlined"
+                  whileHover={{ rotate: '90deg', cursor: 'pointer' }}
+                  onClick={onReload}
+                />
+              )}
             </Box>
           </Box>
         )
