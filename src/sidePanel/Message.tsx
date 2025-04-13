@@ -43,9 +43,13 @@ type ParagraphProps = { children?: ReactNode } & HTMLAttributes<HTMLParagraphEle
 
 const P = ({ children, ...rest }: ParagraphProps) => (
   <p style={{
- paddingTop: 0, paddingBottom: '0.2rem', wordBreak: 'break-word'
-}}
-{...rest}>{children}</p>
+    paddingTop: 0,
+    paddingBottom: '0.2rem',
+    wordBreak: 'break-word', // Add this line
+    overflowWrap: 'break-word', // Add this line
+    whiteSpace: 'pre-wrap' // Add this line
+  }}
+  {...rest}>{children}</p>
 );
 
 // Define a more specific type for pre props
