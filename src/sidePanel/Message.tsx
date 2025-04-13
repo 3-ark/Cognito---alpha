@@ -6,6 +6,7 @@ import { CopyIcon } from '@chakra-ui/icons';
 import {
  Box, Button, Collapse, IconButton, useDisclosure
 } from '@chakra-ui/react';
+import remarkGfm from 'remark-gfm';
 
 // Update ListProps type
 type ListProps = { 
@@ -199,6 +200,56 @@ const Em = ({ children, ...rest }: EmProps) => (
   }} {...rest}>{children}</em>
 );
 
+// Add new table components after Em component
+type TableProps = { children?: ReactNode } & HTMLAttributes<HTMLTableElement>;
+const Table = ({ children, ...rest }: TableProps) => (
+  <table style={{ 
+    border: `2px solid var(--text)`,
+    borderCollapse: 'collapse',
+    width: '100%',
+    margin: '1rem 0'
+  }} {...rest}>{children}</table>
+);
+
+type THeadProps = { children?: ReactNode } & HTMLAttributes<HTMLTableSectionElement>;
+const THead = ({ children, ...rest }: THeadProps) => (
+  <thead style={{ 
+    background: 'var(--active)',
+    borderBottom: `2px solid var(--text)`
+  }} {...rest}>{children}</thead>
+);
+
+type TBodyProps = { children?: ReactNode } & HTMLAttributes<HTMLTableSectionElement>;
+const TBody = ({ children, ...rest }: TBodyProps) => (
+  <tbody {...rest}>{children}</tbody>
+);
+
+type TrProps = { children?: ReactNode } & HTMLAttributes<HTMLTableRowElement>;
+const Tr = ({ children, ...rest }: TrProps) => (
+  <tr style={{ 
+    '&:hover': {
+      background: 'rgba(0,0,0,0.05)'
+    }
+  }} {...rest}>{children}</tr>
+);
+
+type ThProps = { children?: ReactNode } & HTMLAttributes<HTMLTableCellElement>;
+const Th = ({ children, ...rest }: ThProps) => (
+  <th style={{
+    padding: '0.5rem',
+    border: `1px solid var(--text)`,
+    fontWeight: 700
+  }} {...rest}>{children}</th>
+);
+
+type TdProps = { children?: ReactNode } & HTMLAttributes<HTMLTableCellElement>;
+const Td = ({ children, ...rest }: TdProps) => (
+  <td style={{
+    padding: '0.5rem',
+    border: `1px solid var(--text)`
+  }} {...rest}>{children}</td>
+);
+
 // Add this new component
 const ThinkingBlock = ({ content }: { content: string }) => {
   const { isOpen, onToggle } = useDisclosure();
@@ -225,12 +276,14 @@ const ThinkingBlock = ({ content }: { content: string }) => {
           p={3}
         >
           <div className="markdown-body">
-            <Markdown components={{
-              ...markdownComponents, // Spread existing components
-              h1: H1,
-              h2: H2,
-              h3: H3
-            }}>{content}</Markdown>
+            <Markdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                ...markdownComponents, // Spread existing components
+                h1: H1,
+                h2: H2,
+                h3: H3
+              }}>{content}</Markdown>
           </div>
         </Box>
       </Collapse>
@@ -246,11 +299,17 @@ const markdownComponents = {
   pre: Pre,
   code: Code,
   a: A,
-  strong: Strong,
-  em: Em,
+  strong: Strong, // Add strong mapping
+  em: Em,        // Add em mapping
   h1: H1,
   h2: H2,
-  h3: H3 // Add H3 to components
+  h3: H3, // Add H3 to components
+  table: Table,
+  thead: THead,
+  tbody: TBody,
+  tr: Tr,
+  th: Th,
+  td: Td
 };
 
 export const Message = ({ m = '', i = 0 }) => {
@@ -268,9 +327,13 @@ export const Message = ({ m = '', i = 0 }) => {
     a: A,
     h1: H1,
     h2: H2,
-    h3: H3
-    
-    // h3: H3, etc.
+    h3: H3,
+    table: Table,
+    thead: THead,
+    tbody: TBody,
+    tr: Tr,
+    th: Th,
+    td: Td
   };
 
   return (
@@ -330,7 +393,9 @@ export const Message = ({ m = '', i = 0 }) => {
             // Render normal markdown content
             return (
               <div className="message-content">
-                <Markdown components={markdownComponents}>{part}</Markdown>
+                <Markdown 
+                  remarkPlugins={[remarkGfm]}
+                  components={markdownComponents}>{part}</Markdown>
               </div>
             );
           }
