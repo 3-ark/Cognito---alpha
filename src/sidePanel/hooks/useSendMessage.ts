@@ -111,13 +111,13 @@ const useSendMessage = (
 
     // Ensure substr is called on a string
     const limitedContent = charLimit && typeof currentPageContent === 'string' ? currentPageContent.substr(0, charLimit) : '';
-    const unlimitedContent = config?.contextLimit === 50 && currentPageContent;
+    const unlimitedContent = config?.contextLimit === 128 && currentPageContent;
 
     const webLimit = 1000 * (config?.webLimit || 1);
 
     // Ensure substr is called on a string
     const limitedWebResult = webLimit && typeof searchRes === 'string' ? searchRes.substr(0, webLimit) : '';
-    const unlimitedWebresults = config?.webLimit === 50 && searchRes;
+    const unlimitedWebresults = config?.webLimit === 128 && searchRes;
 
     const finalWebContent = unlimitedWebresults || limitedWebResult || ''; // Default to empty string
 

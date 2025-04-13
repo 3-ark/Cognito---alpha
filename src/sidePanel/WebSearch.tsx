@@ -32,7 +32,7 @@ const WebSearchButton = ({ size, config }) => (
     pr={4}
     size="sm"
   >
-    {size === 50 ? '' : `${size}k`}
+    {size === 128 ? '' : `${size}k`}
   </Button>
 );
 
@@ -73,11 +73,11 @@ const WebSearchSlider = ({ size, updateConfig }) => (
     >
       char limit:
       {' '}
-      {size === 50 ? 'inf' : `${size}k`}
+      {size === 128 ? 'inf' : `${size}k`}
     </Text>
     <Slider
       defaultValue={size}
-      max={50}
+      max={128}
       min={1}
       onChange={value => updateConfig({ webLimit: value })}
     >

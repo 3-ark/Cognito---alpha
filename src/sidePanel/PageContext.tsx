@@ -45,7 +45,7 @@ export const PageContext = () => {
                   >
                     {isTextMode ? 'text' : 'html'}
                     {' '}
-                    {size === 50 ? '' : `${size}k`}
+                    {size === 128 ? '' : `${size}k`}
                   </Button>
                 )}
             </Grid>
@@ -68,12 +68,12 @@ export const PageContext = () => {
             <Text color="var(--text)" fontSize="lg" fontWeight={800} marginLeft={-4} pl={2} textAlign="left">
               char limit:
               {' '}
-              {size === 50 ? 'inf' : `${size}k`}
+              {size === 128 ? 'inf' : `${size}k`}
             </Text>
             <Slider
               defaultValue={size}
               id="slider"
-              max={50}
+              max={128}
               min={1}
               onChange={e => updateConfig({ contextLimit: e })}
             >

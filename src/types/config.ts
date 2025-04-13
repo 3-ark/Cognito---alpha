@@ -17,7 +17,7 @@ export interface Config {
   persona?: string;
   generateTitle?: boolean;
   backgroundImage?: boolean;
-  webMode?: 'duckduckgo' | 'brave';
+  webMode?: 'duckduckgo' | 'brave' | 'google';
   webLimit?: number;
   pageMode?: 'text' | 'html';
   contextLimit?: number;

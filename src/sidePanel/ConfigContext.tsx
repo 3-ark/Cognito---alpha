@@ -46,7 +46,8 @@ const defaultConfig: Config = {
   lmStudioUrl: 'http://localhost:1234',
   lmStudioConnected: false,
   ollamaUrl: 'http://localhost:11434',
-  ollamaConnected: false
+  ollamaConnected: false,
+  fontSize: 14 // Add this line to set base font size
   
   // ... add defaults for groq, gemini, openai etc.
 };
@@ -82,12 +83,9 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   // Apply visual styles based on config
   useEffect(() => {
     // Apply font size
-    if (config?.fontSize) {
-      document.documentElement.style.setProperty('font-size', `${config.fontSize}px`);
-    } else {
-       // Optional: Set a default if fontSize is missing/undefined in config
-       document.documentElement.style.setProperty('font-size', `${defaultConfig.fontSize}px`);
-    }
+    const baseSize = config?.fontSize || defaultConfig.fontSize;
+    
+    document.documentElement.style.setProperty('font-size', `${baseSize}px`);
 
     // Apply theme
     const currentTheme = themes.find(t => t.name === config.theme) || themes[0]; // Fallback to first theme
