@@ -3,6 +3,8 @@ import {
   combineReducers,
   configureStore,
   createSerializableStateInvariantMiddleware,
+  Dispatch,
+  Middleware,
   Slice
 } from '@reduxjs/toolkit';
 import { logger } from 'redux-logger';
@@ -24,11 +26,11 @@ type BuildStoreOptions = {
 
 const backgroundAliases = { ...sidePanelSlice.aliases, ...contentSlice.aliases };
 
-const middleware = [
-  alias(backgroundAliases),
-  thunkMiddleware,
-  createSerializableStateInvariantMiddleware(),
-  logger
+const middleware: Middleware[] = [
+  alias(backgroundAliases) as Middleware,
+  thunkMiddleware as unknown as Middleware<object, unknown, Dispatch<AnyAction>>,
+  createSerializableStateInvariantMiddleware() as Middleware<object, unknown, Dispatch<AnyAction>>,
+  logger as Middleware<object, unknown, Dispatch<AnyAction>>
 ];
 
 const buildStoreWithDefaults = ({ portName }: BuildStoreOptions = {}) => {
