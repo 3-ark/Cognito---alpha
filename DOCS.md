@@ -2,8 +2,6 @@
 
 ## connections 
 
-![](/docs/connections.png)
-
 ### ollama
 
 - [install ollama](https://ollama.com/download)
@@ -20,7 +18,7 @@ ollama serve
 ### LM Studio
 
 - [install LM Studio](https://lmstudio.ai/)
-- download a model from the home screen, or use the search tab to pull from huggingface
+- download a model from the home screen, or use the search tab to pull from Huggingface
 - go to `Local server` tab, hit `Start server`, and select your downloaded model
 
 ### groq
@@ -37,8 +35,6 @@ Groq offers a wide variety of models with a generous free tier.
 
 ## persona
 
-![](/docs/persona.png)
-
 Create and modify your own personal assistants!
 
 Check out these collections for inspiration:
@@ -49,24 +45,21 @@ Check out these collections for inspiration:
 
 ## page context
 
-![](/docs/pageContext.png)
-
 Augment your conversation with the content of your (currently visited) web page.
 
 - select `text mode` to share the text content of your page
-- select `html mode` to share the source code of the site (resource intensive, 
+- select `html mode` to share the source code of the site (resource-intensive, 
 only for development purposes) 
-- adjust `char limit` to control the maximum amount of characters you want to share in your conversation. decrease this amount if you have limited context window.
+- adjust `char limit` to control the context number in your conversation. Decrease this if you have a limited context window.
 
 ## web search
 
-![](/docs/webSearch.png)
+Basic web augmentation for your chats. Enter your web search query, and Bruside will load up an async web search to answer your questions based on live public data.
 
-Basic web-augmentation for your chats. Enter your web search query, and Bruside will load up an async web search to answer your questions based on live public data.
+- you can choose `duckduckgo`, `brave`, `google` as your web source
+- adjust `char limit` to control the context number in your conversation. decrease this if you have a limited context window.
+- Note: Sometimes you should visit yourself for the first search to gain access.
 
-- you can choose `duckduckgo` or `brave` as your web source
-- adjust `char limit` to control the maximum amount of characters you want to share in your conversation. decrease this amount if you have limited context window.
-- Google added. Note: Sometimes you should visit yourself for the first search to gain access.
 ## File Structure
 
 Key project structure with implementation details:
