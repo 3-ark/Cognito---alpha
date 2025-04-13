@@ -1,5 +1,5 @@
 import {
-   ClassAttributes,HTMLAttributes, ReactNode, useState 
+   ClassAttributes, HTMLAttributes, ReactNode, useState 
   } from 'react'; // Added HTMLAttributes, ClassAttributes
 import Markdown from 'react-markdown';
 import { CopyIcon } from '@chakra-ui/icons';
@@ -7,15 +7,34 @@ import {
  Box, Button, Collapse, IconButton, useDisclosure
 } from '@chakra-ui/react';
 
-// Define a more specific type for list props, making children optional
-// and allowing other standard HTML attributes for ul/ol elements.
-type ListProps = { children?: ReactNode } & HTMLAttributes<HTMLUListElement | HTMLOListElement>;
+// Update ListProps type
+type ListProps = { 
+  children?: ReactNode;
+  ordered?: boolean; // Add ordered prop detection
+} & HTMLAttributes<HTMLUListElement | HTMLOListElement>;
 
+// Keep existing Ul component
 const Ul = ({ children, ...rest }: ListProps) => (
   <ul style={{
- paddingLeft: '2rem', paddingTop: '0.5rem', paddingBottom: '0.5rem'
-}}
-{...rest}>{children}</ul>
+    paddingLeft: '2rem', 
+    paddingTop: '0.5rem', 
+    paddingBottom: '0.5rem',
+    listStyleType: 'disc' // Explicit bullet style
+  }} {...rest}>
+    {children}
+  </ul>
+);
+
+// Add new Ol component
+const Ol = ({ children, ...rest }: ListProps) => (
+  <ol style={{
+    paddingLeft: '2rem',
+    paddingTop: '0.5rem',
+    paddingBottom: '0.5rem',
+    listStyleType: 'decimal' // Explicit number style
+  }} {...rest}>
+    {children}
+  </ol>
 );
 
 // Define a more specific type for paragraph props
@@ -207,19 +226,18 @@ const ThinkingBlock = ({ content }: { content: string }) => {
   );
 };
 
+// Update markdownComponents mapping
 const markdownComponents = {
   ul: Ul,
-  ol: Ul,
+  ol: Ol, // Changed from Ul to new Ol component
   p: P,
   pre: Pre,
   code: Code,
   a: A,
-  strong: Strong,  // Add this
-  em: Em,          // Add this
+  strong: Strong,
+  em: Em,
   h1: H1,
   h2: H2
-  
-  // h3: H3, etc.
 };
 
 export const Message = ({ m = '', i = 0 }) => {
@@ -230,7 +248,7 @@ export const Message = ({ m = '', i = 0 }) => {
   // Define components object once
   const markdownComponents = {
     ul: Ul,
-    ol: Ul, // Assign Ul to ol as well, since its type now allows it
+    ol: Ol, // Assign Ul to ol as well, since its type now allows it
     p: P,
     pre: Pre,
     code: Code,
