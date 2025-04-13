@@ -52,6 +52,4 @@ Bruside comes with three distinct personas to suit different needs:
 
 ![](/docs/Bruside_app.png)
 
-![](/docs/vim.png)
-
 </a>
