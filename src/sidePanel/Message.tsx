@@ -168,6 +168,17 @@ const H2 = ({ children, ...rest }: HeadingProps) => (
   }} {...rest}>{children}</h2>
 );
 
+// Add H3 component after H2
+const H3 = ({ children, ...rest }: HeadingProps) => (
+  <h3 style={{
+    fontSize: '1.1rem',
+    fontWeight: 600,
+    margin: '0.75rem 0 0.5rem',
+    borderBottom: '1px dashed var(--text)',
+    paddingBottom: '0.3rem'
+  }} {...rest}>{children}</h3>
+);
+
 // Add similar components for h3-h6 as needed...
 
 // Add new components for strong/em
@@ -217,7 +228,8 @@ const ThinkingBlock = ({ content }: { content: string }) => {
             <Markdown components={{
               ...markdownComponents, // Spread existing components
               h1: H1,
-              h2: H2
+              h2: H2,
+              h3: H3
             }}>{content}</Markdown>
           </div>
         </Box>
@@ -237,7 +249,8 @@ const markdownComponents = {
   strong: Strong,
   em: Em,
   h1: H1,
-  h2: H2
+  h2: H2,
+  h3: H3 // Add H3 to components
 };
 
 export const Message = ({ m = '', i = 0 }) => {
@@ -254,7 +267,8 @@ export const Message = ({ m = '', i = 0 }) => {
     code: Code,
     a: A,
     h1: H1,
-    h2: H2
+    h2: H2,
+    h3: H3
     
     // h3: H3, etc.
   };
