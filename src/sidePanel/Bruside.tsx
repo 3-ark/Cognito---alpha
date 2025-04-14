@@ -188,8 +188,8 @@ const Bruside = () => {
   }, [response]);
 
   const loadChat = (chat: ChatMessage) => {
-    setChatTitle(chat.title);
-    setMessages(chat.messages);
+    setChatTitle(chat.title || '');
+    setMessages(chat.messages); 
     setChatId(chat.id);
     setHistoryMode(false);
   };
