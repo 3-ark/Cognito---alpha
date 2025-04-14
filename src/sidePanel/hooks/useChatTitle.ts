@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useConfig } from '../ConfigContext';
 import { fetchDataAsStream } from '../network';
 
-const generateTitle = 'create a short title to our conversation. only answer with the title string, say nothing else but the chat title. use spaces between the words. Here is an example title: New summarizer assignment';
+const generateTitle = 'create a short title for our conversation. only answer with the title string, say nothing else but the chat title. use spaces between the words. Here is an example title: Trade War Escalates';
 
 export const useChatTitle = (isLoading, messages, message) => {
   const [chatTitle, setChatTitle] = useState('');
