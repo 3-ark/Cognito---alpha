@@ -1,4 +1,3 @@
- 
 import { useEffect, useState } from 'react';
 import { toast,Toaster } from 'react-hot-toast';
 import {
@@ -123,7 +122,7 @@ const Bruside = () => {
 
   useInterval(async () => {
     if (config?.chatMode === 'page') {
-      await injectBridge();
+      await injectBridge(); // Re-injects content script periodically
     }
   }, 2000);
 
@@ -203,6 +202,26 @@ const Bruside = () => {
     setHistoryMode(false); // Add this line to exit history mode
     updateConfig({ chatMode: undefined }); // Add this line to reset chat mode
   };
+
+  // Add this useEffect
+  useEffect(() => {
+    const handlePanelOpen = async () => {
+      const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+      
+      if (tab?.id) {
+        await injectBridge();
+        chrome.tabs.sendMessage(tab.id, { type: 'GET_PAGE_CONTENT' });
+      }
+    };
+
+    handlePanelOpen();
+    
+    return () => {
+      // Clear cached content when panel closes
+      localStorage.removeItem('pagestring');
+      localStorage.removeItem('pagehtml');
+    };
+  }, []);
 
   return (
     <Container

@@ -11,8 +11,7 @@ export const cleanUrl = (url: string) => {
 };
 
 export const urlRewriteRuntime = async function (
-  domain: string,
-  type = 'ollama'
+  domain: string
 ) {
   try {
     const url = new URL(domain);

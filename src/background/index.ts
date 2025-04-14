@@ -73,4 +73,16 @@ chrome.runtime.onConnect.addListener(port => {
   });
 });
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'GET_PAGE_CONTENT') {
+    sendResponse({
+      title: document.title,
+      text: document.body.innerText.replace(/\s\s+/g, ' '),
+      html: document.body.innerHTML
+    });
+  }
+  
+  return true; // Keep connection open for response
+});
+
 export {};
