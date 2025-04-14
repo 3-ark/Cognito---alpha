@@ -22,6 +22,11 @@ import {
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 
+interface Model {
+  id: string;
+  active: boolean;
+  host?: string;
+}
 import { useConfig } from './ConfigContext';
 import { Docs } from './Docs';
  
@@ -155,7 +160,7 @@ const DrawerLinkSection = ({ title, onClick }) => (
 );
  
 const SettingsDrawer = ({
- isOpen, onClose, config, updateConfig, availableModelNames, setSettingsMode, downloadText, downloadJson, downloadImage, setHistoryMode 
+ isOpen, onClose, config, updateConfig, setSettingsMode, downloadText, downloadJson, downloadImage, setHistoryMode 
 }) => (
   <Drawer isOpen={isOpen} placement="left" size="xs" onClose={onClose}>
     <DrawerOverlay />
@@ -232,14 +237,14 @@ const SettingsDrawer = ({
             {!config?.models?.length ? (
               <option value="default" disabled>loading models...</option>
             ) : (
-              config.models.map((model: unknown) => (
+              config.models.map((model: Model) => (
                 <option 
                   key={model.id} 
                   disabled={model.active === false}
                   value={model.id}
                 >
                   {model.host ? `(${model.host}) ${model.id}` : model.id}
-                </option>
+                </option> 
               ))
             )}
           </Select>
