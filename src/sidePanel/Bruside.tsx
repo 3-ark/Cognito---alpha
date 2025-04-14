@@ -198,12 +198,12 @@ const Bruside = () => {
     if (messages.length && !isLoading) {
       const savedChat = {
         id: chatId,
+        title: chatTitle,
+        messages, // Already contains proper role info
         last_updated: Date.now(),
-        title: chatTitle || messages[messages.length - 1],
-        messages
+        model: config?.selectedModel
       };
-
-      // Remove the existingChat check and always save the latest chat state
+      
       localforage.setItem(chatId, savedChat);
     }
   }, [chatId, messages, isLoading, chatTitle]);
