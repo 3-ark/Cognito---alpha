@@ -4,11 +4,12 @@ import { CopyIcon, RepeatIcon } from '@chakra-ui/icons';
 import { Box, IconButton } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 
+import { ChatMessage } from './ChatHistory';
 import { Message } from './Message';
 
 // Define the props interface for better type safety
 interface MessagesProps {
-  messages?: string[];
+  messages?: ChatMessage[];
   isLoading?: boolean;
   onReload?: () => void;
   settingsMode?: boolean;
