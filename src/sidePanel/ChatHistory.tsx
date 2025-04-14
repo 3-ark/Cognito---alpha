@@ -9,6 +9,7 @@ import localforage from 'localforage';
 const dateToString = date => new Date(date).toLocaleDateString('sv-SE');
 
 export type ChatMessage = {
+  last_updated: number;
   id: string;
   content: string;
   role: 'user' | 'assistant' | 'system';
