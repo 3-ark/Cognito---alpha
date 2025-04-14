@@ -16,6 +16,7 @@ export type ChatMessage = {
   timestamp: number;
   title?: string;
   model?: string;
+  messages: string[];
 }
 
 type ChatHistoryProps = {

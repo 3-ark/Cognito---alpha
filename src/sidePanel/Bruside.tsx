@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { toast,Toaster } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 import {
   Box,
   Container,
@@ -168,7 +168,7 @@ const Bruside = () => {
 
   const onReload = () => {
     setMessages(messages.slice(2));
-    setMessage(messages[1]);
+    setMessage(messages[1]?.content || '');
   };
 
   // load stored theme
@@ -187,9 +187,9 @@ const Bruside = () => {
     }
   }, [response]);
 
-  const loadChat = (chat: ChatMessage) => {
+  const loadChat = (chat: { id: string, title: string, messages: ChatMessage[] }) => {
     setChatTitle(chat.title || '');
-    setMessages(chat.messages); 
+    setMessages(chat.messages);
     setChatId(chat.id);
     setHistoryMode(false);
   };
