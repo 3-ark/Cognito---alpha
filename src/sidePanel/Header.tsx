@@ -160,7 +160,7 @@ const DrawerLinkSection = ({ title, onClick }) => (
 );
  
 const SettingsDrawer = ({
- isOpen, onClose, config, updateConfig, setSettingsMode, downloadText, downloadJson, downloadImage, setHistoryMode 
+ isOpen, onClose, config, updateConfig, availableModelNames, setSettingsMode, downloadText, downloadJson, downloadImage, setHistoryMode 
 }) => (
   <Drawer isOpen={isOpen} placement="left" size="xs" onClose={onClose}>
     <DrawerOverlay />
