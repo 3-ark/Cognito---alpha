@@ -102,28 +102,32 @@ Here’s the **simplified, OpenAI-compatible** `useChatTitle` hook you’re usin
 
 ```typescript
 import { useEffect, useState } from 'react';
+
 import { useConfig } from '../ConfigContext';
 import { fetchDataAsStream } from '../network';
 
-const generateTitle = 'Create a short 2-3 word title for this chat. Only respond with the title. Example: "Trade Analysis"';
+const generateTitle = 'Create a short 2-4 word title for this chat. Only respond with the title. Example: "Trade War Analysis"';
 
-export const useChatTitle = (isLoading: boolean, messages: any[], message: string) => {
+export const useChatTitle = (isLoading: boolean, messages: string[], message: string) => {
   const [chatTitle, setChatTitle] = useState('');
   const { config } = useConfig();
 
   useEffect(() => {
     if (!isLoading && messages.length >= 2 && !chatTitle && config?.generateTitle) {
       const currentModel = config?.models?.find((model) => model.id === config.selectedModel);
+      
       if (!currentModel) return;
 
+      // Prepare messages for title generation (first 2 messages + instruction)
       const messagesForTitle = [
         ...messages.slice(0, 2).map((m, i) => ({
-          content: m.content || generateTitle,
-          role: i % 2 === 0 ? 'user' : 'assistant',
+          content: m || generateTitle,
+          role: i % 2 === 0 ? 'user' : 'assistant'
         })),
-        { role: 'user', content: generateTitle },
+        { role: 'user', content: generateTitle }
       ];
 
+      // Define API endpoints for each provider (OpenAI-compatible)
       const getApiConfig = () => {
         const baseConfig = {
           body: { 
@@ -131,7 +135,7 @@ export const useChatTitle = (isLoading: boolean, messages: any[], message: strin
             messages: messagesForTitle, 
             stream: true 
           },
-          headers: {} as Record<string, string>,
+          headers: {} as Record<string, string>
         };
 
         switch (currentModel.host) {
@@ -139,43 +143,53 @@ export const useChatTitle = (isLoading: boolean, messages: any[], message: strin
             return {
               ...baseConfig,
               url: 'https://api.groq.com/openai/v1/chat/completions',
-              headers: { Authorization: `Bearer ${config.groqApiKey}` },
+              headers: { Authorization: `Bearer ${config.groqApiKey}` }
             };
+
           case 'ollama':
             return {
               ...baseConfig,
-              url: `${config.ollamaUrl}/api/chat`,
+              url: `${config.ollamaUrl}/api/chat`
             };
+
           case 'lmStudio':
             return {
               ...baseConfig,
-              url: `${config.lmStudioUrl}/v1/chat/completions`,
+              url: `${config.lmStudioUrl}/v1/chat/completions`
             };
+
           case 'gemini':
             return {
               ...baseConfig,
-              url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-              headers: { Authorization: `Bearer ${config.geminiApiKey}` },
+              url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', // OpenAI-compatible endpoint
+              headers: { Authorization: `Bearer ${config.geminiApiKey}` }
             };
+
           case 'openai':
             return {
               ...baseConfig,
               url: 'https://api.openai.com/v1/chat/completions',
-              headers: { Authorization: `Bearer ${config.openaiApiKey}` },
+              headers: { Authorization: `Bearer ${config.openAiApiKey}` }
             };
+
           default:
             return null;
         }
       };
 
       const apiConfig = getApiConfig();
+      
       if (!apiConfig) return;
 
       fetchDataAsStream(
         apiConfig.url,
         apiConfig.body,
         (part: string) => {
-          const cleanTitle = part.replace(/"/g, '').replace(/#/g, '').trim();
+          const cleanTitle = part
+            .replace(/"/g, '')
+            .replace(/#/g, '')
+            .trim();
+
           if (cleanTitle) setChatTitle(cleanTitle);
         },
         apiConfig.headers,
