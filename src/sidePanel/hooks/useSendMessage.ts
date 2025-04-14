@@ -16,7 +16,7 @@ interface Model {
 // Define the structure of your configuration object
 interface Config {
   chatMode?: 'web' | 'page' | string; // Add other modes
-  webMode?: string; // Define more specific types if possible
+  webMode?: 'brave' | 'google' | 'duckduckgo' | string; // Define more specific types if possible
   generateTitle?: boolean;
   personas: Record<string, string>; // Assumes personas are string instructions keyed by name
   persona: string; // The key for the selected persona
@@ -29,6 +29,7 @@ interface Config {
   groqApiKey?: string;
   geminiApiKey?: string;
   openAiApiKey?: string;
+  pageMode?: string;
 
   // Add any other config properties
 }
@@ -102,6 +103,9 @@ const useSendMessage = (
     // Use type guards or assertions if you expect a specific type (here assuming string)
     const pageStringContent = typeof pageString === 'string' ? pageString : '';
     const pageHtmlContent = typeof pageHtml === 'string' ? pageHtml : '';
+
+    const altTexts = JSON.parse(localStorage.getItem('alttexts') || '""');
+    const tableData = JSON.parse(localStorage.getItem('tabledata') || '""');
 
     const currentPageContent = config?.chatMode === 'page' &&
       !window.location.href.startsWith('chrome://') &&

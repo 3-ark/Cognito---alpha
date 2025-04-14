@@ -10,6 +10,20 @@ export const cleanUrl = (url: string) => {
   return url;
 };
 
+// Prevent XSS in HTML content
+const sanitizeHtml = (html: string) => {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const whitelist = ['b','i','em','strong','p','br'];
+  
+  doc.body.querySelectorAll('*').forEach(node => {
+    if (!whitelist.includes(node.tagName.toLowerCase())) {
+      node.remove();
+    }
+  });
+  
+  return doc.body.innerHTML;
+};
+
 export const urlRewriteRuntime = async function (
   domain: string
 ) {

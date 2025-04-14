@@ -25,10 +25,29 @@ import { Settings } from './Settings';
 import { setTheme, themes } from './Themes';
 
 function bridge() {
+  // Collect image alt texts
+  const altTexts = Array.from(document.images)
+    .map(img => img.alt)
+    .filter(alt => alt.trim().length > 0)
+    .join('. ');
+
+  // Extract table contents
+  const tableData = Array.from(document.querySelectorAll('table'))
+    .map(table => table.innerText.replace(/\s\s+/g, ' '))
+    .join('\n');
+
   const response = JSON.stringify({
     title: document.title,
     text: document.body.innerText.replace(/\s\s+/g, ' '),
-    html: document.body.innerHTML.replace(/\s\s+/g, ' ')
+    html: document.body.innerHTML.replace(/\s\s+/g, ' '),
+    
+    // New fields
+    altTexts,
+    tableData,
+    meta: {
+      description: document.querySelector('meta[name="description"]')?.getAttribute('content'),
+      keywords: document.querySelector('meta[name="keywords"]')?.getAttribute('content')
+    }
   });
 
   return response;
@@ -56,6 +75,8 @@ async function injectBridge() {
     try {
       localStorage.setItem('pagestring', JSON.stringify(res?.text || ''));
       localStorage.setItem('pagehtml', JSON.stringify(res?.html || ''));
+      localStorage.setItem('alttexts', JSON.stringify(res?.altTexts || ''));
+      localStorage.setItem('tabledata', JSON.stringify(res?.tableData || ''));
     } catch (err) {
       console.debug('localStorage error:', err);
     }
