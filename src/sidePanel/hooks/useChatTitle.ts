@@ -37,7 +37,6 @@ export const useChatTitle = (isLoading, messages, message) => {
         (part: string) => {
           if (part) setChatTitle(part.replace('"', '').replace('"', '').replace('# ', '').trim());
         },
-        { Authorization: `Bearer ${config?.geminiApiKey}` },
         currentModel?.host
       );
     }
