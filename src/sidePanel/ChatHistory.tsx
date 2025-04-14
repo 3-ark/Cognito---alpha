@@ -23,6 +23,12 @@ type ChatHistoryProps = {
   onDeleteAll: () => void;
 };
 
+declare global {
+  interface Window {
+    deleteAllChats: () => void;
+  }
+}
+
 export const ChatHistory = ({ loadChat, onDeleteAll }: ChatHistoryProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hoverId, setHoverId] = useState('');
