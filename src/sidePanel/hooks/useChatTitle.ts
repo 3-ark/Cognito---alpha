@@ -11,7 +11,7 @@ export const useChatTitle = (isLoading, messages, message) => {
   const configBody = { stream: true };
 
   useEffect(() => {
-    if (!isLoading && messages.length > 3 && !chatTitle && config?.generateTitle) {
+    if (!isLoading && messages.length >= 2 && !chatTitle && config?.generateTitle) {
       const currentMessages = [message, ...messages].map((m, i) => ({
         content: m || generateTitle,
         role: i % 2 === 1 ? 'assistant' : 'user'
