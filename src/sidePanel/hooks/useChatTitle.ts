@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useConfig } from '../ConfigContext';
 import { fetchDataAsStream } from '../network';
 
-const generateTitle = 'Create a concise title (2-4 words) for our conversation. Only respond with the title, no extra text. Example: "Trade War Escalates"';
+const generateTitle = 'Create a short 2-4 word title for this chat. Only respond with the title. Example: "Trade War Analysis"';
 
 export const useChatTitle = (isLoading: boolean, messages: string[], message: string) => {
   const [chatTitle, setChatTitle] = useState('');
@@ -15,6 +15,7 @@ export const useChatTitle = (isLoading: boolean, messages: string[], message: st
       
       if (!currentModel) return;
 
+      // Prepare messages for title generation (first 2 messages + instruction)
       const messagesForTitle = [
         ...messages.slice(0, 2).map((m, i) => ({
           content: m || generateTitle,
@@ -23,49 +24,49 @@ export const useChatTitle = (isLoading: boolean, messages: string[], message: st
         { role: 'user', content: generateTitle }
       ];
 
+      // Define API endpoints for each provider (OpenAI-compatible)
       const getApiConfig = () => {
+        const baseConfig = {
+          body: { 
+            model: currentModel.id, 
+            messages: messagesForTitle, 
+            stream: true 
+          },
+          headers: {} as Record<string, string>
+        };
+
         switch (currentModel.host) {
           case 'groq':
             return {
+              ...baseConfig,
               url: 'https://api.groq.com/openai/v1/chat/completions',
-              headers: { Authorization: `Bearer ${config.groqApiKey}` },
-              body: {
-                 model: currentModel.id, messages: messagesForTitle, stream: true 
-                }
+              headers: { Authorization: `Bearer ${config.groqApiKey}` }
             };
 
           case 'ollama':
             return {
-              url: `${config.ollamaUrl}/api/chat`,
-              headers: {},
-              body: {
-                 model: currentModel.id, messages: messagesForTitle, stream: true 
-                }
+              ...baseConfig,
+              url: `${config.ollamaUrl}/api/chat`
             };
 
           case 'lmStudio':
             return {
-              url: `${config.lmStudioUrl}/v1/chat/completions`,
-              headers: {},
-              body: {
-                 model: currentModel.id, messages: messagesForTitle, stream: true 
-                }
+              ...baseConfig,
+              url: `${config.lmStudioUrl}/v1/chat/completions`
             };
 
           case 'gemini':
             return {
-              url: `https://generativelanguage.googleapis.com/v1beta/models/${currentModel.id}:generateContent`,
-              headers: { 'Content-Type': 'application/json' },
-              body: { contents: messagesForTitle }
+              ...baseConfig,
+              url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', // OpenAI-compatible endpoint
+              headers: { Authorization: `Bearer ${config.geminiApiKey}` }
             };
 
           case 'openai':
             return {
+              ...baseConfig,
               url: 'https://api.openai.com/v1/chat/completions',
-              headers: { Authorization: `Bearer ${config.openAiApiKey}` },
-              body: {
-                 model: currentModel.id, messages: messagesForTitle, stream: true 
-                }
+              headers: { Authorization: `Bearer ${config.openAiApiKey}` }
             };
 
           default:
