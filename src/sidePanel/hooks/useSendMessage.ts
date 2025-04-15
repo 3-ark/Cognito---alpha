@@ -87,7 +87,7 @@ const useSendMessage = (
 
     const persona = config?.personas?.[config?.persona] || ''; // Default to empty string if not found
 
-    // Handle JSON.parse safely - it returns 'any'
+    // Handle JSON.parse safely - it returns 'unknown'
     let pageString: unknown;
     let pageHtml: unknown;
 

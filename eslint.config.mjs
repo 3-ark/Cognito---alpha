@@ -78,7 +78,7 @@ export default [
         "ignoreCase": true,
         "reservedFirst": true
       }],
-      "react/forbid-prop-types": ["error", { "forbid": ["any"] }],
+      "react/forbid-prop-types": ["error", { "forbid": ["unknown"] }],
       "react/function-component-definition": ["error", { "namedComponents": "arrow-function", "unnamedComponents": "arrow-function" }]
     }
   },
@@ -191,13 +191,13 @@ export default [
            "blankLine": "always", "prev": ["const", "let", "var"], "next": "*" 
           }, // Blank after declarations
         {
-           "blankLine": "any", "prev": ["const", "let", "var"], "next": ["const", "let", "var"] 
+           "blankLine": "unknown", "prev": ["const", "let", "var"], "next": ["const", "let", "var"] 
           }, // No blank between declarations
         {
            "blankLine": "always", "prev": "directive", "next": "*" 
           }, // Blank after directives (e.g., "use strict")
         {
-           "blankLine": "any", "prev": "directive", "next": "directive" 
+           "blankLine": "unknown", "prev": "directive", "next": "directive" 
           },
         {
            "blankLine": "always", "prev": ["case", "default"], "next": "*" 
