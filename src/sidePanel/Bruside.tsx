@@ -373,8 +373,8 @@ const Bruside = () => {
           duration: 2000,
           position: "bottom-center",
           style: {
-            background: '#363636',
-            color: '#fff',
+            background: 'var(--bg)',
+            color: 'var(--text)',
             fontSize: "1.25rem"
           },
 
@@ -382,8 +382,8 @@ const Bruside = () => {
           success: {
             duration: 2000,
             style: {
-              background: '#363636',
-              color: '#fff',
+              background: 'var(--bg)',
+              color: 'var(--text)',
               fontSize: "1.25rem"
             }
           }
