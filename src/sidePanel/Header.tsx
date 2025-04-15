@@ -193,6 +193,7 @@ const SettingsDrawer = ({
               '> option': {
                 background: 'var(--bg)',
                 color: 'var(--text)',
+                '--option-bg-contrast': 'color-mix(in srgb, var(--text) 20%, var(--bg))'
               },
             }}
             
@@ -225,6 +226,7 @@ const SettingsDrawer = ({
               '> option': {
                 background: 'var(--bg)',
                 color: 'var(--text)',
+                '--option-bg-contrast': 'color-mix(in srgb, var(--text) 20%, var(--bg))'
               },
             }}
             _focus={{
