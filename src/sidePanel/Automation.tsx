@@ -29,7 +29,7 @@ export const Automation = () => {
         />
       </AccordionButton>
       <AccordionPanel p={4} pt={2}>
-        <Text textAlign="left" color="var(--text)" fontSize="md" fontWeight={800}>coming soon!</Text>
+        <Text textAlign="left" color="var(--text)" fontSize="md" fontWeight={800}>Placeholder</Text>
       </AccordionPanel>
     </AccordionItem>
   );

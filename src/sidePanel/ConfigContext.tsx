@@ -35,7 +35,12 @@ const defaultConfig: Config = {
   webMode: 'brave', // Now checked against Config['webMode']
   webLimit: 48,
   contextLimit: 48,
-  theme: themes[0].name, // Assumes themes[0] exists
+  theme: 'paper',
+  customTheme: {
+    active: '#C2E7B5',
+    bg: '#748a6c',
+    text: '#333333'
+  },
   params: { temperature: 0.5 },
   models: [], // Initialize as an empty array matching Config['models'] type
   // Initialize other potentially missing properties from Config if necessary
@@ -64,12 +69,10 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
         console.error("Failed to parse config from localStorage", e);
         
         // Fallback to default if parsing fails
-        return defaultConfig; // Now correctly typed
+        return defaultConfig;
       }
     }
 
-    // Merge stored config with defaults to ensure all keys exist
-    // and new default values are applied if missing in storage
     return { ...defaultConfig, ...storedConfig };
   };
 
@@ -87,16 +90,37 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     
     document.documentElement.style.setProperty('font-size', `${baseSize}px`);
 
-    // Apply theme
-    const currentTheme = themes.find(t => t.name === config.theme) || themes[0]; // Fallback to first theme
-    
-    setTheme(currentTheme); // Use the setTheme function from Themes.tsx
+    const applyTheme = () => {
+      const themeToApply = config.theme === 'custom'
+        ? { name: 'custom', ...config.customTheme }
+        : themes.find(t => t.name === config.theme) || themes[0];
+      
+      setTheme(themeToApply);
+    };
 
-  }, [config?.fontSize, config?.theme]); // Add config.theme dependency
+    applyTheme(); // Use the setTheme function from Themes.tsx
+
+  }, [config?.fontSize, config.customTheme, config?.theme]); // Add config.theme dependency
 
   const updateConfig = (newConfig: Partial<Config>) => {
-    // Use functional update to ensure using the latest state
-    setConfig(prevConfig => ({ ...prevConfig, ...newConfig }));
+    setConfig(prev => {
+      const updated = { ...prev, ...newConfig };
+  
+      if (newConfig.theme || newConfig.customTheme) {
+        const themeToApply = updated.theme === 'custom'
+          ? { name: 'custom', ...updated.customTheme }
+          : themes.find(t => t.name === updated.theme) || themes[0];
+        
+        setTheme(themeToApply);
+      }
+      
+      // Apply font size changes
+      if (newConfig.fontSize) {
+        document.documentElement.style.setProperty('font-size', `${newConfig.fontSize}px`);
+      }
+
+      return updated;
+    });
   };
 
   return (
@@ -105,5 +129,4 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     </ConfigContext.Provider>
   );
 };
-
 export const useConfig = () => useContext(ConfigContext);

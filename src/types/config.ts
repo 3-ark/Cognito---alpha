@@ -43,6 +43,11 @@ export interface Config {
   selectedModel?: string;
   chatMode?: 'web' | 'page' | 'chat';
   theme?: string; // Add this line
+  customTheme?: {
+    active: string;
+    bg: string;
+    text: string;
+  };
 }
 
 export interface ConfigContextType {
