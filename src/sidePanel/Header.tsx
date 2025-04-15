@@ -52,23 +52,6 @@ const WelcomeModal = ({
             mr={2}
             position="relative"
             size="md"
-            sx={{
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundImage: 'url(assets/images/paper-texture.png)',
-                backgroundSize: 'auto',
-                opacity: 0.8,
-                pointerEvents: 'none',
-                borderRadius: '16px',
-                mixBlendMode: 'multiply',
-                zIndex: 0
-              }
-            }}
             onClick={() => setSettingsMode(true)}
           >
             settings
