@@ -138,7 +138,7 @@ export const modifyArrayItemAt = <T>(
     const isFunctionMatch = typeof keyNameOrMatcher === 'function' && keyNameOrMatcher(element);
 
     // Type assertion needed here as element[keyNameOrMatcher] is not safe without more constraints
-    const isValueMatch = typeof keyNameOrMatcher === 'string' && (element as never)[keyNameOrMatcher] === valueOrModifier;
+    const isValueMatch = typeof keyNameOrMatcher === 'string' && (element as unknown)[keyNameOrMatcher] === valueOrModifier;
 
     if (isFunctionMatch || isValueMatch) {
       // Note: Spreading arrays/objects might not be the desired behavior if T is a primitive.
@@ -177,7 +177,7 @@ export const removeArrayItemAt = <T>(
 
   // Case 2: Remove by matching property value (keyNameOrValue is a string key)
   // Type assertion needed for dynamic property access
-  if (typeof keyNameOrValue === 'string' && typeof element === 'object' && element !== null && (element as never)[keyNameOrValue] === value) {
+  if (typeof keyNameOrValue === 'string' && typeof element === 'object' && element !== null && (element as unknown)[keyNameOrValue] === value) {
     return false;
   }
 
@@ -201,7 +201,7 @@ export const replaceArrayItemAt = <T>(
   newItem: T
 ): T[] => array.map((element: T) => {
   // Type assertion needed for dynamic property access
-  if (typeof element === 'object' && element !== null && (element as never)[keyName] === value) {
+  if (typeof element === 'object' && element !== null && (element as unknown)[keyName] === value) {
     return newItem;
   }
 
@@ -226,8 +226,8 @@ type Path = PathSegment | PathSegment[];
  * @returns The value found at the path, or the defaultValue.
  */
 export const get = <T = unknown>( // Default generic to unknown
-  input: never, // Input can be anything, hard to type strongly
-  path: Path | ((input: never) => T),
+  input:unknown, // Input can be anything, hard to type strongly
+  path: Path | ((input: unknown) => T),
   defaultValue: T | null = null,
   shouldThrow = false,
   allowFalsyValues = true
@@ -270,7 +270,7 @@ export const get = <T = unknown>( // Default generic to unknown
     return input as T ?? defaultValue; // Use nullish coalescing
   }
 
-  let currentVal: never = input;
+  let currentVal: unknown = input;
 
   for (let i = 0; i < currentPath.length; i++) {
       const key = currentPath[i];
@@ -312,7 +312,7 @@ export const get = <T = unknown>( // Default generic to unknown
  * @param path The path string (e.g., 'a.b[0].c') or array of segments.
  * @param val The value to set.
  */
-export const set = (obj: never, path: Path, val: unknown): void => {
+export const set = (obj: unknown, path: Path, val: unknown): void => {
   // Improved path parsing to handle array indices like [0]
   function stringToPath(stringPath: string | PathSegment[]): PathSegment[] {
     if (Array.isArray(stringPath)) return stringPath;
@@ -337,7 +337,7 @@ export const set = (obj: never, path: Path, val: unknown): void => {
 
   const currentPath = stringToPath(path);
   const { length } = currentPath;
-  let current: never = obj;
+  let current: unknown = obj;
 
   for (let i = 0; i < length; i++) {
     const key = currentPath[i];
@@ -392,7 +392,7 @@ export function createMap<T>(
   return inputArray.reduce((hashmap: Record<string | number, T | T[]>, element: T) => {
     // Use 'unknown' for keyValue initially as 'get' returns unknown/T|null
     const keyValue: unknown = path
-      ? get(element as never, path) // Need 'as any' because 'get' expects 'any' input
+      ? get(element as unknown, path) // Need 'as any' because 'get' expects 'any' input
       : element;
 
     // Ensure keyValue is suitable as an object key (string or number)
@@ -441,8 +441,8 @@ export function sortAlphaNumeric<T>(key: Path | null = null) {
     const isNumber = (v: string): boolean => (+v).toString() === v;
 
     // Use 'unknown' as 'get' returns unknown/T|null
-    const aValueUnknown = key ? get(a as never, key) : a;
-    const bValueUnknown = key ? get(b as never, key) : b;
+    const aValueUnknown = key ? get(a as unknown, key) : a;
+    const bValueUnknown = key ? get(b as unknown, key) : b;
 
     // Convert potentially non-string values to strings for comparison
     const aValue = String(aValueUnknown ?? ''); // Use nullish coalescing and String()

@@ -153,7 +153,7 @@ export default [
       "array-callback-return": "off",
       "arrow-parens": ["error", "as-needed"],
       "class-methods-use-this": "warn",
-      "comma-dangle": ["error", "never"],
+      "comma-dangle": ["error", "unknown"],
       "function-paren-newline": "off",
       "import/extensions": "off",
       "import/no-extraneous-dependencies": "off",
@@ -209,7 +209,7 @@ export default [
            "blankLine": "always", "prev": ["if", "for", "while", "switch", "try", "class"], "next": "*" 
           } // Blank after control structures/classes
       ],
-      "template-curly-spacing": ["error", "never"],
+      "template-curly-spacing": ["error", "unknown"],
       "lines-around-comment": ["error", {
         "beforeBlockComment": true,
         "afterBlockComment": false, // Common preference
