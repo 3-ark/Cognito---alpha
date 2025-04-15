@@ -189,6 +189,13 @@ const SettingsDrawer = ({
         <DrawerHeader onClose={onClose} />
         <DrawerSection title="persona">
           <Select
+             sx={{
+              '> option': {
+                background: 'var(--bg)',
+                color: 'var(--text)',
+              },
+            }}
+            
             _focus={{
  borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' 
 }}
@@ -214,6 +221,12 @@ const SettingsDrawer = ({
         </DrawerSection>
         <DrawerSection title="model">
           <Select
+            sx={{
+              '> option': {
+                background: 'var(--bg)',
+                color: 'var(--text)',
+              },
+            }}
             _focus={{
  borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' 
 }}
