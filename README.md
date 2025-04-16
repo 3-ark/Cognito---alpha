@@ -21,10 +21,12 @@ All-around tiny browser-augmented chat client for open-source language models.
 - [ ] Better web search
 - [ ] Better web parsing
 
+Notes: Chakra-UI 3 doesn't support Chakra icons, so I need to migrate to react-icons instead. It looks better and gives you more choices. But it's quite a lot of work, and it's currently hard for vibecoding, because you need to provide docs and check line by line. But this is still the easy part to start because you don't need to upgrade Chakra-UI to finish this; it can be done in the current setup.
+
 ## installation
 
 - download the latest [release](https://github.com/3-ark/Bruside/releases)
-- enable chrome `Extensions > Developer mode`
+- enable Chrome `Extensions > Developer mode`
 - load the content of the extracted zip with `Load unpacked` button
 
 ### install from source
