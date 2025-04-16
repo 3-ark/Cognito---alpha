@@ -1,13 +1,85 @@
 // Fetching data using readable stream
 import { events } from 'fetch-event-stream';
 
-// clean url ending if it with /
-export const cleanUrl = (url: string) => {
-  if (url.endsWith('/')) {
-    return url.slice(0, -1);
+// network.tsx
+export const processQueryWithAI = async (
+  query: string,
+  config: Config,
+  currentModel: Model,
+  authHeader?: Record<string, string>
+): Promise<string> => {
+  try {
+   // Ensure currentModel and host exist before trying to get the URL
+   if (!currentModel?.host) {
+    console.error('processQueryWithAI: currentModel or currentModel.host is undefined. Cannot determine API URL.');
+    return query; // Fallback to original query
   }
 
-  return url;
+  // System prompt to optimize queries
+  const systemPrompt = `You're a search query optimizer. Convert this into an optimized query for google.
+Format as: "optimized_query" (in quotes). Never explain.`;
+
+    const urlMap: Record<string, string> = {
+      groq: 'https://api.groq.com/openai/v1/chat/completions',
+      ollama: `${config?.ollamaUrl || ''}/api/chat`, // Add default empty string
+      gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`, // Add default empty string
+      openai: 'https://api.openai.com/v1/chat/completions'
+    };
+    const apiUrl = urlMap[currentModel.host];
+    if (!apiUrl) {
+      console.error('processQueryWithAI: Could not determine API URL for host:', currentModel.host);
+      return query; // Fallback to original query
+    }
+
+    console.log(`processQueryWithAI: Using API URL: ${apiUrl} for host: ${currentModel.host}`); // Added logging
+    
+    // --- Direct Fetch for Non-Streaming ---
+    const requestBody = {
+      model: config?.selectedModel || '',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: query }
+      ],
+      stream: false // Explicitly set stream to false
+    };
+
+    // Adjust fetch options based on host if necessary (e.g., Gemini might need different body/headers)
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(authHeader || {}) // Spread authHeader if it exists
+        },
+        body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`processQueryWithAI: API request failed with status ${response.status}: ${errorBody}`);
+        throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+
+    // --- Extract Content based on expected response structure ---
+    const optimizedContent = responseData?.choices?.[0]?.message?.content;
+
+    if (typeof optimizedContent === 'string' && optimizedContent.trim()) {
+        const processedQuery = optimizedContent.trim().replace(/["']/g, ''); // Remove quotes
+        console.log('processQueryWithAI: Query processed successfully:', processedQuery);
+        return processedQuery;
+    } else {
+        console.error('processQueryWithAI: Could not extract optimized query from response:', responseData);
+        return query; // Fallback if content extraction fails
+    }
+    // --- End Direct Fetch ---
+
+  } catch (error) {
+    // Log the specific error that occurred within the try block
+    console.error('processQueryWithAI: Error during execution, using original query:', error);
+    return query; // Fallback to original
+  }
 };
 
 // Prevent XSS in HTML content
@@ -66,39 +138,66 @@ export const urlRewriteRuntime = async function (
 };
 
 export const webSearch = async (query: string, webMode: string) => {
-  const baseUrl = webMode === 'brave' 
-    ? `https://search.brave.com/search?q=${query}`
-    : webMode === 'google' // Added google case
-      ? `https://www.google.com/search?q=${query}`
-      : 'https://html.duckduckgo.com/html/';
+  const baseUrl = webMode === 'brave'
+    ? `https://search.brave.com/search?q=${encodeURIComponent(query)}`
+    : webMode === 'google'
+      ? `https://www.google.com/search?q=${encodeURIComponent(query)}`
+      : `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
 
-  await urlRewriteRuntime(cleanUrl(`${baseUrl}${query}`));
+  const isPost = webMode === 'duckduckgo';
+  const method = isPost ? 'POST' : 'GET';
+
+  let body: FormData | undefined = undefined;
+  if (isPost) {
+    body = new FormData();
+    body.append('q', query);
+  }
+
+  // Consider if urlRewriteRuntime is needed here for Brave/Google/DDG. It might not be.
+  // await urlRewriteRuntime(cleanUrl(baseUrl));
 
   const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), 15000);
 
-  setTimeout(() => abortController.abort(), 15000);
-  const formData = new FormData();
+  try {
+    const response = await fetch(
+      isPost ? 'https://html.duckduckgo.com/html/' : baseUrl,
+      {
+        signal: abortController.signal,
+        method: method,
+        body: body,
+        headers: {
+          // Add necessary headers if requests fail
+        }
+      }
+    );
 
-  formData.append('q', query);
+    clearTimeout(timeoutId);
 
-  const htmlString = await fetch(
-    `${baseUrl}`,
-    {
-      signal: abortController.signal,
-      method: webMode === 'brave' || webMode === 'google' ? 'GET' : 'POST', // Added google
-      body: webMode === 'brave' || webMode === 'google' ? undefined : formData
+    if (!response.ok) {
+      throw new Error(`Web search failed with status: ${response.status}`);
     }
-  )
-    .then(response => response.text())
-    .catch();
 
-  const parser = new DOMParser();
-  const htmlDoc = parser.parseFromString(htmlString, 'text/html');
+    const htmlString = await response.text();
 
-  htmlDoc.querySelectorAll('svg,#header,style,link[rel="stylesheet"],script,input,option,select,form').forEach(item => item.remove());
+    const parser = new DOMParser();
+    const htmlDoc = parser.parseFromString(htmlString, 'text/html');
 
-  return htmlDoc.body.innerText.replace(/\s\s+/g, ' ');
+    htmlDoc.querySelectorAll('svg, #header, style, link[rel="stylesheet"], script, input, option, select, form, nav, footer, [role="alert"], [aria-hidden="true"]').forEach(item => item.remove());
+
+    return htmlDoc.body.innerText.replace(/\s\s+/g, ' ').trim();
+
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      console.error('Web search timed out.');
+    } else {
+      console.error('Web search failed:', error);
+    }
+    return '';
+  }
 };
+
 
 export async function fetchDataAsStream(
   url: string,
