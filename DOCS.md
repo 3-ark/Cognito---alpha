@@ -96,6 +96,9 @@ npm start      # Development watch mode
 
 ## Advanced Tweaks
 
+### UI Adjustments
+
+[UI Customization Guide](https://github.com/3-ark/Bruside/blob/main/UI%20Customization%20Guide.md)
 
 ### useChatTitle.ts
 Here’s the **simplified, OpenAI-compatible** `useChatTitle` hook you’re using, with easy extensibility for future models:  
