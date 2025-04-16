@@ -12,9 +12,11 @@ import {
   Text
 } from '@chakra-ui/react';
 
+// Removed unused imports: processQueryWithAI, urlRewriteRuntime, cleanUrl
 import { useConfig } from './ConfigContext';
 import { SettingTitle } from './SettingsTitle';
 
+// WebSearchButton, WebSearchModeSelector, WebSearchSlider components remain unchanged...
 const WebSearchButton = ({ size, config }) => (
   <Button
     _hover={{
@@ -89,6 +91,7 @@ const WebSearchSlider = ({ size, updateConfig }) => (
   </Box>
 );
 
+
 export const WebSearch = () => {
   const { config, updateConfig } = useConfig();
   const size = config?.webLimit || 1;
@@ -104,11 +107,6 @@ export const WebSearch = () => {
           icon="🌐"
           padding={0}
           text="web search"
-          widget={(
-            <Grid alignItems="center" display="flex">
-              {config?.host && <WebSearchButton config={config} size={size} />}
-            </Grid>
-          )}
         />
       </AccordionButton>
       <AccordionPanel p={4} pt={2}>
