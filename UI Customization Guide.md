@@ -194,4 +194,5 @@ const theme = extendTheme({
 });
 ```
 
+![[Comprehensive UI Customization Guide for Bruside Extension.md]]
 Remember that most visual styling should be done through the theme system and CSS variables rather than direct component overrides for maintainability.
