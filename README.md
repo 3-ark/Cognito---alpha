@@ -18,12 +18,13 @@ All-around tiny browser-augmented chat client for open-source language models.
 ~- [ ] toolkit to 2 webpack-plugin 13 framer-motion to 12~ <br>
 
 - [X] Picture
-- [ ] Better web search
-- [ ] Better web parsing
+- [X] Better web search
+- [X] Better web parsing
 
 Notes: 
 1. Chakra-UI 3 doesn't support Chakra icons, so I need to migrate to react-icons instead. It looks better and gives you more choices. But it's quite a lot of work, and it's currently hard for vibecoding, because you need to provide docs and check line by line. But this is still easy to start because you don't need to upgrade Chakra-UI to finish this; it can be done in the current setup.
 2. The document is not clear in many places and it's still new, so it's not a bad idea to stick to current version. 
+3. Only fix bugs I guess, it's too hard for me.
 
 ## installation
 
@@ -62,5 +63,11 @@ Bruside comes with three distinct personas to suit different needs:
    - Provides straightforward feedback and solutions
 
 ![](/docs/Bruside_app.png)
+
+Web Search
+![alt text](/docs/websearch.png)
+![](/docs/1.png)
+![](/docs/2.png)
+![](/docs/3.png)
 
 </a>
