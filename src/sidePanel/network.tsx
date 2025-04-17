@@ -1,6 +1,6 @@
 // Fetching data using readable stream
 import { events } from 'fetch-event-stream';
-
+import { cleanUrl } from './WebSearch';
 // network.tsx
 export const processQueryWithAI = async (
   query: string,
@@ -230,6 +230,7 @@ export const webSearch = async (query: string, webMode: string) => {
 };
 
 
+
 export async function fetchDataAsStream(
   url: string,
   data: Record<string, unknown>,
@@ -237,6 +238,7 @@ export async function fetchDataAsStream(
   headers: Record<string, string> = {},
   host: string
 ) {
+  
   if (url.startsWith('chrome://')) {
     return; // Skip chrome:// URLs
   }
