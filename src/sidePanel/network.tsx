@@ -149,7 +149,9 @@ export const webSearch = async (query: string, webMode: string) => {
       signal: abortController.signal,
       method: 'GET',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Referer': 'https://search.brave.com/'
       }
     });
 
@@ -186,12 +188,29 @@ export const webSearch = async (query: string, webMode: string) => {
         const snippet = result.querySelector('.VwiC3b, .MUxGbd')?.textContent?.trim();
         if (title) resultsText += `${title}\n${snippet || ''}\n\n`;
       });
-    } else {
-      // Brave/fallback
-      const results = htmlDoc.querySelectorAll('.snippet-title, h3');
-      results.forEach(el => {
-        resultsText += el.textContent?.trim() + '\n\n';
+    } 
+    else if (webMode === 'brave') {
+      // First try new layout
+      const braveResults = htmlDoc.querySelectorAll('.snippet, .snippet-wrapper, [data-loc="rw"]');
+      
+      braveResults.forEach(result => {
+        const title = result.querySelector('.title, .snippet-title, h3, [data-testid="mainline"] h3')?.textContent?.trim();
+        const url = result.querySelector('.url, .snippet-url, .result-header')?.textContent?.trim();
+        const snippet = result.querySelector('.snippet-description, .description, .result-snippet')?.textContent?.trim();
+    
+        if (title) {
+          resultsText += `**${title}**\n${url ? url + '\n' : ''}${snippet || ''}\n\n`;
+        }
       });
+    
+      // Fallback to organic results
+      if (!braveResults.length) {
+        htmlDoc.querySelectorAll('.organic-result').forEach(result => {
+          const title = result.querySelector('h3')?.textContent?.trim();
+          const snippet = result.querySelector('.snippet-content')?.textContent?.trim();
+          if (title) resultsText += `${title}\n${snippet || ''}\n\n`;
+        });
+      }
     }
 
     return resultsText.trim() || 'No results found';
