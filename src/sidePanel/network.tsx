@@ -216,7 +216,7 @@ export const webSearch = async (query: string, webMode: string) => {
 
     htmlDoc.querySelectorAll('svg, #header, style, link[rel="stylesheet"], script, input, option, select, form, nav, footer, [role="alert"], [aria-hidden="true"]').forEach(item => item.remove());
 
-    return htmlDoc.body.innerText.replace(/\s\s+/g, ' ').trim();
+    return sanitizeHtml(htmlDoc.body.innerHTML).replace(/\s\s+/g, ' ').trim();
 
   } catch (error) {
     clearTimeout(timeoutId);
