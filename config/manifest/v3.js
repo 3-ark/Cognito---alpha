@@ -23,17 +23,7 @@ module.exports = {
     matches: ['<all_urls>']
   }],
   "host_permissions": ["<all_urls>"],
-  content_security_policy: {
-    extension_pages: `
-      default-src 'self' 'unsafe-eval' http://localhost:* http://127.0.0.1:* https://api.groq.com https://duckduckgo.com https://www.duckduckgo.com https://generativelanguage.googleapis.com https://*.brave.com https://api.openai.com https://*.google.com https://google.com;
-      script-src 'self'; 
-      style-src 'self' 'unsafe-inline'
-        https://fonts.googleapis.com
-        https://fonts.gstatic.com;
-      font-src 'self'
-        https://fonts.googleapis.com
-        https://fonts.gstatic.com;
-      img-src 'self' data: http://localhost:* http://127.0.0.1:* https:; 
-    `
-  }
-};
+  "content_security_policy": {
+  "extension_pages": "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: http://localhost:* http://127.0.0.1:* https:; connect-src 'self' http://localhost:* http://127.0.0.1:* https://duckduckgo.com https://*.duckduckgo.com https://search.brave.com https://www.google.com https://google.com https://api.groq.com https://generativelanguage.googleapis.com https://api.openai.com;"
+},
+}

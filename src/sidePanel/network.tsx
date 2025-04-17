@@ -139,17 +139,19 @@ export const webSearch = async (query: string, webMode: string) => {
     ? `https://search.brave.com/search?q=${encodeURIComponent(query)}`
     : webMode === 'google'
       ? `https://www.google.com/search?q=${encodeURIComponent(query)}`
-      : `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-
+      : `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
 
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), 15000);
 
   try {
     const response = await fetch(baseUrl, {
-        signal: abortController.signal,
-        method: 'GET',
-      });
+      signal: abortController.signal,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
+      }
+    });
 
     clearTimeout(timeoutId);
 
@@ -161,15 +163,44 @@ export const webSearch = async (query: string, webMode: string) => {
     const parser = new DOMParser();
     const htmlDoc = parser.parseFromString(htmlString, 'text/html');
 
-    htmlDoc.querySelectorAll('svg, #header, style, link[rel="stylesheet"], script, input, option, select, form, nav, footer, [role="alert"], [aria-hidden="true"]').forEach(item => item.remove());
+    // Clean up unnecessary elements
+    htmlDoc.querySelectorAll(
+      'script, style, nav, footer, header, svg, img, noscript, iframe, form, .modal, .cookie-banner'
+    ).forEach(el => el.remove());
 
-    return htmlDoc.body.innerText.replace(/\s\s+/g, ' ').trim();
+    let resultsText = '';
+    
+    if (webMode === 'duckduckgo') {
+      // DuckDuckGo's current structure
+      const results = htmlDoc.querySelectorAll('.web-result');
+      results.forEach(result => {
+        const title = result.querySelector('.result__a')?.textContent?.trim();
+        const snippet = result.querySelector('.result__snippet')?.textContent?.trim();
+        if (title) resultsText += `${title}\n${snippet || ''}\n\n`;
+      });
+    } else if (webMode === 'google') {
+      // Google's current structure
+      const results = htmlDoc.querySelectorAll('.MjjYud');
+      results.forEach(result => {
+        const title = result.querySelector('h3')?.textContent?.trim();
+        const snippet = result.querySelector('.VwiC3b, .MUxGbd')?.textContent?.trim();
+        if (title) resultsText += `${title}\n${snippet || ''}\n\n`;
+      });
+    } else {
+      // Brave/fallback
+      const results = htmlDoc.querySelectorAll('.snippet-title, h3');
+      results.forEach(el => {
+        resultsText += el.textContent?.trim() + '\n\n';
+      });
+    }
+
+    return resultsText.trim() || 'No results found';
   } catch (error) {
     clearTimeout(timeoutId);
-      console.error('Web search failed:', error);
-    }
+    console.error('Web search failed:', error);
     return '';
   }
+};
 
 export async function fetchDataAsStream(
   url: string,
