@@ -6,7 +6,8 @@ export const processQueryWithAI = async (
   query: string,
   config: Config,
   currentModel: Model,
-  authHeader?: Record<string, string>
+  authHeader?: Record<string, string>,
+  contextMessages: string[] = []
 ): Promise<string> => {
   try {
    // Ensure currentModel and host exist before trying to get the URL
@@ -16,8 +17,36 @@ export const processQueryWithAI = async (
   }
 
   // System prompt to optimize queries
-  const systemPrompt = `You're a search query optimizer. Convert this into an optimized query for google.
-Format as: "optimized_query" (in quotes). Never explain.`;
+  const systemPrompt = `You are a Google search query optimizer. Your task is to rewrite user's input [The user's raw input && chat history:${contextMessages.join('\n')}].
+\n\n
+Instructions:
+**Important** No Explanation, just the optimized query!
+\n\n
+1. Extract the key keywords and named entities from the user's input.
+2. Correct any obvious spelling errors.
+3. Remove unnecessary words (stop words) unless they are essential for the query's meaning.
+4. If the input is nonsensical or not a query, return the original input.
+5. Using previous chat history to understand the user's intent.
+\n\n
+Output:
+'The optimized Google search query'
+\n\n
+Example 1:
+Input from user ({{user}}): where can i find cheep flights to london
+Output:
+'cheap flights London'
+\n\n
+Example 2:
+Context: {{user}}:today is a nice day in paris i want to have a walk and find a restaurant to have a nice meal. {{assistant}}: Bonjour, it's a nice day!
+Input from user ({{user}}): please choose me the best resturant 
+Output:
+'best restaurants Paris France'
+\n\n
+Example 3:
+Input from user ({{user}}): asdf;lkjasdf
+Output:
+'asdf;lkjasdf'
+`;
 
     const urlMap: Record<string, string> = {
       groq: 'https://api.groq.com/openai/v1/chat/completions',
@@ -32,8 +61,10 @@ Format as: "optimized_query" (in quotes). Never explain.`;
       return query; // Fallback to original query
     }
 
-    console.log(`processQueryWithAI: Using API URL: ${apiUrl} for host: ${currentModel.host}`); // Added logging
-    
+    console.log(`processQueryWithAI: Using API URL: ${apiUrl} for host: ${currentModel.host}`); 
+    console.log('Chat history context:', contextMessages);
+    console.log('Full system prompt:', systemPrompt);
+
     // --- Direct Fetch for Non-Streaming ---
     const requestBody = {
       model: config?.selectedModel || '',

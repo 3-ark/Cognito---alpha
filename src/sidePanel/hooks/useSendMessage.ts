@@ -90,7 +90,8 @@ const useSendMessage = (
         message,
         config,
         currentModel,
-        authHeader
+        authHeader,
+        messages
       );
       // Only update finalQuery if optimization was successful and different
       if (optimizedQuery && optimizedQuery !== message) {
@@ -119,7 +120,17 @@ const useSendMessage = (
     }
 
     // *** This variable holds the string you want to prepend ***
-    const combinedWebContentDisplay = `${processedQueryDisplay}${webContentForLlm || ''}`.trim();
+    const webLimit = 1000 * (config?.webLimit || 1);
+    const limitedWebResult = webLimit && typeof searchRes === 'string'
+      ? searchRes.substring(0, webLimit)
+      : searchRes;
+
+    // Change this line to ONLY include the processed query for display
+    const combinedWebContentDisplay = processedQueryDisplay; // Removed webContentForLlm
+
+    // Keep webContentForLlm ONLY for the system prompt
+    const webContentForLlm = config?.webLimit === 128 ? searchRes : limitedWebResult;
+
     // Keep this if you still want webContent displayed elsewhere too
     setWebContent(combinedWebContentDisplay);
 
@@ -171,13 +182,6 @@ const useSendMessage = (
     } else {
       setPageContent('');
     }
-
-    // Limit web results AND prepend the processed query for display
-    const webLimit = 1000 * (config?.webLimit || 1);
-    const limitedWebResult = webLimit && typeof searchRes === 'string'
-      ? searchRes.substring(0, webLimit)
-      : searchRes;
-    const webContentForLlm = config?.webLimit === 128 ? searchRes : limitedWebResult;
 
     // Construct the system prompt (using webContentForLlm which doesn't have the display prefix)
     const systemContent = `

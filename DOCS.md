@@ -99,9 +99,53 @@ only for development purposes)
 
 Basic web augmentation for your chats. Enter your web search query, and Bruside will load up an async web search to answer your questions based on live public data.
 
+Context awareness
+```ts
+export const processQueryWithAI = async (
+  query: string,
+  config: Config,
+  currentModel: Model,
+  authHeader?: Record<string, string>,
+  contextMessages: string[] = []
+```
 - you can choose `duckduckgo`, `brave`, `google` as your web source
 - adjust `char limit` to control the context number in your conversation. decrease this if you have a limited context window.
 - Note: Sometimes you should visit yourself for the first search to gain access.
+
+A system prompt with chat history to make it understand the context.
+```ts
+ // System prompt to optimize queries
+  const systemPrompt = `You are a Google search query optimizer. Your task is to rewrite user's input [The user's raw input && chat history:${contextMessages.join('\n')}].
+\n\n
+Instructions:
+**Important** No Explanation, just the optimized query!
+\n\n
+1. Extract the key keywords and named entities from the user's input.
+2. Correct any obvious spelling errors.
+3. Remove unnecessary words (stop words) unless they are essential for the query's meaning.
+4. If the input is nonsensical or not a query, return the original input.
+5. Using previous chat history to understand the user's intent.
+\n\n
+Output:
+'The optimized Google search query'
+\n\n
+Example 1:
+Input from user ({{user}}): where can i find cheep flights to london
+Output:
+'cheap flights London'
+\n\n
+Example 2:
+Context: {{user}}:today is a nice day in paris i want to have a walk and find a restaurant to have a nice meal. {{assistant}}: Bonjour, it's a nice day!
+Input from user ({{user}}): please choose me the best resturant 
+Output:
+'best restaurants Paris France'
+\n\n
+Example 3:
+Input from user ({{user}}): asdf;lkjasdf
+Output:
+'asdf;lkjasdf'
+`;
+```
 
 ## File Structure
 
