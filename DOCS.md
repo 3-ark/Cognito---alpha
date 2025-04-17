@@ -377,6 +377,33 @@ Remember that most visual styling should be done through the theme system and CS
 
 ### Others
 
+#### Parsing HTML
+
+A few pro tips to keep it robust:
+
+1. **Selector Maintenance**  
+Bookmark these test pages to quickly check CSS changes:
+- DuckDuckGo: `view-source:https://duckduckgo.com/?q=test&ia=web`
+- Google: `view-source:https://www.google.com/search?q=test`
+
+2. **User-Agent Rotation**  
+Add these to headers to avoid bot detection:
+```typescript
+headers: {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+  'Accept-Language': 'en-US,en;q=0.9'
+}
+```
+
+3. **Defensive Parsing**  
+Add this fallback logic before returning results:
+```typescript
+if (!resultsText.trim()) {
+  console.warn('Fallback parsing activated');
+  resultsText = htmlDoc.body.textContent?.trim().substring(0, 2000) || '';
+}
+```
+
 #### useChatTitle.ts
 Here’s the **simplified, OpenAI-compatible** `useChatTitle` hook you’re using, with easy extensibility for future models:  
 
