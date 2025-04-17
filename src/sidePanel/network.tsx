@@ -18,30 +18,30 @@ export const processQueryWithAI = async (
 
   // System prompt to optimize queries
   const systemPrompt = `You are a Google search query optimizer. Your task is to rewrite user's input [The user's raw input && chat history:${contextMessages.join('\n')}].
-\n\n
+\n
 Instructions:
 **Important** No Explanation, just the optimized query!
-\n\n
+\n
 1. Extract the key keywords and named entities from the user's input.
 2. Correct any obvious spelling errors.
 3. Remove unnecessary words (stop words) unless they are essential for the query's meaning.
 4. If the input is nonsensical or not a query, return the original input.
 5. Using previous chat history to understand the user's intent.
-\n\n
+\n
 Output:
 'The optimized Google search query'
-\n\n
+\n
 Example 1:
 Input from user ({{user}}): where can i find cheep flights to london
 Output:
 'cheap flights London'
-\n\n
+\n
 Example 2:
 Context: {{user}}:today is a nice day in paris i want to have a walk and find a restaurant to have a nice meal. {{assistant}}: Bonjour, it's a nice day!
-Input from user ({{user}}): please choose me the best resturant 
+Input from user ({{user}}): please choose me the best restaurant 
 Output:
 'best restaurants Paris France'
-\n\n
+\n
 Example 3:
 Input from user ({{user}}): asdf;lkjasdf
 Output:
@@ -62,10 +62,9 @@ Output:
     }
 
     console.log(`processQueryWithAI: Using API URL: ${apiUrl} for host: ${currentModel.host}`); 
-    console.log('Chat history context:', contextMessages);
-    console.log('Full system prompt:', systemPrompt);
+    // console.log('Chat history context:', contextMessages);
+    // console.log('Full system prompt:', systemPrompt); console logs, for debugging
 
-    // --- Direct Fetch for Non-Streaming ---
     const requestBody = {
       model: config?.selectedModel || '',
       messages: [
@@ -87,42 +86,23 @@ Output:
 
     if (!response.ok) {
         const errorBody = await response.text();
-        console.error(`processQueryWithAI: API request failed with status ${response.status}: ${errorBody}`);
+        console.error(`API request failed with status ${response.status}: ${errorBody}`);
         throw new Error(`API request failed: ${response.statusText}`);
     }
 
     const responseData = await response.json();
-
-    // --- Extract Content based on expected response structure ---
     const optimizedContent = responseData?.choices?.[0]?.message?.content;
-
-    if (typeof optimizedContent === 'string' && optimizedContent.trim()) {
-        const processedQuery = optimizedContent.trim().replace(/["']/g, ''); // Remove quotes
-        console.log('processQueryWithAI: Query processed successfully:', processedQuery);
-        return processedQuery;
-    } else {
-        console.error('processQueryWithAI: Could not extract optimized query from response:', responseData);
-        return query; // Fallback if content extraction fails
-    }
-    // --- End Direct Fetch ---
-
+    return typeof optimizedContent === 'string' ? optimizedContent.trim().replace(/["']/g, '') : query;
   } catch (error) {
-    // Log the specific error that occurred within the try block
-    console.error('processQueryWithAI: Error during execution, using original query:', error);
-    return query; // Fallback to original
+    console.error('processQueryWithAI: Error during execution:', error);
+    return query;
   }
 };
 
-export const urlRewriteRuntime = async function (
-  domain: string
-) {
+export const urlRewriteRuntime = async function (domain: string) {
   try {
     const url = new URL(domain);
-
-    // Skip chrome:// URLs
-    if (url.protocol === 'chrome:') {
-      return;
-    }
+    if (url.protocol === 'chrome:') return;
     
     const domains = [url.hostname];
     const origin = `${url.protocol}//${url.hostname}`;
@@ -159,35 +139,17 @@ export const webSearch = async (query: string, webMode: string) => {
     ? `https://search.brave.com/search?q=${encodeURIComponent(query)}`
     : webMode === 'google'
       ? `https://www.google.com/search?q=${encodeURIComponent(query)}`
-      : `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+      : `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
 
-  const isPost = webMode === 'duckduckgo';
-  const method = isPost ? 'POST' : 'GET';
-
-  let body: FormData | undefined = undefined;
-  if (isPost) {
-    body = new FormData();
-    body.append('q', query);
-  }
-
-  // Consider if urlRewriteRuntime is needed here for Brave/Google/DDG. It might not be.
-  // await urlRewriteRuntime(cleanUrl(baseUrl));
 
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), 15000);
 
   try {
-    const response = await fetch(
-      isPost ? 'https://html.duckduckgo.com/html/' : baseUrl,
-      {
+    const response = await fetch(baseUrl, {
         signal: abortController.signal,
-        method: method,
-        body: body,
-        headers: {
-          // Add necessary headers if requests fail
-        }
-      }
-    );
+        method: 'GET',
+      });
 
     clearTimeout(timeoutId);
 
@@ -196,26 +158,18 @@ export const webSearch = async (query: string, webMode: string) => {
     }
 
     const htmlString = await response.text();
-
     const parser = new DOMParser();
     const htmlDoc = parser.parseFromString(htmlString, 'text/html');
 
     htmlDoc.querySelectorAll('svg, #header, style, link[rel="stylesheet"], script, input, option, select, form, nav, footer, [role="alert"], [aria-hidden="true"]').forEach(item => item.remove());
 
     return htmlDoc.body.innerText.replace(/\s\s+/g, ' ').trim();
-
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      console.error('Web search timed out.');
-    } else {
       console.error('Web search failed:', error);
     }
     return '';
   }
-};
-
-
 
 export async function fetchDataAsStream(
   url: string,
