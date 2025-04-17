@@ -113,20 +113,6 @@ Output:
   }
 };
 
-// Prevent XSS in HTML content
-const sanitizeHtml = (html: string) => {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const whitelist = ['b','i','em','strong','p','br'];
-  
-  doc.body.querySelectorAll('*').forEach(node => {
-    if (!whitelist.includes(node.tagName.toLowerCase())) {
-      node.remove();
-    }
-  });
-  
-  return doc.body.innerHTML;
-};
-
 export const urlRewriteRuntime = async function (
   domain: string
 ) {
@@ -216,7 +202,7 @@ export const webSearch = async (query: string, webMode: string) => {
 
     htmlDoc.querySelectorAll('svg, #header, style, link[rel="stylesheet"], script, input, option, select, form, nav, footer, [role="alert"], [aria-hidden="true"]').forEach(item => item.remove());
 
-    return sanitizeHtml(htmlDoc.body.innerHTML).replace(/\s\s+/g, ' ').trim();
+    return htmlDoc.body.innerText.replace(/\s\s+/g, ' ').trim();
 
   } catch (error) {
     clearTimeout(timeoutId);
