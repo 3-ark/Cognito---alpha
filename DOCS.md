@@ -47,6 +47,49 @@ Check out these collections for inspiration:
 
 Augment your conversation with the content of your (currently visited) web page.
 
+The chat history includes **all previous messages** in the conversation by default, but context limits apply for AI processing:
+
+1. **Full History Storage** in Bruside.tsx:
+```tsx
+const [messages, setMessages] = useState<ChatMessage[]>([]); // Stores all messages
+```
+
+2. **Context Limits** in useSendMessage.ts:
+```ts
+// Page content limited by contextLimit (default 1000 chars)
+const charLimit = 1000 * (config?.contextLimit || 1);
+const limitedContent = currentPageContent.substring(0, charLimit);
+
+// Web results limited by webLimit (default 1000 chars)
+const webLimit = 1000 * (config?.webLimit || 1);
+const limitedWebResult = searchRes.substring(0, webLimit);
+```
+
+3. **Message Processing** in useSendMessage.ts:
+```ts
+const currentMessages: ApiMessage[] = [message, ...messages] // All messages included
+  .map((m: string, i: number) => ({ content: m, role: i % 2 === 1 ? 'assistant' : 'user' }))
+  .reverse();
+// Previous messages are included in each API request
+```
+
+4. System Prompt Construction (also in useSendMessage.ts):
+```ts
+const systemContent = `
+  ${persona}
+  ${pageContentForLlm ? `. Use page context: ${pageContentForLlm}` : ''}
+  ${webContentForLlm ? `. Web results: ${webContentForLlm}` : ''}
+`;
+// Combines persona instructions with contextual information
+```
+
+There's no hard-coded message count limit - the conversation history grows until:
+- User resets the chat
+- Browser storage limits are reached (via localforage)
+- Context window limits of the AI model being used
+
+You can configure content limits in Settings via `contextLimit` and `webLimit` multipliers.
+
 - select `text mode` to share the text content of your page
 - select `html mode` to share the source code of the site (resource-intensive, 
 only for development purposes) 
