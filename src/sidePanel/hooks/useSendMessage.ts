@@ -238,7 +238,7 @@ const useSendMessage = (
           // Check if there's web content/query info to display
           const finalMessageContent = combinedWebContentDisplay
             ? // If yes, prepend it to the AI response with separation
-            `**From Internet**\n${combinedWebContentDisplay}\n\n---\n\n${currentFullresponse}`        
+            `**From the Internet**\n${combinedWebContentDisplay}\n\n---\n\n${currentFullresponse}`        
             : // Otherwise, just use the AI response
             currentFullresponse;
             // --- MODIFICATION END ---          
