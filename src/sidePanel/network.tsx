@@ -220,22 +220,21 @@ export const webSearch = async (query: string, webMode: string) => {
       });
       console.log('Google Result Structure:', resultsText);
 
-    } 
-    else if (webMode === 'brave') {
-      // First try new layout
-      const braveResults = htmlDoc.querySelectorAll('.snippet, .snippet-wrapper, [data-loc="rw"]');
-      
+    } else if (webMode === 'brave') {
+      // Brave's updated structure
+      const braveResults = htmlDoc.querySelectorAll('#results .snippet');
       braveResults.forEach(result => {
-        const title = result.querySelector('.title, .snippet-title, h3, [data-testid="mainline"] h3')?.textContent?.trim();
-        const url = result.querySelector('.url, .snippet-url, .result-header')?.textContent?.trim();
-        const snippet = result.querySelector('.snippet-description, .description, .result-snippet')?.textContent?.trim();
+        const link = result.querySelector('a[href]');
+        const url = link?.getAttribute('href')?.trim();
+        const title = link?.querySelector('.title.mt-s')?.textContent?.trim();
+        const snippet = result.querySelector('.snippet-description')?.textContent?.trim();
     
         if (title) {
           resultsText += `**${title}**\n${url ? url + '\n' : ''}${snippet || ''}\n\n`;
         }
       });
     
-      // Fallback to organic results
+      // Fallback to legacy organic results
       if (!braveResults.length) {
         htmlDoc.querySelectorAll('.organic-result').forEach(result => {
           const title = result.querySelector('h3')?.textContent?.trim();
@@ -244,13 +243,14 @@ export const webSearch = async (query: string, webMode: string) => {
         });
       }
     }
-
+    console.log('Brave Result Structure:', resultsText);
     return resultsText.trim() || 'No results found';
   } catch (error) {
     clearTimeout(timeoutId);
     console.error('Web search failed:', error);
     return '';
   }
+  
 };
 
 export async function fetchDataAsStream(
