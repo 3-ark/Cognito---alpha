@@ -218,6 +218,8 @@ export const webSearch = async (query: string, webMode: string) => {
         if (title) {
           resultsText += `${title}\n${snippet || ''}\n\n`;}
       });
+      console.log('Google Result Structure:', resultsText);
+
     } 
     else if (webMode === 'brave') {
       // First try new layout

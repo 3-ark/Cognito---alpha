@@ -97,7 +97,7 @@ only for development purposes)
 
 ## web search
 
-Basic web augmentation for your chats. Enter your web search query, and Bruside will load up an async web search to answer your questions based on live public data.
+~Basic~ web augmentation for your chats. Enter your web search query, and Bruside will load up an async web search to answer your questions based on live public data.
 
 Context awareness
 ```ts
@@ -146,6 +146,11 @@ Output:
 'asdf;lkjasdf'
 `;
 ```
+This is a showcase that how this web search works.
+![](docs/web1.png)
+![](docs/web2.png)
+![alt text](docs/web3.png)
+![alt text](docs/web4.png)
 
 ## File Structure
 
@@ -403,6 +408,106 @@ if (!resultsText.trim()) {
   resultsText = htmlDoc.body.textContent?.trim().substring(0, 2000) || '';
 }
 ```
+#### Google Search Results
+
+Based on web search, Beautifulsoup is a good choice but I don't know how to use it in this extension and it sounds trouble.
+
+Title of search snippets is <h3> in <div class="MjjYud">, this is the container for search result [20250418]. And I find all the snippets including some in other structures all in <div class="VwiC3b....."> as bellow. 
+
+```html
+<div class="VwiC3b yXK7lf p4wth r025kc hJNv6b Hdw6tb" style="-webkit-line-clamp:2"><span class="YrbPuc"><span>5 hours ago</span> — </span><span>President <em>Donald Trump talks to reporters as he signs executive orders</em>. Trump news updates: US president meets with Italy's Giorgia Meloni. These are the&nbsp;...</span></div>
+```
+
+Here's the snippet extraction logic targeting that specific structure while handling timestamps and multiple spans:
+
+```typescript
+const snippet = Array.from(result.querySelectorAll('div[class*="VwiC3b"] > span'))
+  .map(span => {
+    // Extract and format timestamp if present
+    const timestampSpan = span.querySelector('.YrbPuc span');
+    if (timestampSpan) {
+      const timestamp = timestampSpan.textContent?.trim();
+      const timeAgo = timestamp ? `[${timestamp}] ` : '';
+      
+      // Get remaining text after timestamp (including the dash)
+      const postTimestamp = span.textContent
+        ?.replace(timestamp || '', '')
+        .replace(/^—\s*/, ': ') // Convert leading dash to colon
+        .trim();
+
+      return timeAgo + postTimestamp;
+    }
+
+    // Process regular text with emphasis
+    return Array.from(span.childNodes)
+      .map(node => {
+        if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+        if (node.nodeName === 'EM') return `*${node.textContent}*`;
+        return node.textContent;
+      })
+      .join('')
+      .replace(/\u00A0/g, ' ')
+      .trim();
+  })
+  .filter(text => text)
+  .join(' ') 
+  .replace(/\s+/g, ' ');
+```
+
+**Key Features:**
+1. **Targeted Selector:** `div[class*="VwiC3b"] > span` finds direct child spans of the snippet container
+2. **Text Normalization:**
+   - Preserves emphasis with asterisks `*`
+   - Handles non-breaking spaces (&nbsp;)
+   - Combines multiple spans naturally
+   - Transforms " — " into a cleaner ": " separator
+   - Maintains temporal context while keeping snippets readable
+3. **Structural Resilience:** Works even if Google adds more classes to the div
+4. **Flexible Time Formats**  
+   Converts "5 hours ago" → "[5h ago]" for compact display
+
+   Works with any timestamp format Google might use:
+   - "2 days ago" → "[2d ago]"
+   - "Mar 5, 2024" → "[Mar 5]"
+   - "5 hours ago" → "[5h ago]"
+
+**To adjust timestamp formatting**, modify this line:
+```typescript
+const timeAgo = timestamp ? `[${timestamp}] ` : '';
+```
+For example, to show relative hours:
+```typescript
+const timeAgo = timestamp?.includes('hour') 
+  ? `[${timestamp.replace(' hours', 'h').replace(' hour', 'h')}] `
+  : `[${timestamp}] `;
+```
+
+**Integration with Existing Code:**
+```typescript
+if (webMode === 'google') {
+  const results = htmlDoc.querySelectorAll('.MjjYud');
+  results.forEach(result => {
+    const title = result.querySelector('h3')?.textContent?.trim();
+    const snippet = /* the above logic */;
+    
+    if (title) {
+      resultsText += `${title}\n${snippet || ''}\n\n`;
+    }
+  });
+}
+```
+
+Example HTML:
+```html
+<div class="VwiC3b...">
+  <span class="YrbPuc"><span>5 hours ago</span> — </span>
+  <span>President <em>Donald Trump talks...</span>
+</div>
+```
+
+This will now produce:
+`"[5h ago] President *Donald Trump talks to reporters as he signs executive orders*. Trump news updates..."`
+![showcase](docs/googleparsing.png)
 
 #### useChatTitle.ts
 Here’s the **simplified, OpenAI-compatible** `useChatTitle` hook you’re using, with easy extensibility for future models:  
