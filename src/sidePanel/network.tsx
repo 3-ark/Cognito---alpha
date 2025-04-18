@@ -256,199 +256,152 @@ export const webSearch = async (query: string, webMode: string) => {
 export async function fetchDataAsStream(
   url: string,
   data: Record<string, unknown>,
-  onMessage: (message: string, done?: boolean) => void,
+  onMessage: (message: string, done?: boolean, error?: boolean) => void, // Added optional error flag
   headers: Record<string, string> = {},
   host: string
 ) {
-  
+  let streamFinished = false; // Flag to prevent multiple final calls
+
+  // Helper to call final message exactly once
+  const finishStream = (message: string, isError: boolean = false) => {
+    if (!streamFinished) {
+      streamFinished = true;
+      // Ensure message is a string, even if error object is passed accidentally
+      const finalMessage = typeof message === 'string' ? message : (message instanceof Error ? message.message : String(message));
+      onMessage(finalMessage, true, isError); // Pass done=true and error status
+    }
+  };
+
+  // --- Your Original URL Checks (Correct Placement) ---
   if (url.startsWith('chrome://')) {
+    console.log("fetchDataAsStream: Skipping chrome:// URL:", url);
+    // Optionally call finishStream with an appropriate message/error if needed
+    // finishStream("Skipped chrome:// URL", true); // Or perhaps just return void silently?
     return; // Skip chrome:// URLs
   }
 
   if (url.includes('localhost')) {
+    // Assuming cleanUrl is defined elsewhere
     await urlRewriteRuntime(cleanUrl(url));
   }
+  // --- End Original URL Checks ---
 
+  // --- Main Try/Catch for Fetch and Streaming ---
   try {
+    // --- Your Original Fetch Setup (Correct Placement) ---
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...headers },
       body: JSON.stringify(data)
+      // Consider adding AbortController for timeouts if needed here too
     });
+    // --- End Original Fetch Setup ---
 
+    // Check if the fetch itself failed
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      // Try to get error details from the body
+      let errorBody = `Network response was not ok (${response.status})`;
+      try {
+         const text = await response.text();
+         errorBody += `: ${text || response.statusText}`;
+      } catch (_) {
+         // Ignore if reading body fails
+         errorBody += `: ${response.statusText}`;
+      }
+      throw new Error(errorBody);
     }
 
-    let str = '';
+    // --- Start Stream Processing ---
+    let str = ''; // Accumulator for the response string
 
+    // --- Refined Host-Specific Stream Logic ---
     if (host === "ollama") {
-      if (!response.body) return;
+        if (!response.body) throw new Error('Response body is null for Ollama');
+        const reader = response.body.getReader();
+        let done, value;
+        while (true) {
+          ({ value, done } = await reader.read());
+          if (done) break; // Exit loop if stream ends naturally
+          const chunk = new TextDecoder().decode(value);
 
-      const reader = response.body.getReader();
+          // Split potential multiple JSON objects in one chunk (Ollama might do this)
+          const jsonObjects = chunk.split('\n').filter(line => line.trim() !== '');
 
-      let done;
-      let value;
-
-      while (!done) {
-        ({ value, done } = await reader.read());
-
-        if (done) {
-          onMessage(str, true);
-          break;
-        }
-
-        const chunk = new TextDecoder().decode(value);
-
-        // Handle [DONE] marker
-        if (chunk.trim() === '[DONE]') {
-          onMessage(str, true);
-          break;
-        }
-
-        try {
-          const parsed = JSON.parse(chunk);
-
-          if (parsed.message?.content) {
-            str += parsed.message.content;
-            onMessage(str);
+          for (const jsonObjStr of jsonObjects) {
+             if (jsonObjStr.trim() === '[DONE]') { // Check for [DONE] marker if Ollama uses it
+                finishStream(str);
+                return; // Exit function completely
+             }
+             try {
+                const parsed = JSON.parse(jsonObjStr);
+                if (parsed.message?.content) {
+                  str += parsed.message.content;
+                  if (!streamFinished) onMessage(str); // Send intermediate update
+                }
+                // Check for Ollama's own 'done' flag within the JSON
+                if (parsed.done === true && !streamFinished) {
+                   finishStream(str);
+                   return; // Exit function completely
+                }
+             } catch (error) {
+                console.debug('Skipping invalid JSON chunk:', jsonObjStr);
+             }
           }
-        } catch (error) {
-          // Ignore JSON parse errors for non-JSON chunks
-          console.debug('Skipping invalid JSON chunk:', chunk);
-          continue;
         }
-      }
-    }
+        // If loop finished naturally (done=true reading stream)
+        finishStream(str);
 
-    if (host === "lmStudio") {
-      const stream = events(response);
+      } else if (["lmStudio", "groq", "gemini", "openai"].includes(host)) {
+        // Using fetch-event-stream for SSE
+        const stream = events(response); // Assuming 'events' is correctly imported
+        for await (const event of stream) {
+          if (streamFinished) continue;
+          if (!event.data) continue;
 
-      for await (const event of stream) {
-        if (!event.data) continue;
-
-        // Handle [DONE] marker
-        if (event.data.trim() === '[DONE]') {          onMessage(str, true);
-
-          break;
-        }
-
-        try {
-          const received = JSON.parse(event.data || '');
-          const err = received?.x_groq?.error;
-
-          if (err) {
-            onMessage(`Error: ${err}`, true);
-
-            return;
+          // Handle [DONE] marker (relevant for non-OpenAI)
+          if (event.data.trim() === '[DONE]') {
+            finishStream(str);
+            break; // Exit SSE loop
           }
 
-          str += received?.choices?.[0]?.delta?.content || '';
-          onMessage(str || '');
-        } catch (error) {
-          // Skip invalid JSON chunks
-          console.debug('Skipping invalid chunk:', event.data);
-          continue;
-        }
-      }
-    }
-
-    if (host === "groq") {
-      const stream = events(response);
-
-      for await (const event of stream) {
-        if (!event.data) continue;
-
-        // Handle [DONE] marker
-        if (event.data.trim() === '[DONE]') {          onMessage(str, true);
-
-          break;
-        }
-
-        try {
-          const received = JSON.parse(event.data || '');
-          const err = received?.x_groq?.error;
-
-          if (err) {
-            onMessage(`Error: ${err}`, true);
-
-            return;
-          }
-
-          str += received?.choices?.[0]?.delta?.content || '';
-          onMessage(str || '');
-        } catch (error) {
-          // Skip invalid JSON chunks
-          console.debug('Skipping invalid chunk:', event.data);
-          continue;
-        }
-      }
-    }
-
-    if (host === "gemini") {
-      const stream = events(response);
-
-      for await (const event of stream) {
-        if (!event.data) continue;
-
-        // Check if the event data is exactly '[DONE]'
-        if (event.data.trim() === '[DONE]') {
-          onMessage(str, true);
-          break;
-        }
-
-        try {
-          // Only try to parse if it looks like JSON
-          if (typeof event.data === 'string' && event.data.startsWith('{')) {
+          try {
             const received = JSON.parse(event.data);
-            const err = received?.x_gemini?.error;
+            let apiError = null; // Check for API-reported errors in payload
+            if (host === 'groq' && received?.x_groq?.error) apiError = received.x_groq.error;
+            else if (host === 'gemini' && received?.error) apiError = received.error.message || JSON.stringify(received.error); // Gemini might use standard 'error' field in OpenAI compat mode
+            else if (received?.error) apiError = received.error.message || JSON.stringify(received.error); // General OpenAI structure
 
-            if (err) {
-              onMessage(`Error: ${err}`, true);
-
-              return;
+            if (apiError) {
+               throw new Error(`API Error: ${apiError}`);
             }
 
             str += received?.choices?.[0]?.delta?.content || '';
-            onMessage(str || '');
+            if (!streamFinished) onMessage(str); // Send intermediate update
+
+          } catch (error) {
+            if (error instanceof Error && error.message.startsWith('API Error:')) {
+               // If we already parsed an API error message, finish with error
+               finishStream(error.message, true); // Mark as error
+            } else {
+               // Log JSON parse errors but potentially continue if minor
+               console.debug('Skipping invalid SSE chunk or parse error:', event.data, error);
+            }
+            // Decide if a parse error should terminate the stream or just be skipped
+            // continue; // Or: finishStream(`Parse Error: ${error}`, true); break;
           }
-        } catch (error) {
-          // Skip invalid chunks silently
-          console.debug('Skipping invalid chunk');
-          continue;
         }
+        // If SSE loop finished naturally (stream closed by server)
+        finishStream(str);
+
+      } else {
+         // Handle unknown host
+         throw new Error(`Unsupported host specified: ${host}`);
       }
-    }
+      // --- End Stream Processing ---
 
-    if (host === "openai") {
-      const stream = events(response);
-
-      for await (const event of stream) {
-        if (!event.data) continue;
-
-        try {
-          const received = JSON.parse(event.data || '');
-          const err = received?.x_openai?.error;
-
-          if (err) {
-            onMessage(`Error: ${err}`, true);
-
-            return;
-          }
-
-          str += received?.choices?.[0]?.delta?.content || '';
-
-          onMessage(str || '');
-        } catch (error) {
-          onMessage(`${error}`, true);
-          console.error('Error fetching data:', error);
-        }
-      }
-    }
-
-    onMessage(str, true);
   } catch (error) {
-    onMessage(`${error}`, true);
-    console.error('Error fetching data:', error);
+    // Catch errors from fetch, response.ok check, or stream processing
+    console.error('Error in fetchDataAsStream:', error);
+    finishStream(error instanceof Error ? error.message : String(error), true); // Finish with error state
   }
 }

@@ -234,17 +234,22 @@ const useSendMessage = (
 
         if (isFinished) {
           console.log("useSendMessage: Stream finished.");
-          // --- MODIFICATION START ---
-          // Check if there's web content/query info to display
+          console.log("Checking value inside 'isFinished':", combinedWebContentDisplay); //debug
+
           const finalMessageContent = combinedWebContentDisplay
             ? // If yes, prepend it to the AI response with separation
             `**From the Internet**\n${combinedWebContentDisplay}\n\n---\n\n${currentFullresponse}`        
             : // Otherwise, just use the AI response
             currentFullresponse;
-            // --- MODIFICATION END ---          
           
-          // Use the final complete response string for the message history
-          setMessages(prev => [finalMessageContent, ...prev.slice(1)]);
+            setMessages(prev => {
+              // ADD THIS LOG:
+              console.log("setMessages: Previous state's first item:", prev[0]);
+              const newState = [finalMessageContent, ...prev.slice(1)];
+              // ADD THIS LOG:
+              console.log("setMessages: New state's first item:", newState[0]);
+              return newState;
+          });
           setLoading(false);
           // Optional: Clear the streaming response state if needed, though it gets overwritten on next send
           // setResponse('');
