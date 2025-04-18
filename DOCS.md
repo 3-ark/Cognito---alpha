@@ -1,5 +1,40 @@
 # Bruside
 
+- [Bruside](#bruside)
+  * [connections](#connections)
+  * [persona](#persona)
+  * [page context](#page-context)
+  * [web search](#web-search)
+  * [File Structure](#file-structure)
+  * [Advanced Tweaks](#advanced-tweaks)
+    + [UI Customization Guide for Bruside Extension](#ui-customization-guide-for-bruside-extension)
+      - [Theme System Overview](#theme-system-overview)
+      - [Customizing Colors](#customizing-colors)
+        * [1. Preset Themes](#1-preset-themes)
+        * [2. Custom Theme](#2-custom-theme)
+      - [Component Styling](#component-styling)
+        * [1. Buttons](#1-buttons)
+        * [2. Select Boxes](#2-select-boxes)
+        * [3. Input Fields](#3-input-fields)
+      - [Typography](#typography)
+        * [1. Font Family](#1-font-family)
+        * [2. Text Components](#2-text-components)
+      - [Special Elements](#special-elements)
+        * [1. Paper Texture](#1-paper-texture)
+        * [2. Message Bubbles](#2-message-bubbles)
+      - [Troubleshooting](#troubleshooting)
+        * [Common Issues](#common-issues)
+        * [Development Tips](#development-tips)
+      - [Advanced Customization](#advanced-customization)
+    + [Others](#others)
+      - [Parsing HTML](#parsing-html)
+      - [Google Search Results](#google-search-results)
+      - [useChatTitle.ts](#usechattitlets)
+      - [**How to Add New Models Later**](#--how-to-add-new-models-later--)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 ## connections 
 
 **ollama**
