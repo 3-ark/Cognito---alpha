@@ -415,7 +415,7 @@ if (!resultsText.trim()) {
 
 Based on web search, Beautifulsoup is a good choice but I don't know how to use it in this extension and it sounds trouble.
 
-Title of search snippets is <h3> in <div class="MjjYud">, this is the container for search result [20250418]. And I find all the snippets, including some in other structures, all in <div class="VwiC3b....."> as below. 
+Title of search snippets is `<h3>` in `<div class="MjjYud">`, this is the container for search result [20250418]. And I find all the snippets, including some in other structures, all in `<div class="VwiC3b.....">` as below. 
 
 ```html
 <div class="VwiC3b yXK7lf p4wth r025kc hJNv6b Hdw6tb" style="-webkit-line-clamp:2"><span class="YrbPuc"><span>5 hours ago</span> — </span><span>President <em>Donald Trump talks to reporters as he signs executive orders</em>. Trump news updates: US president meets with Italy's Giorgia Meloni. These are the&nbsp;...</span></div>
