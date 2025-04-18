@@ -240,7 +240,7 @@ const useSendMessage = (
             ? // If yes, prepend it to the AI response with separation
             `**From Internet**\n${combinedWebContentDisplay}\n\n---\n\n${currentFullresponse}`        
             : // Otherwise, just use the AI response
-              currentFullresponse;
+            `**From Internet**\n&{combinedWebContentDisplay}\n\n---\n\n${currentFullresponse}`;
           // --- MODIFICATION END ---          
           
           // Use the final complete response string for the message history
