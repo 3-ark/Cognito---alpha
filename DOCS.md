@@ -30,7 +30,7 @@
       - [Parsing HTML](#parsing-html)
       - [Google Search Results](#google-search-results)
       - [useChatTitle.ts](#usechattitlets)
-      - [**How to Add New Models Later**](#--how-to-add-new-models-later--)
+      - [How to Add New Models Later](#how-to-add-new-models-later)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
