@@ -181,7 +181,7 @@ Output:
 'asdf;lkjasdf'
 `;
 ```
-This is a showcase that how this web search works.
+This is a showcase of how this content-awareness web search works.
 ![](docs/web1.png)
 ![](docs/web2.png)
 ![alt text](docs/web3.png)
