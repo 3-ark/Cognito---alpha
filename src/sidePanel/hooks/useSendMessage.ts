@@ -96,11 +96,11 @@ const useSendMessage = (
       // Only update finalQuery if optimization was successful and different
       if (optimizedQuery && optimizedQuery !== message) {
           finalQuery = optimizedQuery;
-          processedQueryDisplay = `~**SUB:**~ [*${finalQuery}*]\n\n`; // Prepare for display
+          processedQueryDisplay = `**SUB:** [*${finalQuery}*]\n\n`; // Prepare for display
           console.log(`useSendMessage: Original query: "${message}", Processed query: "${finalQuery}"`);
       } else {
           console.log(`useSendMessage: Using original query: "${message}" (Optimization failed or returned same query)`);
-          // Optionally, you could set processedQueryDisplay = `(Using original query: "${finalQuery}")\n\n`;
+          processedQueryDisplay = `**ORG:** (${finalQuery})\n\n`;
       }
     }
 
@@ -240,8 +240,8 @@ const useSendMessage = (
             ? // If yes, prepend it to the AI response with separation
             `**From Internet**\n${combinedWebContentDisplay}\n\n---\n\n${currentFullresponse}`        
             : // Otherwise, just use the AI response
-            `**From Internet**\n&{combinedWebContentDisplay}\n\n---\n\n${currentFullresponse}`;
-          // --- MODIFICATION END ---          
+            currentFullresponse;
+            // --- MODIFICATION END ---          
           
           // Use the final complete response string for the message history
           setMessages(prev => [finalMessageContent, ...prev.slice(1)]);
