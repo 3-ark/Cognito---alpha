@@ -185,8 +185,38 @@ export const webSearch = async (query: string, webMode: string) => {
       const results = htmlDoc.querySelectorAll('.MjjYud');
       results.forEach(result => {
         const title = result.querySelector('h3')?.textContent?.trim();
-        const snippet = result.querySelector('.VwiC3b, .MUxGbd')?.textContent?.trim();
-        if (title) resultsText += `${title}\n${snippet || ''}\n\n`;
+        const snippet = Array.from(result.querySelectorAll('div[class*="VwiC3b"] > span'))
+        .map(span => {
+          const timestampSpan = span.querySelector('.YrbPuc span');
+          if (timestampSpan) {
+            const timestamp = timestampSpan.textContent?.trim();
+            const timeAgo = timestamp ? `[${timestamp}] ` : '';
+
+            // Get remaining text after timestamp (including the dash)
+            const postTimestamp = span.textContent
+              ?.replace(timestamp || '', '')
+              .replace(/^—\s*/, ': ') // Convert leading dash to colon
+              .trim();
+
+            return timeAgo + postTimestamp;
+          }
+
+          return Array.from(span.childNodes)
+            .map(node => {
+              if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+              if (node.nodeName === 'EM') return `*${node.textContent}*`;
+              return node.textContent;
+            })
+            .join('')
+            .replace(/\u00A0/g, ' ')
+            .trim();
+        })
+        .filter(text => text)
+        .join(' ') 
+        .replace(/\s+/g, ' ');
+
+        if (title) {
+          resultsText += `${title}\n${snippet || ''}\n\n`;}
       });
     } 
     else if (webMode === 'brave') {
