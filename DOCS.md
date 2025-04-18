@@ -1,5 +1,40 @@
 # Bruside
 
+- [Bruside](#bruside)
+  * [connections](#connections)
+  * [persona](#persona)
+  * [page context](#page-context)
+  * [web search](#web-search)
+  * [File Structure](#file-structure)
+  * [Advanced Tweaks](#advanced-tweaks)
+    + [UI Customization Guide for Bruside Extension](#ui-customization-guide-for-bruside-extension)
+      - [Theme System Overview](#theme-system-overview)
+      - [Customizing Colors](#customizing-colors)
+        * [1. Preset Themes](#1-preset-themes)
+        * [2. Custom Theme](#2-custom-theme)
+      - [Component Styling](#component-styling)
+        * [1. Buttons](#1-buttons)
+        * [2. Select Boxes](#2-select-boxes)
+        * [3. Input Fields](#3-input-fields)
+      - [Typography](#typography)
+        * [1. Font Family](#1-font-family)
+        * [2. Text Components](#2-text-components)
+      - [Special Elements](#special-elements)
+        * [1. Paper Texture](#1-paper-texture)
+        * [2. Message Bubbles](#2-message-bubbles)
+      - [Troubleshooting](#troubleshooting)
+        * [Common Issues](#common-issues)
+        * [Development Tips](#development-tips)
+      - [Advanced Customization](#advanced-customization)
+    + [Others](#others)
+      - [Parsing HTML](#parsing-html)
+      - [Google Search Results](#google-search-results)
+      - [useChatTitle.ts](#usechattitlets)
+      - [How to Add New Models Later](#how-to-add-new-models-later)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 ## connections 
 
 **ollama**
@@ -384,7 +419,7 @@ Remember that most visual styling should be done through the theme system and CS
 
 #### Parsing HTML
 
-A few pro tips to keep it robust:
+I purge the results from DuckDuckGo too much, it returns 0. It took me a while to find it. A few pro tips to keep it robust:
 
 1. **Selector Maintenance**  
 Bookmark these test pages to quickly check CSS changes:
@@ -393,6 +428,7 @@ Bookmark these test pages to quickly check CSS changes:
 
 2. **User-Agent Rotation**  
 Add these to headers to avoid bot detection:
+
 ```typescript
 headers: {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
@@ -402,17 +438,19 @@ headers: {
 
 3. **Defensive Parsing**  
 Add this fallback logic before returning results:
+
 ```typescript
 if (!resultsText.trim()) {
   console.warn('Fallback parsing activated');
   resultsText = htmlDoc.body.textContent?.trim().substring(0, 2000) || '';
 }
 ```
+
 #### Google Search Results
 
 Based on web search, Beautifulsoup is a good choice but I don't know how to use it in this extension and it sounds trouble.
 
-Title of search snippets is <h3> in <div class="MjjYud">, this is the container for search result [20250418]. And I find all the snippets including some in other structures all in <div class="VwiC3b....."> as bellow. 
+Title of search snippets is `<h3>` in `<div class="MjjYud">`, this is the container for search result [20250418]. And I find all the snippets, including some in other structures, all in `<div class="VwiC3b.....">` as below. 
 
 ```html
 <div class="VwiC3b yXK7lf p4wth r025kc hJNv6b Hdw6tb" style="-webkit-line-clamp:2"><span class="YrbPuc"><span>5 hours ago</span> — </span><span>President <em>Donald Trump talks to reporters as he signs executive orders</em>. Trump news updates: US president meets with Italy's Giorgia Meloni. These are the&nbsp;...</span></div>
@@ -472,10 +510,13 @@ const snippet = Array.from(result.querySelectorAll('div[class*="VwiC3b"] > span'
    - "5 hours ago" → "[5h ago]"
 
 **To adjust timestamp formatting**, modify this line:
+
 ```typescript
 const timeAgo = timestamp ? `[${timestamp}] ` : '';
 ```
+
 For example, to show relative hours:
+
 ```typescript
 const timeAgo = timestamp?.includes('hour') 
   ? `[${timestamp.replace(' hours', 'h').replace(' hour', 'h')}] `
@@ -483,6 +524,7 @@ const timeAgo = timestamp?.includes('hour')
 ```
 
 **Integration with Existing Code:**
+
 ```typescript
 if (webMode === 'google') {
   const results = htmlDoc.querySelectorAll('.MjjYud');
@@ -498,6 +540,7 @@ if (webMode === 'google') {
 ```
 
 Example HTML:
+
 ```html
 <div class="VwiC3b...">
   <span class="YrbPuc"><span>5 hours ago</span> — </span>
@@ -614,7 +657,7 @@ export const useChatTitle = (isLoading: boolean, messages: string[], message: st
 };
 ```
 
-#### **How to Add New Models Later**
+#### How to Add New Models Later
 1. **Extend `getApiConfig()`**  
    Just add a new `case` for your model (e.g., `anthropic`, `mistral`, etc.):  
    ```typescript

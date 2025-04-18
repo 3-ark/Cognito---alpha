@@ -20,11 +20,17 @@ All-around tiny browser-augmented chat client for open-source language models.
 - [X] Picture
 - [X] Better web search
 - [X] Better web parsing
-- [ ] Refine the Web Search, no query shows in the first search message, even with a connection. The prompt should include the messages as contexts.
+- [X] Refine the Web Search, no query shows in the first search message, even with a connection. The prompt should include the messages as contexts.
+- [ ] Fix bugs (searching title display, border gets too wide sometimes, web search UI crash with developer tools)
+- [ ] Better parsing for Brave and DuckDuckGo
+- [ ] Add some extra buttons for page mode
+- [ ] Rewrite the API connection in openai compatible endpoint that allows custom API to be added freely
+
+
 Notes: 
 1. Chakra-UI 3 doesn't support Chakra icons, so I need to migrate to react-icons instead. It looks better and gives you more choices. But it's quite a lot of work, and it's currently hard for Vibecoding, because you need to provide docs and check line by line. But this is still easy to start because you don't need to upgrade Chakra-UI to finish this; it can be done in the current setup.
 2. The document is unclear in many places and is still new, so it's not a bad idea to stick to the current version. 
-3. Only fix bugs, it's too hard for me.
+3. Only fix bugs. At least for now, adding new functions is too hard for me.
 
 ## installation
 
