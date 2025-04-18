@@ -657,7 +657,7 @@ export const useChatTitle = (isLoading: boolean, messages: string[], message: st
 };
 ```
 
-#### **How to Add New Models Later**
+#### How to Add New Models Later
 1. **Extend `getApiConfig()`**  
    Just add a new `case` for your model (e.g., `anthropic`, `mistral`, etc.):  
    ```typescript
