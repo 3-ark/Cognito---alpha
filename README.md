@@ -72,5 +72,3 @@ Bruside comes with three distinct personas to suit different needs:
 
 Web Search
 ![alt text](/docs/websearch.png)
-
-</a>
