@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useRef } from 'react';
 
 import { fetchDataAsStream, webSearch, processQueryWithAI } from '../network';
 
@@ -59,15 +59,33 @@ const useSendMessage = (
   setPageContent: Dispatch<SetStateAction<string>>,
   setLoading: Dispatch<SetStateAction<boolean>>
 ) => {
-  const onSend = async (overridedMessage?: string) => {
+   // Use a ref to track if the completion logic for a specific call has run
+   const completionGuard = useRef<Record<number, boolean>>({});
+  
+   const onSend = async (overridedMessage?: string) => {
+    // Generate a unique ID for this specific call to onSend
+    const callId = Date.now();
+    console.log(`[${callId}] useSendMessage: onSend triggered.`);
+    
     const message = overridedMessage || originalMessage;
 
-    if (isLoading || !message || !config) return;
+    if (isLoading) {
+      console.log(`[${callId}] useSendMessage: Bailing out: isLoading is true.`);
+      return;
+    }
+    if (!message || !config) {
+      console.log(`[${callId}] useSendMessage: Bailing out: Missing message or config.`);
+      return;
+    }
+
+    console.log(`[${callId}] useSendMessage: Setting loading true.`);
 
     setLoading(true);
     setWebContent(''); // Clear previous web content display
     setPageContent('');
     setResponse('');
+    // Reset the guard for this new call
+    completionGuard.current[callId] = false;
 
     let finalQuery = message;
     let searchRes: string = '';
@@ -77,7 +95,7 @@ const useSendMessage = (
     const currentModel = config?.models?.find(m => m.id === config.selectedModel);
 
     if (!currentModel) {
-      console.error("useSendMessage: No current model found.");
+      console.error("[${callId}] useSendMessage: No current model found.");
       setLoading(false);
       return;
     }
@@ -97,27 +115,19 @@ const useSendMessage = (
       if (optimizedQuery && optimizedQuery !== message) {
           finalQuery = optimizedQuery;
           processedQueryDisplay = `**SUB:** [*${finalQuery}*]\n\n`; // Prepare for display
-          console.log(`useSendMessage: Original query: "${message}", Processed query: "${finalQuery}"`);
+          console.log(`[${callId}] useSendMessage: Query optimized to: "${finalQuery}"`);
       } else {
-          console.log(`useSendMessage: Using original query: "${message}" (Optimization failed or returned same query)`);
           processedQueryDisplay = `**ORG:** (${finalQuery})\n\n`;
+          console.log(`[${callId}] useSendMessage: Using original query: "${finalQuery}"`);
       }
     }
 
     // --- Step 2: Perform Web Search ---
     if (performSearch) {
-      if (!config.webMode) {
-        console.error("useSendMessage: webMode is not defined.");
-        searchRes = '';
-      } else {
-        console.log(`useSendMessage: Performing web search with query: "${finalQuery}" using mode: ${config.webMode}`);
-        searchRes = await webSearch(finalQuery, config.webMode).catch((err) => {
-          console.error("useSendMessage: webSearch function failed:", err);
-          return '';
-        });
-        console.log(`useSendMessage: Web search result length: ${searchRes.length}`);
-      }
-    }
+      console.log(`[${callId}] useSendMessage: Performing web search...`);
+      searchRes = await webSearch(finalQuery, config.webMode || 'google').catch(/* ... */);
+      console.log(`[${callId}] useSendMessage: Web search done. Length: ${searchRes.length}`);
+   }
 
     // *** This variable holds the string you want to prepend ***
     const webLimit = 1000 * (config?.webLimit || 1);
@@ -125,14 +135,11 @@ const useSendMessage = (
       ? searchRes.substring(0, webLimit)
       : searchRes;
 
-    // Change this line to ONLY include the processed query for display
-    const combinedWebContentDisplay = processedQueryDisplay; // Removed webContentForLlm
+    const combinedWebContentDisplay = processedQueryDisplay; 
 
-    // Keep webContentForLlm ONLY for the system prompt
     const webContentForLlm = config?.webLimit === 128 ? searchRes : limitedWebResult;
-
-    // Keep this if you still want webContent displayed elsewhere too
     setWebContent(combinedWebContentDisplay);
+    console.log(`[${callId}] useSendMessage: Web content prepared for display.`);
 
     // --- Step 3: Prepare Context & Messages ---
     const currentMessages: ApiMessage[] = [message, ...messages]
@@ -145,6 +152,7 @@ const useSendMessage = (
     const newMessages = ['', message, ...messages];
     setMessages(newMessages);
     setMessage('');
+    console.log(`[${callId}] useSendMessage: User message added to state.`);
 
     const persona = config?.personas?.[config?.persona] || '';
 
@@ -165,7 +173,7 @@ const useSendMessage = (
 
     let pageContentForLlm = '';
     if (config?.chatMode === 'page') {
-      let currentPageContent = '';
+      let currentPageContent = '';console.log(`[${callId}] useSendMessage: Preparing page content...`);
       const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
       if (tab?.url && !tab.url.startsWith('chrome://')) {
         currentPageContent = config?.pageMode === 'html' ? pageHtmlContent : pageStringContent;
@@ -179,6 +187,7 @@ const useSendMessage = (
         : currentPageContent;
       pageContentForLlm = config?.contextLimit === 128 ? currentPageContent : limitedContent;
       setPageContent(pageContentForLlm || '');
+      console.log(`[${callId}] useSendMessage: Page content prepared.`);
     } else {
       setPageContent('');
     }
@@ -189,6 +198,7 @@ const useSendMessage = (
       ${pageContentForLlm ? `. Use the following page content for context: ${pageContentForLlm}` : ''}
       ${webContentForLlm ? `. Refer to this web search summary: ${webContentForLlm}` : ''}
     `.trim().replace(/\s+/g, ' ');
+    console.log(`[${callId}] useSendMessage: System prompt constructed.`);
 
     // --- Step 4: Call LLM (Streaming) ---
     const configBody = { stream: true };
@@ -208,13 +218,13 @@ const useSendMessage = (
     };
     const url = urlMap[currentModel.host];
 
-    if (!url) {
-      console.error("Could not determine API URL for host:", currentModel.host);
+    if (!url || !currentModel?.host) {
+      console.error("[${callId}] Could not determine API URL for host:", currentModel.host);
       setLoading(false);
       return;
     }
 
-    console.log(`useSendMessage: Sending chat request to ${url}`);
+    console.log(`[${callId}] useSendMessage: Sending chat request to ${url}`);
 
     let accumulatedResponse = ''; // Accumulate response here for final setMessages
     fetchDataAsStream(
@@ -228,36 +238,47 @@ const useSendMessage = (
         ]
       },
       (part: string, isFinished?: boolean) => {
-        const currentFullresponse = part || '';
-
-        setResponse(currentFullresponse); 
-
+        console.log(`[${callId}] fetchDataAsStream Callback: isFinished=${isFinished}, part length=${part?.length ?? 0}`);
+        
+        accumulatedResponse = part || ''; // Update accumulated response
+        setResponse(accumulatedResponse); // Update live response state
+        
         if (isFinished) {
-          console.log("useSendMessage: Stream finished.");
-          console.log("Checking value inside 'isFinished':", combinedWebContentDisplay); //debug
-
-          const finalMessageContent = combinedWebContentDisplay
-            ? // If yes, prepend it to the AI response with separation
-            `**From the Internet**\n${combinedWebContentDisplay}\n\n---\n\n${currentFullresponse}`        
-            : // Otherwise, just use the AI response
-            currentFullresponse;
+          console.log("[${callId}] fetchDataAsStream Callback: 'isFinished' block ENTERED.");
           
+          if (completionGuard.current[callId]) {
+            console.warn(`[${callId}] fetchDataAsStream Callback: 'isFinished' block SKIPPED - already executed for this callId.`);
+            return; // Already processed the finish signal for this specific onSend invocation
+         }
+         completionGuard.current[callId] = true; // Mark as executed for this callId
+         console.log(`[${callId}] fetchDataAsStream Callback: Completion guard SET for this callId.`);
+         console.log(`[${callId}] Checking value inside 'isFinished': combinedWebContentDisplay length = ${combinedWebContentDisplay?.length}`); //debug
+         
+         const finalMessageContent = combinedWebContentDisplay
+            ? // If yes, prepend it to the AI response with separation
+            `**From the Internet**\n${combinedWebContentDisplay}\n\n---\n\n${accumulatedResponse}`        
+            : // Otherwise, just use the AI response
+            accumulatedResponse;
+            console.log(`[${callId}] FINAL finalMessageContent being set (length ${finalMessageContent.length}):\n---\n${finalMessageContent}\n---`);
+            console.log(`[${callId}] Preparing to call setMessages with final content.`);
             setMessages(prev => {
-              // ADD THIS LOG:
-              console.log("setMessages: Previous state's first item:", prev[0]);
+              // Log previous state (use length for brevity in prod logs)
+              console.log(`[${callId}] setMessages updater: Prev state[0] length: ${prev[0]?.length}`);
               const newState = [finalMessageContent, ...prev.slice(1)];
               // ADD THIS LOG:
-              console.log("setMessages: New state's first item:", newState[0]);
+              console.log(`[${callId}] setMessages updater: New state[0] length: ${newState[0]?.length}`);
               return newState;
           });
+          console.log(`[${callId}] Preparing to call setLoading(false).`);
           setLoading(false);
-          // Optional: Clear the streaming response state if needed, though it gets overwritten on next send
-          // setResponse('');
+          console.log(`[${callId}] --- Stream finished processing COMPLETE ---`);          // Optional: Clear the streaming response state if needed, though it gets overwritten on next send
         }
       },
       authHeader,
       currentModel.host
     );
+    console.log(`[${callId}] useSendMessage: fetchDataAsStream call INITIATED.`);
+
   };
 
   return onSend;
