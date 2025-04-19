@@ -23,7 +23,6 @@ export async function injectContentScript(tabId: number) {
 
     await chrome.scripting.executeScript({
 
-      // @ts-expect-error - chrome.scripting.Target type might expect frameIds, but tabId alone is valid for executeScript
       target: { tabId },
       files: [
         'assets/vendor.js',

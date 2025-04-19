@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useRef } from 'react';
-
+import { MessageTurn } from '../ChatHistory'; // Adjust path if needed
 import { fetchDataAsStream, webSearch, processQueryWithAI } from '../network';
 
 // --- Interfaces (Model, Config, ApiMessage) remain the same ---
@@ -49,12 +49,11 @@ export const getAuthHeader = (config: Config, currentModel: Model) => {
 const useSendMessage = (
   isLoading: boolean,
   originalMessage: string,
-  messages: string[],
+  currentTurns: MessageTurn[],
   webContent: string,
   config: Config | null | undefined,
-  setMessages: Dispatch<SetStateAction<string[]>>,
+  setTurns: Dispatch<SetStateAction<MessageTurn[]>>,
   setMessage: Dispatch<SetStateAction<string>>,
-  setResponse: Dispatch<SetStateAction<string>>,
   setWebContent: Dispatch<SetStateAction<string>>,
   setPageContent: Dispatch<SetStateAction<string>>,
   setLoading: Dispatch<SetStateAction<boolean>>
@@ -83,9 +82,17 @@ const useSendMessage = (
     setLoading(true);
     setWebContent(''); // Clear previous web content display
     setPageContent('');
-    setResponse('');
     // Reset the guard for this new call
     completionGuard.current[callId] = false;
+
+    const userTurn: MessageTurn = {
+      role: 'user',
+      rawContent: message,
+      timestamp: Date.now()
+    };
+    setTurns(prevTurns => [...prevTurns, userTurn]);
+    setMessage(''); // Clear input field
+    console.log(`[${callId}] useSendMessage: User turn added to state.`);
 
     let finalQuery = message;
     let searchRes: string = '';
@@ -103,13 +110,19 @@ const useSendMessage = (
 
     // --- Step 1: Optimize Query ---
     if (performSearch) {
-      console.log("useSendMessage: Optimizing query for web search...");
+      console.log("[${callId}] useSendMessage: Optimizing query...");
+      
+      const historyForQueryOptimization: ApiMessage[] = currentTurns.map(turn => ({
+        role: turn.role,
+        content: turn.rawContent // Use only the raw content
+    }));
+
       const optimizedQuery = await processQueryWithAI(
         message,
         config,
         currentModel,
         authHeader,
-        messages
+        historyForQueryOptimization
       );
       // Only update finalQuery if optimization was successful and different
       if (optimizedQuery && optimizedQuery !== message) {
@@ -138,61 +151,59 @@ const useSendMessage = (
     const combinedWebContentDisplay = processedQueryDisplay; 
 
     const webContentForLlm = config?.webLimit === 128 ? searchRes : limitedWebResult;
-    setWebContent(combinedWebContentDisplay);
     console.log(`[${callId}] useSendMessage: Web content prepared for display.`);
 
-    // --- Step 3: Prepare Context & Messages ---
-    const currentMessages: ApiMessage[] = [message, ...messages]
-      .map((m: string, i: number): ApiMessage => ({
-        content: m || '',
-        role: i % 2 === 1 ? 'assistant' : 'user'
+    // --- Step 3: Prepare Context & Turns ---
+    const messageForApi: ApiMessage[] = currentTurns
+      .map((turn): ApiMessage => ({
+        content: turn.rawContent || '',
+        role: turn.role
       }))
-      .reverse();
+      .concat({ role: 'user', content: message });    
 
-    const newMessages = ['', message, ...messages];
-    setMessages(newMessages);
-    setMessage('');
-    console.log(`[${callId}] useSendMessage: User message added to state.`);
-
-    const persona = config?.personas?.[config?.persona] || '';
-
-    const safeJsonParse = (key: string, defaultValue: string = '""') => {
-      try {
-        const item = localStorage.getItem(key);
-        return JSON.parse(item || defaultValue);
-      } catch (e) {
-        console.error(`Failed to parse ${key} from localStorage`, e);
-        try { return JSON.parse(defaultValue); } catch { return ''; }
-      }
-    };
-
-    const pageString = safeJsonParse('pagestring');
-    const pageHtml = safeJsonParse('pagehtml');
-    const pageStringContent = typeof pageString === 'string' ? pageString : '';
-    const pageHtmlContent = typeof pageHtml === 'string' ? pageHtml : '';
 
     let pageContentForLlm = '';
     if (config?.chatMode === 'page') {
       let currentPageContent = '';console.log(`[${callId}] useSendMessage: Preparing page content...`);
       const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+      
       if (tab?.url && !tab.url.startsWith('chrome://')) {
+        
+        const storedPageString = localStorage.getItem('pagestring');
+        const storedPageHtml = localStorage.getItem('pagehtml');
+
+        let pageStringContent = '';
+        let pageHtmlContent = '';
+
+        try {
+            // Parse the stored values (they were stringified in injectBridge)
+            pageStringContent = storedPageString ? JSON.parse(storedPageString) : '';
+            pageHtmlContent = storedPageHtml ? JSON.parse(storedPageHtml) : '';
+        } catch (e) {
+            console.error("Error parsing page content from localStorage:", e);
+        }
+
         currentPageContent = config?.pageMode === 'html' ? pageHtmlContent : pageStringContent;
+        console.log(`useSendMessage: Retrieved page content. Mode: ${config?.pageMode}. String length: ${pageStringContent.length}, HTML length: ${pageHtmlContent.length}`);
       } else {
         console.log("useSendMessage: Not fetching page content.");
       }
 
       const charLimit = 1000 * (config?.contextLimit || 1);
-      const limitedContent = charLimit && typeof currentPageContent === 'string'
-        ? currentPageContent.substring(0, charLimit)
-        : currentPageContent;
+      const safeCurrentPageContent = typeof currentPageContent === 'string' ? currentPageContent : '';
+      const limitedContent = charLimit && safeCurrentPageContent
+        ? safeCurrentPageContent.substring(0, charLimit)
+        : safeCurrentPageContent;
+
       pageContentForLlm = config?.contextLimit === 128 ? currentPageContent : limitedContent;
       setPageContent(pageContentForLlm || '');
-      console.log(`[${callId}] useSendMessage: Page content prepared.`);
+      console.log(`[${callId}] useSendMessage: Page content prepared. Length: ${pageContentForLlm?.length}`);
     } else {
       setPageContent('');
     }
 
     // Construct the system prompt (using webContentForLlm which doesn't have the display prefix)
+    const persona = config?.personas?.[config?.persona] || '';
     const systemContent = `
       ${persona}
       ${pageContentForLlm ? `. Use the following page content for context: ${pageContentForLlm}` : ''}
@@ -200,15 +211,18 @@ const useSendMessage = (
     `.trim().replace(/\s+/g, ' ');
     console.log(`[${callId}] useSendMessage: System prompt constructed.`);
 
+    // --- Add Placeholder Assistant Turn ---
+    const assistantTurnPlaceholder: MessageTurn = {
+      role: 'assistant',
+      rawContent: '', // Start empty
+      webDisplayContent: combinedWebContentDisplay, // Store the prefix info here!
+      timestamp: Date.now() + 1 // Ensure slightly later timestamp
+    };
+    setTurns(prevTurns => [...prevTurns, assistantTurnPlaceholder]);
+    console.log(`[${callId}] useSendMessage: Assistant placeholder turn added.`);
+
     // --- Step 4: Call LLM (Streaming) ---
     const configBody = { stream: true };
-
-    if (!currentModel?.host) {
-      console.error("useSendMessage: Cannot proceed without currentModel.host");
-      setLoading(false);
-      return;
-    }
-
     const urlMap: Record<string, string> = {
       groq: 'https://api.groq.com/openai/v1/chat/completions',
       ollama: `${config?.ollamaUrl || ''}/api/chat`,
@@ -218,7 +232,7 @@ const useSendMessage = (
     };
     const url = urlMap[currentModel.host];
 
-    if (!url || !currentModel?.host) {
+    if (!url) {
       console.error("[${callId}] Could not determine API URL for host:", currentModel.host);
       setLoading(false);
       return;
@@ -226,7 +240,6 @@ const useSendMessage = (
 
     console.log(`[${callId}] useSendMessage: Sending chat request to ${url}`);
 
-    let accumulatedResponse = ''; // Accumulate response here for final setMessages
     fetchDataAsStream(
       url,
       {
@@ -234,40 +247,40 @@ const useSendMessage = (
         model: config?.selectedModel || '',
         messages: [
           { role: 'system', content: systemContent },
-          ...currentMessages
+          ...messageForApi
         ]
       },
-      (part: string, isFinished?: boolean) => {
+      (part: string, isFinished?: boolean, isError?: boolean) => {
         console.log(`[${callId}] fetchDataAsStream Callback: isFinished=${isFinished}, part length=${part?.length ?? 0}`);
         
-        accumulatedResponse = part || ''; // Update accumulated response
-        setResponse(accumulatedResponse); // Update live response state
+        setTurns(prevTurns => {
+          if (prevTurns.length === 0) return prevTurns; // Should not happen if placeholder added
+          const lastTurn = prevTurns[prevTurns.length - 1];
+          // Only update if it's the assistant placeholder we added
+          if (lastTurn.role === 'assistant') {
+              // Update content, potentially mark as error
+              const updatedContent = isError ? `Error: ${part}` : part;
+               // Create a new object for the last turn to ensure state update
+              const updatedLastTurn = { ...lastTurn, rawContent: updatedContent };
+              return [...prevTurns.slice(0, -1), updatedLastTurn]; // Replace last element
+          }
+          return prevTurns; // Return previous state if last turn wasn't assistant
+      });
         
-        if (isFinished) {
+      if (isFinished) {
           console.log("[${callId}] fetchDataAsStream Callback: 'isFinished' block ENTERED.");
           
           if (completionGuard.current[callId]) {
             console.warn(`[${callId}] fetchDataAsStream Callback: 'isFinished' block SKIPPED - already executed for this callId.`);
             return; // Already processed the finish signal for this specific onSend invocation
-         }
-         completionGuard.current[callId] = true; // Mark as executed for this callId
-         console.log(`[${callId}] fetchDataAsStream Callback: Completion guard SET for this callId.`);
-         console.log(`[${callId}] Checking value inside 'isFinished': combinedWebContentDisplay length = ${combinedWebContentDisplay?.length}`); //debug
+          }
+          completionGuard.current[callId] = true; // Mark as executed for this callId
+          console.log(`[${callId}] fetchDataAsStream Callback: Completion guard SET for this callId.`);
          
-         const finalMessageContent = combinedWebContentDisplay
-            ? // If yes, prepend it to the AI response with separation
-            `**From the Internet**\n${combinedWebContentDisplay}\n\n---\n\n${accumulatedResponse}`        
-            : // Otherwise, just use the AI response
-            accumulatedResponse;
-            console.log(`[${callId}] FINAL finalMessageContent being set (length ${finalMessageContent.length}):\n---\n${finalMessageContent}\n---`);
-            console.log(`[${callId}] Preparing to call setMessages with final content.`);
-            setMessages(prev => {
-              // Log previous state (use length for brevity in prod logs)
-              console.log(`[${callId}] setMessages updater: Prev state[0] length: ${prev[0]?.length}`);
-              const newState = [finalMessageContent, ...prev.slice(1)];
-              // ADD THIS LOG:
-              console.log(`[${callId}] setMessages updater: New state[0] length: ${newState[0]?.length}`);
-              return newState;
+          // Final check log (optional)
+          setTurns(prev => {
+          console.log(`[${callId}] FINAL state check: Last turn content length = ${prev[prev.length-1]?.rawContent?.length}, webDisplay length = ${prev[prev.length-1]?.webDisplayContent?.length}`);
+          return prev; // Just logging, no actual change here
           });
           console.log(`[${callId}] Preparing to call setLoading(false).`);
           setLoading(false);

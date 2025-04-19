@@ -7,6 +7,7 @@ import {
  Box, Button, Collapse, IconButton, useDisclosure
 } from '@chakra-ui/react';
 import remarkGfm from 'remark-gfm';
+import { MessageTurn } from './ChatHistory'; // Adjust path if needed
 
 // Update ListProps type
 type ListProps = { 
@@ -316,47 +317,39 @@ const markdownComponents = {
   td: Td
 };
 
-export const Message = ({ m = '', i = 0 }) => {
-  // Split the message by <think> tags, keeping the delimiters
-  const parts = m.split(/(<think>[\s\S]*?<\/think>)/g).filter(part => part && part.trim() !== '');
-  const thinkRegex = /<think>([\s\S]*?)<\/think>/;
+interface MessageProps {
+  turn: MessageTurn;
+  index: number; // Keep index if needed for styling/keys further down
+}
 
+export const Message: React.FC<MessageProps> = ({ turn, index }) => {
+  // Split the message by <think> tags, keeping the delimiters
+  const contentToRender = turn.rawContent || '';
+  const parts = contentToRender.split(/(<think>[\s\S]*?<\/think>)/g).filter(part => part && part.trim() !== '');
+  const thinkRegex = /<think>([\s\S]*?)<\/think>/;
   // Define components object once
-  const markdownComponents = {
-    ul: Ul,
-    ol: Ol, // Assign Ul to ol as well, since its type now allows it
-    p: P,
-    pre: Pre,
-    code: Code,
-    a: A,
-    h1: H1,
-    h2: H2,
-    h3: H3,
-    table: Table,
-    thead: THead,
-    tbody: TBody,
-    tr: Tr,
-    th: Th,
-    td: Td
-  };
 
   return (
     <Box
-      background={i % 2 !== 0 ? 'var(--bg)' : 'var(--active)'}
+      // --- Style based on turn.role ---
+      background={turn.role === 'assistant' ? 'var(--active)' : 'var(--bg)'}
       border="2px"
-      borderColor={i % 2 !== 0 ? 'var(--text)' : 'var(--text)'}
+      borderColor={turn.role === 'assistant' ? 'var(--text)' : 'var(--text)'} // Or use different borders?
       borderRadius={16}
-      className="chatMessage"
-      color={i % 2 !== 0 ? 'var(--text)' : 'var(--text)'}
+      className="chatMessage" // --- Keep this class for downloadImage ---
+      color={'var(--text)'} // Assuming text color is consistent
       fontSize="md"
       fontStyle={'normal'}
       fontWeight={600}
-      maxWidth="calc(100% - 3rem)"
-      ml={2}
-      pb={1}
-      pl={4}
-      pr={4}
-      pt={2}
+       // --- Adjust maxWidth/margins based on role if needed ---
+       maxWidth="calc(100% - 3rem)" // Maybe adjust for user vs assistant?
+       // ml={turn.role === 'assistant' ? 2 : 'auto'} // Example alignment adjustment
+       // mr={turn.role === 'user' ? 2 : 'auto'} // Example alignment adjustment
+       ml={2} // Keep original for now
+       pb={1}
+       pl={4}
+       pr={4}
+       pt={2}
       sx={{
         textAlign: 'left',
         position: 'relative',
@@ -386,20 +379,36 @@ export const Message = ({ m = '', i = 0 }) => {
       }}
     >
       <div className="message-markdown">
-        {/* Render parts sequentially */}
-        {parts.map((part, index) => {
+        {/* --- Conditionally Render Prefix for Assistant --- */}
+        {turn.role === 'assistant' && turn.webDisplayContent && (
+          <div className="message-prefix"> {/* Optional wrapper class */}
+             <Markdown
+                remarkPlugins={[remarkGfm]}
+                components={markdownComponents}
+              >
+                {`**From the Internet**\n${turn.webDisplayContent}\n\n---\n\n`}
+              </Markdown>
+          </div>
+        )}
+
+       {/* Render actual content parts (including thinking blocks) */}
+        {parts.map((part, partIndex) => {
           const match = part.match(thinkRegex);
 
           if (match && match[1]) {
             // Render thinking block
-            return <ThinkingBlock key={index} content={match[1]} />;
+            return <ThinkingBlock key={`think_${partIndex}`} content={match[1]} />;
           } else {
-            // Render normal markdown content
+            // Render normal markdown content from turn.rawContent
             return (
-              <div className="message-content">
-                <Markdown 
+              // Using partIndex for key as part content might not be unique
+              <div key={`content_${partIndex}`} className="message-content">
+                <Markdown
                   remarkPlugins={[remarkGfm]}
-                  components={markdownComponents}>{part}</Markdown>
+                  components={markdownComponents}
+                >
+                  {part}
+                </Markdown>
               </div>
             );
           }

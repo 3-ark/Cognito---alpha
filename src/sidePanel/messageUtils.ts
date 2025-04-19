@@ -1,13 +1,18 @@
 import { toPng } from 'html-to-image';
+import { MessageTurn } from './ChatHistory'; // Adjust path if needed
 
-export const downloadText = (messages: string[]) => {
-  if (messages.length === 0) return;
+export const downloadText = (turns: MessageTurn[]) => {
+  if (!turns || turns.length === 0) return;
 
-  const currentMessages = messages.map((m, i) => ({
-    content: m,
-    role: i % 2 === 0 ? 'assistant' : 'user'
-  })).reverse();
-  const text = currentMessages.map(m => `${m.role}\n${m.content}`).join('\n\n');
+  const text = turns.map(turn => {
+    let turnText = `${turn.role}\n`;
+    // Optionally include the web prefix for assistant turns if desired in the text export
+    if (turn.role === 'assistant' && turn.webDisplayContent) {
+        turnText += `**From the Internet**\n${turn.webDisplayContent}\n\n---\n\n`;
+    }
+    turnText += turn.rawContent;
+    return turnText;
+}).join('\n\n');
 
   const element = document.createElement('a');
 
@@ -24,14 +29,10 @@ export const downloadText = (messages: string[]) => {
   document.body.removeChild(element);
 };
 
-export const downloadJson = (messages: string[]) => {
-  if (messages.length === 0) return;
+export const downloadJson = (turns: MessageTurn[]) => {
+  if (!turns || turns.length === 0) return;
 
-  const currentMessages = messages.map((m, i) => ({
-    content: m,
-    role: i % 2 === 0 ? 'assistant' : 'user'
-  })).reverse();
-  const text = JSON.stringify(currentMessages, null, 2);
+  const text = JSON.stringify(turns, null, 2);
 
   const element = document.createElement('a');
 
@@ -48,8 +49,8 @@ export const downloadJson = (messages: string[]) => {
   document.body.removeChild(element);
 };
 
-export const downloadImage = (messages: string[]) => {
-  if (!messages.length) return;
+export const downloadImage = (turns: MessageTurn[]) => {
+  if (!turns || turns.length === 0) return; // Check the turns array
 
   const nodes = document.querySelectorAll<HTMLElement>('.chatMessage');
   

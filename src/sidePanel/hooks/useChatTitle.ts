@@ -2,26 +2,32 @@ import { useEffect, useState } from 'react';
 
 import { useConfig } from '../ConfigContext';
 import { fetchDataAsStream } from '../network';
+import { MessageTurn } from '../ChatHistory';
+
+interface ApiMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
 
 const generateTitle = 'Create a short 2-4 word title for this chat. Only respond with the title. Example: "Trade War Analysis"';
 
-export const useChatTitle = (isLoading: boolean, messages: string[], message: string) => {
+export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: string) => {
   const [chatTitle, setChatTitle] = useState('');
   const { config } = useConfig();
 
   useEffect(() => {
-    if (!isLoading && messages.length >= 2 && !chatTitle && config?.generateTitle) {
+    if (!isLoading && turns.length >= 2 && !chatTitle && config?.generateTitle) {
       const currentModel = config?.models?.find((model) => model.id === config.selectedModel);
       
       if (!currentModel) return;
 
       // Prepare messages for title generation (first 2 messages + instruction)
-      const messagesForTitle = [
-        ...messages.slice(0, 2).map((m, i) => ({
-          content: m || generateTitle,
-          role: i % 2 === 0 ? 'user' : 'assistant'
+      const messagesForTitle: ApiMessage[] = [ // Explicitly type as ApiMessage[]
+        ...turns.slice(0, 2).map((turn): ApiMessage => ({ // Map over the first two turns
+          content: turn.rawContent || '', // Use rawContent from the turn
+          role: turn.role // Use the actual role from the turn
         })),
-        { role: 'user', content: generateTitle }
+        { role: 'user', content: generateTitle } // Add the specific instruction
       ];
 
       // Define API endpoints for each provider (OpenAI-compatible)
@@ -70,6 +76,7 @@ export const useChatTitle = (isLoading: boolean, messages: string[], message: st
             };
 
           default:
+            console.warn(`useChatTitle: Unsupported host for title generation: ${currentModel.host}`);
             return null;
         }
       };
@@ -78,22 +85,28 @@ export const useChatTitle = (isLoading: boolean, messages: string[], message: st
       
       if (!apiConfig) return;
 
+      let accumulatedTitle = '';
       fetchDataAsStream(
         apiConfig.url,
         apiConfig.body,
-        (part: string) => {
-          const cleanTitle = part
-            .replace(/"/g, '')
-            .replace(/#/g, '')
-            .trim();
-
-          if (cleanTitle) setChatTitle(cleanTitle);
+        (part: string, isFinished?: boolean) => {
+          accumulatedTitle = part; // Update with the latest part
+          if (isFinished) { // Only set the title once the stream is finished
+              const cleanTitle = accumulatedTitle
+                  .replace(/"/g, '')
+                  .replace(/#/g, '')
+                  .trim();
+              if (cleanTitle) {
+                  console.log("Setting chat title:", cleanTitle);
+                  setChatTitle(cleanTitle);
+              }
+          }
         },
         apiConfig.headers,
         currentModel.host
       );
     }
-  }, [isLoading, messages, message, config]);
+  }, [isLoading, turns, message, config, chatTitle]);
 
   return { chatTitle, setChatTitle };
 };

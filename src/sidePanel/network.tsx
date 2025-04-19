@@ -1,13 +1,40 @@
 // Fetching data using readable stream
 import { events } from 'fetch-event-stream';
 import { cleanUrl } from './WebSearch';
-// network.tsx
+
+interface ApiMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+interface Model {
+  id: string;
+  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | string;
+  active?: boolean;
+}
+interface Config {
+  chatMode?: 'web' | 'page' | string;
+  webMode?: 'brave' | 'google' | 'duckduckgo' | string;
+  generateTitle?: boolean;
+  personas: Record<string, string>;
+  persona: string;
+  models?: Model[];
+  selectedModel?: string;
+  contextLimit?: number;
+  webLimit?: number;
+  ollamaUrl?: string;
+  lmStudioUrl?: string;
+  groqApiKey?: string;
+  geminiApiKey?: string;
+  openAiApiKey?: string;
+  pageMode?: string;
+}
+
 export const processQueryWithAI = async (
   query: string,
   config: Config,
   currentModel: Model,
   authHeader?: Record<string, string>,
-  contextMessages: string[] = []
+  contextMessages: ApiMessage[] = []
 ): Promise<string> => {
   try {
    // Ensure currentModel and host exist before trying to get the URL
@@ -16,8 +43,12 @@ export const processQueryWithAI = async (
     return query; // Fallback to original query
   }
 
+  // --- CHANGE 2: Format context messages for the prompt ---
+  const formattedContext = contextMessages
+      .map(msg => `{{${msg.role}}}: ${msg.content}`) // Format as {{role}}: content
+      .join('\n');     
   // System prompt to optimize queries
-  const systemPrompt = `You are a Google search query optimizer. Your task is to rewrite user's input [The user's raw input && chat history:${contextMessages.join('\n')}].
+  const systemPrompt = `You are a Google search query optimizer. Your task is to rewrite user's input [The user's raw input && chat history:${formattedContext}].
 \n
 Instructions:
 **Important** No Explanation, just the optimized query!
@@ -63,7 +94,7 @@ Output:
 
     console.log(`processQueryWithAI: Using API URL: ${apiUrl} for host: ${currentModel.host}`); 
     // console.log('Chat history context:', contextMessages);
-    // console.log('Full system prompt:', systemPrompt); console logs, for debugging
+    console.log('Formatted Context for Prompt:', formattedContext); // Debug log
 
     const requestBody = {
       model: config?.selectedModel || '',

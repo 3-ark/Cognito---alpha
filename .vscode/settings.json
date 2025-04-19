@@ -5,6 +5,7 @@
         "overrided",
         "pagehtml",
         "pagestring",
+        "rawcontent",
         "sidepanel"
     ]
 }
