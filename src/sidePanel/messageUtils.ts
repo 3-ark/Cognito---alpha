@@ -5,7 +5,7 @@ export const downloadText = (messages: string[]) => {
 
   const currentMessages = messages.map((m, i) => ({
     content: m,
-    role: i % 2 === 0 ? 'LLAMA' : 'USER'
+    role: i % 2 === 0 ? 'assistant' : 'user'
   })).reverse();
   const text = currentMessages.map(m => `${m.role}\n${m.content}`).join('\n\n');
 
