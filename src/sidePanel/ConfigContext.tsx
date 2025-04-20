@@ -8,6 +8,9 @@ import { Config, ConfigContextType } from '../types/config';
 
 import { setTheme, themes } from './Themes'; // Import themes and setTheme
 
+// Add this import statement at the top of the file
+import storage from '../util/storageUtil';
+
 export const ConfigContext = createContext<ConfigContextType>({} as ConfigContextType);
 
 export const personas = {
@@ -121,20 +124,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   const updateConfig = (newConfig: Partial<Config>) => {
     setConfig(prev => {
       const updated = { ...prev, ...newConfig };
-  
-      if (newConfig.theme || newConfig.customTheme) {
-        const themeToApply = updated.theme === 'custom'
-          ? { name: 'custom', ...updated.customTheme }
-          : themes.find(t => t.name === updated.theme) || themes[0];
-        
-        setTheme(themeToApply);
-      }
-      
-      // Apply font size changes
-      if (newConfig.fontSize) {
-        document.documentElement.style.setProperty('font-size', `${newConfig.fontSize}px`);
-      }
-
+      storage.setItem('config', updated); // Use chrome.storage via storageUtil
       return updated;
     });
   };
