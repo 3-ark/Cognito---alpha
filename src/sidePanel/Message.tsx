@@ -78,58 +78,6 @@ const Code = ({
     }
   };
 
-  // Determine if it's a block or inline code based on className (react-markdown convention)
-  const match = /language-(\w+)/.exec(className || '');
-  const isBlock = !!match; // True if className contains language-*, indicating a block
-
-  if (isBlock) {
-    return (
-      <Box position="relative" my={4}>
-        <pre style={{
-          overflow: 'auto', // Changed from scroll to auto
-          padding: '1rem', // Consistent padding
-          margin: 0, // Reset margin if Box handles it
-          background: 'var(--text)',
-          color: 'var(--bg)',
-          borderRadius: '8px', // Slightly smaller radius for blocks
-          maxWidth: '100%' // Allow full width within container
-        }}
-{...rest}>
-          <code className={className}>{children}</code>
-        </pre>
-        <IconButton
-          _hover={{ background: 'var(--active)' }}
-          aria-label={copied ? "Copied!" : "Copy code"}
-          background="var(--bg)"
-          color="var(--text)"
-          icon={<CopyIcon />}
-          position="absolute"
-          right="0.5rem"
-          size="sm"
-          title={copied ? "Copied!" : "Copy code"} // Tooltip for better UX
-          top="0.5rem"
-          onClick={copyToClipboard}
-        />
-      </Box>
-    );
-  }
-
-  // Inline code
-  return (
-    <code style={{
-      color: 'var(--bg)',
-      background: 'var(--text)',
-      padding: '0.2rem 0.4rem', // Adjusted padding for inline
-      borderRadius: '4px' // Smaller radius for inline
-    }}
-    className={className}
-    {...rest}
-    >
-      {children}
-    </code>
-  );
-};
-
 // Define a more specific type for anchor props
 type AnchorProps = { children?: ReactNode; href?: string } & HTMLAttributes<HTMLAnchorElement>;
 
