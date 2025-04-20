@@ -12,7 +12,7 @@ import useSendMessage from './hooks/useSendMessage';
 import { useUpdateModels } from './hooks/useUpdateModels';
 import { AddToChat } from './AddToChat';
 import { Background } from './Background';
-import { ChatHistory, ChatMessage } from './ChatHistory';  // Remove deleteAll from import
+import { ChatHistory, ChatMessage, MessageTurn } from './ChatHistory';  // Remove deleteAll from import
 import { useConfig } from './ConfigContext';
 import { Header } from './Header';
 import { Input } from './Input';
@@ -22,7 +22,7 @@ import {
 } from './messageUtils';
 import { Send } from './Send';
 import { Settings } from './Settings';
-import { setTheme, themes } from './Themes';
+import storage from '../util/storageUtil';
 
 function bridge() {
   // Collect image alt texts
@@ -73,12 +73,12 @@ async function injectBridge() {
     const res = JSON.parse(result?.[0]?.result || '{}');
 
     try {
-      localStorage.setItem('pagestring', JSON.stringify(res?.text || ''));
-      localStorage.setItem('pagehtml', JSON.stringify(res?.html || ''));
-      localStorage.setItem('alttexts', JSON.stringify(res?.altTexts || ''));
-      localStorage.setItem('tabledata', JSON.stringify(res?.tableData || ''));
+      storage.setItem('pagestring', res?.text || ''); // Raw string, no JSON.stringify
+      storage.setItem('pagehtml', res?.html || '');
+      storage.setItem('alttexts', res?.altTexts || '');
+      storage.setItem('tabledata', res?.tableData || '');
     } catch (err) {
-      console.debug('localStorage error:', err);
+      console.debug('storage error:', err);
     }
   } catch (err) {
     console.debug('Script injection failed:', err);
@@ -129,11 +129,9 @@ const MessageTemplate = ({ children, onClick }) => (
 );
 
 const Bruside = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [turns, setTurns] = useState<MessageTurn[]>([]);
   const [message, setMessage] = useState('');
-  const [chunk, setChunk] = useState('');
   const [chatId, setChatId] = useState(generateChatId());
-  const [response, setResponse] = useState('');
   const [webContent, setWebContent] = useState('');
   const [pageContent, setPageContent] = useState('');
   const [isLoading, setLoading] = useState(false);
@@ -147,19 +145,18 @@ const Bruside = () => {
     }
   }, 2000);
 
-  const { chatTitle, setChatTitle } = useChatTitle(isLoading, messages, message);
+  const { chatTitle, setChatTitle } = useChatTitle(isLoading, turns, message);
 
-  const onSend = useSendMessage(isLoading, message, messages, webContent, config, setMessages, setMessage, setResponse, setWebContent, setPageContent, setLoading);
+  const onSend = useSendMessage(isLoading, message, turns, webContent, config, setTurns, setMessage, setWebContent, setPageContent, setLoading);
 
   useUpdateModels();
 
   const reset = () => {
-    setMessages([]);
+    setTurns([]);
     setPageContent('');
     setWebContent('');
     setLoading(false);
     updateConfig({ chatMode: undefined });
-    setChunk('');
     setMessage('');
     setChatTitle('');
     setChatId(generateChatId());
@@ -167,56 +164,48 @@ const Bruside = () => {
   };
 
   const onReload = () => {
-    setMessages(messages.slice(2));
-    setMessage(messages[1]?.content || '');
-  };
-
-  // load stored theme
-  useEffect(() => {
-    const theme = localStorage.getItem('theme') || 'moss';
-
-    setTheme(themes.find(({ name }) => name === theme) || themes[0]);
-    updateConfig({ chatMode: undefined })
-  }, []);
-
-  useEffect(() => {
-    if (response) {
-      const [, ...others] = messages;
-
-      setMessages([response, ...others]);
+    // Keep only the second-to-last turn (the last user message)
+    const lastUserTurn = turns.length >= 2 ? turns[turns.length - 2] : null;
+    if (lastUserTurn?.role === 'user') {
+        setTurns([lastUserTurn]); // Keep only that user turn
+        setMessage(lastUserTurn.rawContent || ''); // Set input field
+    } else {
+        // If history is too short or last user message not found, just reset turns
+        setTurns([]);
+        setMessage('');
     }
-  }, [response]);
+    setLoading(false); // Ensure loading is reset
+  };
 
   const loadChat = (chat: { id: string, title: string, messages: ChatMessage[] }) => {
     setChatTitle(chat.title || '');
-    setMessages(chat.messages);
+    setTurns(chat.turns);
     setChatId(chat.id);
     setHistoryMode(false);
   };
 
   useEffect(() => {
-    if (messages.length && !isLoading) {
-      const savedChat = {
+    if (turns.length && !isLoading) {
+      const savedChat = ChatMessage = {
         id: chatId,
         title: chatTitle,
-        messages, // Already contains proper role info
+        turns, // Already contains proper role info
         last_updated: Date.now(),
         model: config?.selectedModel
       };
-      
+      console.log(`[${Date.now()}] Bruside: Saving chat ${chatId}`, savedChat); // Debug log
+
       localforage.setItem(chatId, savedChat);
     }
-  }, [chatId, messages, isLoading, chatTitle]);
+  }, [chatId, turns, isLoading, chatTitle, config?.selectedModel]);
 
   const deleteAll = async () => {
     const keys = await localforage.keys();
-
     await Promise.all(keys.map(key => localforage.removeItem(key)));
-    setMessages([]);
+    setTurns([]);
     setPageContent('');
     setWebContent('');
     setLoading(false);
-    setChunk('');
     setMessage('');
     setChatTitle('');
     setChatId(generateChatId());
@@ -239,8 +228,8 @@ const Bruside = () => {
     
     return () => {
       // Clear cached content when panel closes
-      localStorage.removeItem('pagestring');
-      localStorage.removeItem('pagehtml');
+      storage.deleteItem('pagestring');
+      storage.deleteItem('pagehtml');
     };
   }, []);
 
@@ -260,9 +249,9 @@ const Bruside = () => {
         <Header
           chatTitle={chatTitle}
           deleteAll={deleteAll}  // Pass the local deleteAll function
-          downloadImage={() => downloadImage(messages)}
-          downloadJson={() => downloadJson(messages)}
-          downloadText={() => downloadText(messages)}
+          downloadImage={() => downloadImage(turns)}
+          downloadJson={() => downloadJson(turns)}
+          downloadText={() => downloadText(turns)}
           historyMode={historyMode}
           reset={reset}
           setHistoryMode={setHistoryMode}
@@ -270,15 +259,15 @@ const Bruside = () => {
           settingsMode={settingsMode}
         />
         {settingsMode && <Settings />}
-        {!settingsMode && !historyMode && messages.length > 0 && (
+        {!settingsMode && !historyMode && turns.length > 0 && (
           <Messages
             isLoading={isLoading}
-            messages={messages}
+            turns={turns}
             settingsMode={settingsMode}
             onReload={onReload}
           />
         )}
-        {!settingsMode && !historyMode && messages.length === 0 && !config?.chatMode && (
+        {!settingsMode && !historyMode && turns.length === 0 && !config?.chatMode && (
           <Box bottom="4rem" left="0.5rem" position="absolute">
             <MessageTemplate onClick={() => {
               updateConfig({ chatMode: 'web' });
@@ -294,7 +283,7 @@ const Bruside = () => {
             </MessageTemplate>
           </Box>
         )}
-        {!settingsMode && !historyMode && messages.length === 0 && config?.chatMode === "page" && (
+        {!settingsMode && !historyMode && turns.length === 0 && config?.chatMode === "page" && (
           <Box bottom="4rem" left="0.5rem" position="absolute">
             <MessageTemplate onClick={async () => {
               const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
@@ -336,22 +325,6 @@ const Bruside = () => {
             style={{ opacity: settingsMode ? 0 : 1 }}
             zIndex={2}
           >
-            {/* Add paper texture layer */}
-            <Box
-              bottom={0}
-              left={0}
-              position="absolute"
-              right={0}
-              sx={{
-                backgroundImage: 'url(assets/images/paper-texture.png)',
-                backgroundSize: '512px',
-                opacity: 0.3,
-                pointerEvents: 'none',
-                mixBlendMode: 'multiply',
-                zIndex: 0
-              }}
-              top={0}
-            />
             <Input isLoading={isLoading} message={message} setMessage={setMessage} onSend={onSend} />
             <AddToChat />
             <Send isLoading={isLoading} onSend={onSend} />

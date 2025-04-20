@@ -1,12 +1,40 @@
 // Fetching data using readable stream
 import { events } from 'fetch-event-stream';
+import { cleanUrl } from './WebSearch';
 
-// network.tsx
+interface ApiMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+interface Model {
+  id: string;
+  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | string;
+  active?: boolean;
+}
+interface Config {
+  chatMode?: 'web' | 'page' | string;
+  webMode?: 'brave' | 'google' | 'duckduckgo' | string;
+  generateTitle?: boolean;
+  personas: Record<string, string>;
+  persona: string;
+  models?: Model[];
+  selectedModel?: string;
+  contextLimit?: number;
+  webLimit?: number;
+  ollamaUrl?: string;
+  lmStudioUrl?: string;
+  groqApiKey?: string;
+  geminiApiKey?: string;
+  openAiApiKey?: string;
+  pageMode?: string;
+}
+
 export const processQueryWithAI = async (
   query: string,
   config: Config,
   currentModel: Model,
-  authHeader?: Record<string, string>
+  authHeader?: Record<string, string>,
+  contextMessages: ApiMessage[] = []
 ): Promise<string> => {
   try {
    // Ensure currentModel and host exist before trying to get the URL
@@ -15,9 +43,41 @@ export const processQueryWithAI = async (
     return query; // Fallback to original query
   }
 
+  // --- CHANGE 2: Format context messages for the prompt ---
+  const formattedContext = contextMessages
+      .map(msg => `{{${msg.role}}}: ${msg.content}`) // Format as {{role}}: content
+      .join('\n');     
   // System prompt to optimize queries
-  const systemPrompt = `You're a search query optimizer. Convert this into an optimized query for google.
-Format as: "optimized_query" (in quotes). Never explain.`;
+  const systemPrompt = `You are a Google search query optimizer. Your task is to rewrite user's input [The user's raw input && chat history:${formattedContext}].
+\n
+Instructions:
+**Important** No Explanation, just the optimized query!
+\n
+1. Extract the key keywords and named entities from the user's input.
+2. Correct any obvious spelling errors.
+3. Remove unnecessary words (stop words) unless they are essential for the query's meaning.
+4. If the input is nonsensical or not a query, return the original input.
+5. Using previous chat history to understand the user's intent.
+\n
+Output:
+'The optimized Google search query'
+\n
+Example 1:
+Input from user ({{user}}): where can i find cheep flights to london
+Output:
+'cheap flights London'
+\n
+Example 2:
+Context: {{user}}:today is a nice day in paris i want to have a walk and find a restaurant to have a nice meal. {{assistant}}: Bonjour, it's a nice day!
+Input from user ({{user}}): please choose me the best restaurant 
+Output:
+'best restaurants Paris France'
+\n
+Example 3:
+Input from user ({{user}}): asdf;lkjasdf
+Output:
+'asdf;lkjasdf'
+`;
 
     const urlMap: Record<string, string> = {
       groq: 'https://api.groq.com/openai/v1/chat/completions',
@@ -32,9 +92,10 @@ Format as: "optimized_query" (in quotes). Never explain.`;
       return query; // Fallback to original query
     }
 
-    console.log(`processQueryWithAI: Using API URL: ${apiUrl} for host: ${currentModel.host}`); // Added logging
-    
-    // --- Direct Fetch for Non-Streaming ---
+    console.log(`processQueryWithAI: Using API URL: ${apiUrl} for host: ${currentModel.host}`); 
+    // console.log('Chat history context:', contextMessages);
+    console.log('Formatted Context for Prompt:', formattedContext); // Debug log
+
     const requestBody = {
       model: config?.selectedModel || '',
       messages: [
@@ -56,56 +117,23 @@ Format as: "optimized_query" (in quotes). Never explain.`;
 
     if (!response.ok) {
         const errorBody = await response.text();
-        console.error(`processQueryWithAI: API request failed with status ${response.status}: ${errorBody}`);
+        console.error(`API request failed with status ${response.status}: ${errorBody}`);
         throw new Error(`API request failed: ${response.statusText}`);
     }
 
     const responseData = await response.json();
-
-    // --- Extract Content based on expected response structure ---
     const optimizedContent = responseData?.choices?.[0]?.message?.content;
-
-    if (typeof optimizedContent === 'string' && optimizedContent.trim()) {
-        const processedQuery = optimizedContent.trim().replace(/["']/g, ''); // Remove quotes
-        console.log('processQueryWithAI: Query processed successfully:', processedQuery);
-        return processedQuery;
-    } else {
-        console.error('processQueryWithAI: Could not extract optimized query from response:', responseData);
-        return query; // Fallback if content extraction fails
-    }
-    // --- End Direct Fetch ---
-
+    return typeof optimizedContent === 'string' ? optimizedContent.trim().replace(/["']/g, '') : query;
   } catch (error) {
-    // Log the specific error that occurred within the try block
-    console.error('processQueryWithAI: Error during execution, using original query:', error);
-    return query; // Fallback to original
+    console.error('processQueryWithAI: Error during execution:', error);
+    return query;
   }
 };
 
-// Prevent XSS in HTML content
-const sanitizeHtml = (html: string) => {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const whitelist = ['b','i','em','strong','p','br'];
-  
-  doc.body.querySelectorAll('*').forEach(node => {
-    if (!whitelist.includes(node.tagName.toLowerCase())) {
-      node.remove();
-    }
-  });
-  
-  return doc.body.innerHTML;
-};
-
-export const urlRewriteRuntime = async function (
-  domain: string
-) {
+export const urlRewriteRuntime = async function (domain: string) {
   try {
     const url = new URL(domain);
-
-    // Skip chrome:// URLs
-    if (url.protocol === 'chrome:') {
-      return;
-    }
+    if (url.protocol === 'chrome:') return;
     
     const domains = [url.hostname];
     const origin = `${url.protocol}//${url.hostname}`;
@@ -142,35 +170,21 @@ export const webSearch = async (query: string, webMode: string) => {
     ? `https://search.brave.com/search?q=${encodeURIComponent(query)}`
     : webMode === 'google'
       ? `https://www.google.com/search?q=${encodeURIComponent(query)}`
-      : `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-
-  const isPost = webMode === 'duckduckgo';
-  const method = isPost ? 'POST' : 'GET';
-
-  let body: FormData | undefined = undefined;
-  if (isPost) {
-    body = new FormData();
-    body.append('q', query);
-  }
-
-  // Consider if urlRewriteRuntime is needed here for Brave/Google/DDG. It might not be.
-  // await urlRewriteRuntime(cleanUrl(baseUrl));
+      : `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
 
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), 15000);
 
   try {
-    const response = await fetch(
-      isPost ? 'https://html.duckduckgo.com/html/' : baseUrl,
-      {
-        signal: abortController.signal,
-        method: method,
-        body: body,
-        headers: {
-          // Add necessary headers if requests fail
-        }
+    const response = await fetch(baseUrl, {
+      signal: abortController.signal,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Referer': 'https://search.brave.com/'
       }
-    );
+    });
 
     clearTimeout(timeoutId);
 
@@ -179,221 +193,246 @@ export const webSearch = async (query: string, webMode: string) => {
     }
 
     const htmlString = await response.text();
-
     const parser = new DOMParser();
     const htmlDoc = parser.parseFromString(htmlString, 'text/html');
 
-    htmlDoc.querySelectorAll('svg, #header, style, link[rel="stylesheet"], script, input, option, select, form, nav, footer, [role="alert"], [aria-hidden="true"]').forEach(item => item.remove());
+    // Clean up unnecessary elements
+    htmlDoc.querySelectorAll(
+      'script, style, nav, footer, header, svg, img, noscript, iframe, form, .modal, .cookie-banner'
+    ).forEach(el => el.remove());
 
-    return htmlDoc.body.innerText.replace(/\s\s+/g, ' ').trim();
+    let resultsText = '';
+    
+    if (webMode === 'duckduckgo') {
+      // DuckDuckGo's current structure
+      const results = htmlDoc.querySelectorAll('.web-result');
+      results.forEach(result => {
+        const title = result.querySelector('.result__a')?.textContent?.trim();
+        const snippet = result.querySelector('.result__snippet')?.textContent?.trim();
+        if (title) resultsText += `${title}\n${snippet || ''}\n\n`;
+      });
+    } else if (webMode === 'google') {
+      // Google's current structure
+      const results = htmlDoc.querySelectorAll('.MjjYud');
+      results.forEach(result => {
+        const title = result.querySelector('h3')?.textContent?.trim();
+        const snippet = Array.from(result.querySelectorAll('div[class*="VwiC3b"] > span'))
+        .map(span => {
+          const timestampSpan = span.querySelector('.YrbPuc span');
+          if (timestampSpan) {
+            const timestamp = timestampSpan.textContent?.trim();
+            const timeAgo = timestamp ? `[${timestamp}] ` : '';
 
+            // Get remaining text after timestamp (including the dash)
+            const postTimestamp = span.textContent
+              ?.replace(timestamp || '', '')
+              .replace(/^—\s*/, ': ') // Convert leading dash to colon
+              .trim();
+
+            return timeAgo + postTimestamp;
+          }
+
+          return Array.from(span.childNodes)
+            .map(node => {
+              if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+              if (node.nodeName === 'EM') return `*${node.textContent}*`;
+              return node.textContent;
+            })
+            .join('')
+            .replace(/\u00A0/g, ' ')
+            .trim();
+        })
+        .filter(text => text)
+        .join(' ') 
+        .replace(/\s+/g, ' ');
+
+        if (title) {
+          resultsText += `${title}\n${snippet || ''}\n\n`;}
+      });
+      console.log('Google Result Structure:', resultsText);
+
+    } else if (webMode === 'brave') {
+      // Brave's updated structure
+      const braveResults = htmlDoc.querySelectorAll('#results .snippet');
+      braveResults.forEach(result => {
+        const link = result.querySelector('a[href]');
+        const url = link?.getAttribute('href')?.trim();
+        const title = link?.querySelector('.title.mt-s')?.textContent?.trim();
+        const snippet = result.querySelector('.snippet-description')?.textContent?.trim();
+    
+        if (title) {
+          resultsText += `**${title}**\n${url ? url + '\n' : ''}${snippet || ''}\n\n`;
+        }
+      });
+    
+      // Fallback to legacy organic results
+      if (!braveResults.length) {
+        htmlDoc.querySelectorAll('.organic-result').forEach(result => {
+          const title = result.querySelector('h3')?.textContent?.trim();
+          const snippet = result.querySelector('.snippet-content')?.textContent?.trim();
+          if (title) resultsText += `${title}\n${snippet || ''}\n\n`;
+        });
+      }
+    }
+    console.log('Brave Result Structure:', resultsText);
+    return resultsText.trim() || 'No results found';
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      console.error('Web search timed out.');
-    } else {
-      console.error('Web search failed:', error);
-    }
+    console.error('Web search failed:', error);
     return '';
   }
+  
 };
-
 
 export async function fetchDataAsStream(
   url: string,
   data: Record<string, unknown>,
-  onMessage: (message: string, done?: boolean) => void,
+  onMessage: (message: string, done?: boolean, error?: boolean) => void, // Added optional error flag
   headers: Record<string, string> = {},
   host: string
 ) {
+  let streamFinished = false; // Flag to prevent multiple final calls
+
+  // Helper to call final message exactly once
+  const finishStream = (message: string, isError: boolean = false) => {
+    if (!streamFinished) {
+      streamFinished = true;
+      // Ensure message is a string, even if error object is passed accidentally
+      const finalMessage = typeof message === 'string' ? message : (message instanceof Error ? message.message : String(message));
+      onMessage(finalMessage, true, isError); // Pass done=true and error status
+    }
+  };
+
+  // --- Your Original URL Checks (Correct Placement) ---
   if (url.startsWith('chrome://')) {
+    console.log("fetchDataAsStream: Skipping chrome:// URL:", url);
+    // Optionally call finishStream with an appropriate message/error if needed
+    // finishStream("Skipped chrome:// URL", true); // Or perhaps just return void silently?
     return; // Skip chrome:// URLs
   }
 
   if (url.includes('localhost')) {
+    // Assuming cleanUrl is defined elsewhere
     await urlRewriteRuntime(cleanUrl(url));
   }
+  // --- End Original URL Checks ---
 
+  // --- Main Try/Catch for Fetch and Streaming ---
   try {
+    // --- Your Original Fetch Setup (Correct Placement) ---
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...headers },
       body: JSON.stringify(data)
+      // Consider adding AbortController for timeouts if needed here too
     });
+    // --- End Original Fetch Setup ---
 
+    // Check if the fetch itself failed
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      // Try to get error details from the body
+      let errorBody = `Network response was not ok (${response.status})`;
+      try {
+         const text = await response.text();
+         errorBody += `: ${text || response.statusText}`;
+      } catch (_) {
+         // Ignore if reading body fails
+         errorBody += `: ${response.statusText}`;
+      }
+      throw new Error(errorBody);
     }
 
-    let str = '';
+    // --- Start Stream Processing ---
+    let str = ''; // Accumulator for the response string
 
+    // --- Refined Host-Specific Stream Logic ---
     if (host === "ollama") {
-      if (!response.body) return;
+        if (!response.body) throw new Error('Response body is null for Ollama');
+        const reader = response.body.getReader();
+        let done, value;
+        while (true) {
+          ({ value, done } = await reader.read());
+          if (done) break; // Exit loop if stream ends naturally
+          const chunk = new TextDecoder().decode(value);
 
-      const reader = response.body.getReader();
+          // Split potential multiple JSON objects in one chunk (Ollama might do this)
+          const jsonObjects = chunk.split('\n').filter(line => line.trim() !== '');
 
-      let done;
-      let value;
-
-      while (!done) {
-        ({ value, done } = await reader.read());
-
-        if (done) {
-          onMessage(str, true);
-          break;
-        }
-
-        const chunk = new TextDecoder().decode(value);
-
-        // Handle [DONE] marker
-        if (chunk.trim() === '[DONE]') {
-          onMessage(str, true);
-          break;
-        }
-
-        try {
-          const parsed = JSON.parse(chunk);
-
-          if (parsed.message?.content) {
-            str += parsed.message.content;
-            onMessage(str);
+          for (const jsonObjStr of jsonObjects) {
+             if (jsonObjStr.trim() === '[DONE]') { // Check for [DONE] marker if Ollama uses it
+                finishStream(str);
+                return; // Exit function completely
+             }
+             try {
+                const parsed = JSON.parse(jsonObjStr);
+                if (parsed.message?.content) {
+                  str += parsed.message.content;
+                  if (!streamFinished) onMessage(str); // Send intermediate update
+                }
+                // Check for Ollama's own 'done' flag within the JSON
+                if (parsed.done === true && !streamFinished) {
+                   finishStream(str);
+                   return; // Exit function completely
+                }
+             } catch (error) {
+                console.debug('Skipping invalid JSON chunk:', jsonObjStr);
+             }
           }
-        } catch (error) {
-          // Ignore JSON parse errors for non-JSON chunks
-          console.debug('Skipping invalid JSON chunk:', chunk);
-          continue;
         }
-      }
-    }
+        // If loop finished naturally (done=true reading stream)
+        finishStream(str);
 
-    if (host === "lmStudio") {
-      const stream = events(response);
+      } else if (["lmStudio", "groq", "gemini", "openai"].includes(host)) {
+        // Using fetch-event-stream for SSE
+        const stream = events(response); // Assuming 'events' is correctly imported
+        for await (const event of stream) {
+          if (streamFinished) continue;
+          if (!event.data) continue;
 
-      for await (const event of stream) {
-        if (!event.data) continue;
-
-        // Handle [DONE] marker
-        if (event.data.trim() === '[DONE]') {          onMessage(str, true);
-
-          break;
-        }
-
-        try {
-          const received = JSON.parse(event.data || '');
-          const err = received?.x_groq?.error;
-
-          if (err) {
-            onMessage(`Error: ${err}`, true);
-
-            return;
+          // Handle [DONE] marker (relevant for non-OpenAI)
+          if (event.data.trim() === '[DONE]') {
+            finishStream(str);
+            break; // Exit SSE loop
           }
 
-          str += received?.choices?.[0]?.delta?.content || '';
-          onMessage(str || '');
-        } catch (error) {
-          // Skip invalid JSON chunks
-          console.debug('Skipping invalid chunk:', event.data);
-          continue;
-        }
-      }
-    }
-
-    if (host === "groq") {
-      const stream = events(response);
-
-      for await (const event of stream) {
-        if (!event.data) continue;
-
-        // Handle [DONE] marker
-        if (event.data.trim() === '[DONE]') {          onMessage(str, true);
-
-          break;
-        }
-
-        try {
-          const received = JSON.parse(event.data || '');
-          const err = received?.x_groq?.error;
-
-          if (err) {
-            onMessage(`Error: ${err}`, true);
-
-            return;
-          }
-
-          str += received?.choices?.[0]?.delta?.content || '';
-          onMessage(str || '');
-        } catch (error) {
-          // Skip invalid JSON chunks
-          console.debug('Skipping invalid chunk:', event.data);
-          continue;
-        }
-      }
-    }
-
-    if (host === "gemini") {
-      const stream = events(response);
-
-      for await (const event of stream) {
-        if (!event.data) continue;
-
-        // Check if the event data is exactly '[DONE]'
-        if (event.data.trim() === '[DONE]') {
-          onMessage(str, true);
-          break;
-        }
-
-        try {
-          // Only try to parse if it looks like JSON
-          if (typeof event.data === 'string' && event.data.startsWith('{')) {
+          try {
             const received = JSON.parse(event.data);
-            const err = received?.x_gemini?.error;
+            let apiError = null; // Check for API-reported errors in payload
+            if (host === 'groq' && received?.x_groq?.error) apiError = received.x_groq.error;
+            else if (host === 'gemini' && received?.error) apiError = received.error.message || JSON.stringify(received.error); // Gemini might use standard 'error' field in OpenAI compat mode
+            else if (received?.error) apiError = received.error.message || JSON.stringify(received.error); // General OpenAI structure
 
-            if (err) {
-              onMessage(`Error: ${err}`, true);
-
-              return;
+            if (apiError) {
+               throw new Error(`API Error: ${apiError}`);
             }
 
             str += received?.choices?.[0]?.delta?.content || '';
-            onMessage(str || '');
+            if (!streamFinished) onMessage(str); // Send intermediate update
+
+          } catch (error) {
+            if (error instanceof Error && error.message.startsWith('API Error:')) {
+               // If we already parsed an API error message, finish with error
+               finishStream(error.message, true); // Mark as error
+            } else {
+               // Log JSON parse errors but potentially continue if minor
+               console.debug('Skipping invalid SSE chunk or parse error:', event.data, error);
+            }
+            // Decide if a parse error should terminate the stream or just be skipped
+            // continue; // Or: finishStream(`Parse Error: ${error}`, true); break;
           }
-        } catch (error) {
-          // Skip invalid chunks silently
-          console.debug('Skipping invalid chunk');
-          continue;
         }
+        // If SSE loop finished naturally (stream closed by server)
+        finishStream(str);
+
+      } else {
+         // Handle unknown host
+         throw new Error(`Unsupported host specified: ${host}`);
       }
-    }
+      // --- End Stream Processing ---
 
-    if (host === "openai") {
-      const stream = events(response);
-
-      for await (const event of stream) {
-        if (!event.data) continue;
-
-        try {
-          const received = JSON.parse(event.data || '');
-          const err = received?.x_openai?.error;
-
-          if (err) {
-            onMessage(`Error: ${err}`, true);
-
-            return;
-          }
-
-          str += received?.choices?.[0]?.delta?.content || '';
-
-          onMessage(str || '');
-        } catch (error) {
-          onMessage(`${error}`, true);
-          console.error('Error fetching data:', error);
-        }
-      }
-    }
-
-    onMessage(str, true);
   } catch (error) {
-    onMessage(`${error}`, true);
-    console.error('Error fetching data:', error);
+    // Catch errors from fetch, response.ok check, or stream processing
+    console.error('Error in fetchDataAsStream:', error);
+    finishStream(error instanceof Error ? error.message : String(error), true); // Finish with error state
   }
 }

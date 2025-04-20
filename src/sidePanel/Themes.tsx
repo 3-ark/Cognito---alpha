@@ -24,6 +24,7 @@ import {
   import { SettingTitle } from './SettingsTitle';
   import { useState, useEffect } from 'react';
   import { Config } from '../types/config';
+  import storage from '../util/storageUtil';
   
   type Theme = {
     name: string;
@@ -48,7 +49,7 @@ import {
   ];
   
   export const setTheme = (c: Theme) => {
-    localStorage.setItem('theme', c.name);
+    storage.setItem('theme', c.name);
     document.documentElement.style.setProperty('--active', c.active);
     document.documentElement.style.setProperty('--bg', c.bg);
     document.documentElement.style.setProperty('--text', c.text);

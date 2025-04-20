@@ -24,7 +24,12 @@ export const ConnectGroq = () => {
           updateConfig({
             groqApiKey: apiKey,
             groqConnected: true,
-            groqError: undefined
+            groqError: undefined,
+            models: [
+              ...(config?.models || []),
+              { id: 'groq', host: 'groq', active: true } // Add this model entry
+            ],
+            selectedModel: 'groq'
           });
         }
       })
@@ -34,7 +39,7 @@ export const ConnectGroq = () => {
   };
 
   const disabled = config?.groqApiKey === apiKey;
-  const isConnected = config?.groqConnected && config?.groqApiKey === apiKey;
+  const isConnected = config?.groqConnected;
 
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>

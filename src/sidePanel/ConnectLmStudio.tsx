@@ -27,6 +27,15 @@ export const ConnectLmStudio = () => {
             lmStudioError: undefined
           });
           toast.success("connected to LM Studio")
+          updateConfig({
+            lmStudioConnected: true,
+            lmStudioError: undefined,
+            models: [
+              ...(config?.models || []),
+              { id: 'lm', host: 'localhost:1234', active: true } // Add this model entry
+            ],
+            selectedModel: 'lm'
+          });
         }
       })
       .catch(err => {
@@ -39,7 +48,7 @@ export const ConnectLmStudio = () => {
       });
   };
 
-  const isConnected = config?.lmStudioConnected && config?.lmStudioUrl === url;
+  const isConnected = config?.lmStudioConnected;
 
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>

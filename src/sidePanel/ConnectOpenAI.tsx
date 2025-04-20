@@ -26,7 +26,12 @@ export const ConnectOpenAI = () => {
           updateConfig({
             openAiApiKey: apiKey,
             openAiConnected: true,
-            openAiError: undefined
+            openAiError: undefined,
+            models: [
+              ...(config?.models || []),
+              { id: 'openai', host: 'openai', active: true } // Add this model entry
+            ],
+            selectedModel: 'openai'
           });
         }
       })
@@ -36,7 +41,7 @@ export const ConnectOpenAI = () => {
   };
 
   const disabled = config?.openAiApiKey === apiKey;
-  const isConnected = config?.openAiConnected && config?.openAiApiKey === apiKey;
+  const isConnected = config?.openAiConnected;
 
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>

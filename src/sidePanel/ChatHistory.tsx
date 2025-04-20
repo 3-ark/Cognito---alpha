@@ -8,15 +8,22 @@ import localforage from 'localforage';
 
 const dateToString = date => new Date(date).toLocaleDateString('sv-SE');
 
+// In ChatHistory.tsx or a shared types file
+
+export interface MessageTurn {
+  role: 'user' | 'assistant';
+  rawContent: string;         // The actual text from user or LLM
+  webDisplayContent?: string; // Stores the "**SUB:**..." or "**ORG:**..." part for assistant messages
+  timestamp: number;          // Timestamp for this specific turn (useful for keys)
+}
+
+// Updated ChatMessage structure for storing sessions
 export type ChatMessage = {
-  last_updated: number;
   id: string;
-  content: string;
-  role: 'user' | 'assistant' | 'system';
-  timestamp: number;
+  last_updated: number;
   title?: string;
   model?: string;
-  messages: string[];
+  turns: MessageTurn[];
 }
 
 type ChatHistoryProps = {

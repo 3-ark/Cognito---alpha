@@ -24,7 +24,7 @@ export const ConnectOllama = () => {
           updateConfig({
             ollamaConnected: true,
             ollamaUrl: url,
-            groqError: undefined
+            ollamaError: undefined
           });
 
           toast.success('connected to ollama');
@@ -40,7 +40,7 @@ export const ConnectOllama = () => {
       });
   };
 
-  const isConnected = config?.ollamaConnected && config?.ollamaUrl === url;
+  const isConnected = config?.ollamaConnected;
 
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>
