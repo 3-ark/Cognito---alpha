@@ -24,7 +24,7 @@ export const ConnectOllama = () => {
           updateConfig({
             ollamaConnected: true,
             ollamaUrl: url,
-            groqError: undefined
+            ollamaError: undefined
           });
 
           toast.success('connected to ollama');

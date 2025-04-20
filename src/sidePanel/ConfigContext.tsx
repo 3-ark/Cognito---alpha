@@ -47,6 +47,12 @@ Offer critical feedback when needed. Assume the user can handle straight talk an
 
 // Explicitly type defaultConfig with the Config interface
 const defaultConfig: Config = {
+  theme: 'paper',
+  customTheme: {
+    active: '#C2E7B5',
+    bg: '#c2e7b5',
+    text: '#333333'
+  },
   personas,
   generateTitle: true,
   backgroundImage: true,
@@ -54,12 +60,6 @@ const defaultConfig: Config = {
   webMode: 'brave', // Now checked against Config['webMode']
   webLimit: 48,
   contextLimit: 48,
-  theme: 'paper',
-  customTheme: {
-    active: '#C2E7B5',
-    bg: '#748a6c',
-    text: '#333333'
-  },
   params: { temperature: 0.5 },
   models: [], // Initialize as an empty array matching Config['models'] type
   // Initialize other potentially missing properties from Config if necessary
@@ -76,22 +76,23 @@ const defaultConfig: Config = {
   // ... add defaults for groq, gemini, openai etc.
 };
 
-export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
+export const ConfigProvider = ({ children }) => {
   const [config, setConfig] = useState<Config>(defaultConfig);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadStoredConfig = async () => {
       try {
-        const storedConfig = await storage.getItem('config'); // Returns string or null
-        if (storedConfig) {
-          const parsedConfig = JSON.parse(storedConfig); // Parse to object
-          setConfig(prev => ({ ...prev, ...parsedConfig })); // Spread object
-        }
+        const storedConfig = await storage.getItem('config');
+        const parsedConfig = storedConfig ? JSON.parse(storedConfig) : defaultConfig;
+        setConfig(parsedConfig);
       } catch (e) {
-        console.error("Failed to load config from storage", e);
+        console.error("Failed to load config", e);
+        setConfig(defaultConfig);
+      } finally {
+        setLoading(false);
       }
     };
-
     loadStoredConfig();
   }, []);
 
@@ -123,6 +124,8 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       return updated;
     });
   };
+
+  if (loading) return <div>Loading...</div>; // Prevent premature rendering
 
   return (
     <ConfigContext.Provider value={{ config, updateConfig }}>

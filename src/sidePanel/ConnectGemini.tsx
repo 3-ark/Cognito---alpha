@@ -22,7 +22,14 @@ export const ConnectGemini = () => {
         } else {
           toast.success('connected to Gemini');
           updateConfig({
- geminiApiKey: apiKey, geminiConnected: true, geminiError: undefined 
+            geminiApiKey: apiKey,
+            geminiConnected: true, 
+            geminiError: undefined,
+            models: [
+              ...(config?.models || []),
+              { id: 'gemini', host: 'gemini', active: true } 
+            ],
+            selectedModel: 'gemini'
 });
         }
       })

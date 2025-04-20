@@ -24,7 +24,12 @@ export const ConnectGroq = () => {
           updateConfig({
             groqApiKey: apiKey,
             groqConnected: true,
-            groqError: undefined
+            groqError: undefined,
+            models: [
+              ...(config?.models || []),
+              { id: 'groq', host: 'groq', active: true } // Add this model entry
+            ],
+            selectedModel: 'groq'
           });
         }
       })

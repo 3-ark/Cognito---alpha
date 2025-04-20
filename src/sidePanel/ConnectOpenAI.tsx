@@ -26,7 +26,12 @@ export const ConnectOpenAI = () => {
           updateConfig({
             openAiApiKey: apiKey,
             openAiConnected: true,
-            openAiError: undefined
+            openAiError: undefined,
+            models: [
+              ...(config?.models || []),
+              { id: 'openai', host: 'openai', active: true } // Add this model entry
+            ],
+            selectedModel: 'openai'
           });
         }
       })
