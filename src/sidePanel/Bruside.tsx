@@ -73,12 +73,12 @@ async function injectBridge() {
     const res = JSON.parse(result?.[0]?.result || '{}');
 
     try {
-      storage.setItem('pagestring', JSON.stringify(res?.text || ''));
-      storage.setItem('pagehtml', JSON.stringify(res?.html || ''));
-      storage.setItem('alttexts', JSON.stringify(res?.altTexts || ''));
-      storage.setItem('tabledata', JSON.stringify(res?.tableData || ''));
+      localforage.setItem('pagestring', JSON.stringify(res?.text || ''));
+      localforage.setItem('pagehtml', JSON.stringify(res?.html || ''));
+      localforage.setItem('alttexts', JSON.stringify(res?.altTexts || ''));
+      localforage.setItem('tabledata', JSON.stringify(res?.tableData || ''));
     } catch (err) {
-      console.debug('storage error:', err);
+      console.debug('localforage error:', err);
     }
   } catch (err) {
     console.debug('Script injection failed:', err);
@@ -228,8 +228,8 @@ const Bruside = () => {
     
     return () => {
       // Clear cached content when panel closes
-      storage.removeItem('pagestring');
-      storage.removeItem('pagehtml');
+      localforage.removeItem('pagestring');
+      localforage.removeItem('pagehtml');
     };
   }, []);
 
