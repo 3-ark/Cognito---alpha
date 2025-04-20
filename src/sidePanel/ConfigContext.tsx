@@ -77,30 +77,23 @@ const defaultConfig: Config = {
 };
 
 export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
-  const loadInitialConfig = (): Config => {
-    const storedConfigString = localStorage.getItem('config');
-    let storedConfig: Partial<Config> = {};
+  const [config, setConfig] = useState<Config>(defaultConfig);
 
-    if (storedConfigString) {
-      try {
-        storedConfig = JSON.parse(storedConfigString);
-      } catch (e) {
-        console.error("Failed to parse config from localStorage", e);
-        
-        // Fallback to default if parsing fails
-        return defaultConfig;
-      }
-    }
-
-    return { ...defaultConfig, ...storedConfig };
-  };
-
-  const [config, setConfig] = useState<Config>(loadInitialConfig);
-
-  // Save to localStorage whenever config changes
   useEffect(() => {
-    localStorage.setItem('config', JSON.stringify(config));
-  }, [config]);
+    const loadStoredConfig = async () => {
+      try {
+        const storedConfig = await storage.getItem('config');
+        if (storedConfig) {
+          const parsedConfig = JSON.parse(storedConfig);
+          setConfig(prev => ({ ...prev, ...parsedConfig }));
+        }
+      } catch (e) {
+        console.error("Failed to load config from storage", e);
+      }
+    };
+
+    loadStoredConfig();
+  }, []);
 
   // Apply visual styles based on config
   useEffect(() => {
@@ -124,7 +117,9 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   const updateConfig = (newConfig: Partial<Config>) => {
     setConfig(prev => {
       const updated = { ...prev, ...newConfig };
-      storage.setItem('config', updated); // Use chrome.storage via storageUtil
+      storage.setItem('config', updated).catch(err => 
+        console.error("Failed to save config", err)
+      );
       return updated;
     });
   };

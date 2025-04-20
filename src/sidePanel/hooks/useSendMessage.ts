@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useRef } from 'react';
 import { MessageTurn } from '../ChatHistory'; // Adjust path if needed
 import { fetchDataAsStream, webSearch, processQueryWithAI } from '../network';
-
+import storage from 'src/util/storageUtil';
 // --- Interfaces (Model, Config, ApiMessage) remain the same ---
 interface Model {
   id: string;
@@ -169,8 +169,8 @@ const useSendMessage = (
       
       if (tab?.url && !tab.url.startsWith('chrome://')) {
         
-        const storedPageString = localStorage.getItem('pagestring');
-        const storedPageHtml = localStorage.getItem('pagehtml');
+        const storedPageString = storage.getItem('pagestring');
+        const storedPageHtml = storage.getItem('pagehtml');
 
         let pageStringContent = '';
         let pageHtmlContent = '';
@@ -180,7 +180,7 @@ const useSendMessage = (
             pageStringContent = storedPageString ? JSON.parse(storedPageString) : '';
             pageHtmlContent = storedPageHtml ? JSON.parse(storedPageHtml) : '';
         } catch (e) {
-            console.error("Error parsing page content from localStorage:", e);
+            console.error("Error parsing page content from storage:", e);
         }
 
         currentPageContent = config?.pageMode === 'html' ? pageHtmlContent : pageStringContent;

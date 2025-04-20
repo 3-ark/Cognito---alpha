@@ -22,7 +22,7 @@ import {
 } from './messageUtils';
 import { Send } from './Send';
 import { Settings } from './Settings';
-import { setTheme, themes } from './Themes';
+import storage from '../util/storageUtil';
 
 function bridge() {
   // Collect image alt texts
@@ -73,12 +73,12 @@ async function injectBridge() {
     const res = JSON.parse(result?.[0]?.result || '{}');
 
     try {
-      localStorage.setItem('pagestring', JSON.stringify(res?.text || ''));
-      localStorage.setItem('pagehtml', JSON.stringify(res?.html || ''));
-      localStorage.setItem('alttexts', JSON.stringify(res?.altTexts || ''));
-      localStorage.setItem('tabledata', JSON.stringify(res?.tableData || ''));
+      storage.setItem('pagestring', JSON.stringify(res?.text || ''));
+      storage.setItem('pagehtml', JSON.stringify(res?.html || ''));
+      storage.setItem('alttexts', JSON.stringify(res?.altTexts || ''));
+      storage.setItem('tabledata', JSON.stringify(res?.tableData || ''));
     } catch (err) {
-      console.debug('localStorage error:', err);
+      console.debug('storage error:', err);
     }
   } catch (err) {
     console.debug('Script injection failed:', err);
@@ -177,14 +177,6 @@ const Bruside = () => {
     setLoading(false); // Ensure loading is reset
   };
 
-  // load stored theme
-  useEffect(() => {
-    const theme = localStorage.getItem('theme') || 'moss';
-
-    setTheme(themes.find(({ name }) => name === theme) || themes[0]);
-    updateConfig({ chatMode: undefined })
-  }, []);
-
   const loadChat = (chat: { id: string, title: string, messages: ChatMessage[] }) => {
     setChatTitle(chat.title || '');
     setTurns(chat.turns);
@@ -236,8 +228,8 @@ const Bruside = () => {
     
     return () => {
       // Clear cached content when panel closes
-      localStorage.removeItem('pagestring');
-      localStorage.removeItem('pagehtml');
+      storage.removeItem('pagestring');
+      storage.removeItem('pagehtml');
     };
   }, []);
 

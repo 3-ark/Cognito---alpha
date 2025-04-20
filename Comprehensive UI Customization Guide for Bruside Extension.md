@@ -176,7 +176,7 @@ Contextual actions:
 const updateConfig = (newConfig: Partial<Config>) => {
   setConfig(prev => {
     const updated = { ...prev, ...newConfig };
-    localStorage.setItem('config', JSON.stringify(updated));
+    storage.setItem('config', JSON.stringify(updated));
     return updated;
   });
 };
@@ -225,7 +225,7 @@ sx={{
 
 1. **Theme not applying on load**:
    - Check `ConfigContext.tsx` initialization
-   - Verify `localStorage.getItem('config')` parsing
+   - Verify `storage.getItem('config')` parsing
 
 2. **Custom colors not saving**:
    - Ensure `updateConfig` is called with both:

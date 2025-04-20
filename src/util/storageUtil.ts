@@ -8,6 +8,9 @@ const storage: Storage = {
   getItem: async (key: string) => {
     const data = await chrome.storage.local.get(key);
     const value = data[key];
+    if (value === undefined || value === null) {
+      return null;
+    }
     try {
       return typeof value === 'string' ? value : JSON.stringify(value);
     } catch (e) {
