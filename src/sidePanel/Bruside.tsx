@@ -73,10 +73,10 @@ async function injectBridge() {
     const res = JSON.parse(result?.[0]?.result || '{}');
 
     try {
-      storage.setItem('pagestring', JSON.stringify(res?.text || ''));
-      storage.setItem('pagehtml', JSON.stringify(res?.html || ''));
-      storage.setItem('alttexts', JSON.stringify(res?.altTexts || ''));
-      storage.setItem('tabledata', JSON.stringify(res?.tableData || ''));
+      storage.setItem('pagestring', res?.text || ''); // Raw string, no JSON.stringify
+      storage.setItem('pagehtml', res?.html || '');
+      storage.setItem('alttexts', res?.altTexts || '');
+      storage.setItem('tabledata', res?.tableData || '');
     } catch (err) {
       console.debug('storage error:', err);
     }

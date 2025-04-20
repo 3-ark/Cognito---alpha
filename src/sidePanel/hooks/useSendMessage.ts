@@ -170,17 +170,8 @@ const useSendMessage = (
         
         const storedPageString = await storage.getItem('pagestring');
         const storedPageHtml = await storage.getItem('pagehtml');
-
-        let pageStringContent = '';
-        let pageHtmlContent = '';
-
-        try {
-            // Parse the stored values (they were stringified in injectBridge)
-          pageStringContent = storedPageString ? JSON.parse(storedPageString) : '';
-          pageHtmlContent = storedPageHtml ? JSON.parse(storedPageHtml) : '';
-        } catch (e) {
-            console.error("Error parsing page content from storage:", e);
-        }
+        const pageStringContent = storedPageString || '';
+        const pageHtmlContent = storedPageHtml || '';
 
         currentPageContent = config?.pageMode === 'html' ? pageHtmlContent : pageStringContent;
         console.log(`useSendMessage: Retrieved page content. Mode: ${config?.pageMode}. String length: ${pageStringContent.length}, HTML length: ${pageHtmlContent.length}`);

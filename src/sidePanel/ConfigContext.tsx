@@ -82,10 +82,10 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadStoredConfig = async () => {
       try {
-        const storedConfig = await storage.getItem('config');
+        const storedConfig = await storage.getItem('config'); // Returns string or null
         if (storedConfig) {
-          const parsedConfig = JSON.parse(storedConfig);
-          setConfig(prev => ({ ...prev, ...parsedConfig }));
+          const parsedConfig = JSON.parse(storedConfig); // Parse to object
+          setConfig(prev => ({ ...prev, ...parsedConfig })); // Spread object
         }
       } catch (e) {
         console.error("Failed to load config from storage", e);
