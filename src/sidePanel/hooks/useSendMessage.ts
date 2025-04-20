@@ -1,8 +1,7 @@
 import { Dispatch, SetStateAction, useRef } from 'react';
 import { MessageTurn } from '../ChatHistory'; // Adjust path if needed
 import { fetchDataAsStream, webSearch, processQueryWithAI } from '../network';
-import storage from 'src/util/storageUtil';
-// --- Interfaces (Model, Config, ApiMessage) remain the same ---
+import storage from 'src/util/storageUtil';// --- Interfaces (Model, Config, ApiMessage) remain the same ---
 interface Model {
   id: string;
   host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | string;
@@ -169,16 +168,16 @@ const useSendMessage = (
       
       if (tab?.url && !tab.url.startsWith('chrome://')) {
         
-        const storedPageString = storage.getItem('pagestring');
-        const storedPageHtml = storage.getItem('pagehtml');
+        const storedPageString = await storage.getItem('pagestring');
+        const storedPageHtml = await storage.getItem('pagehtml');
 
         let pageStringContent = '';
         let pageHtmlContent = '';
 
         try {
             // Parse the stored values (they were stringified in injectBridge)
-            pageStringContent = storedPageString ? JSON.parse(storedPageString) : '';
-            pageHtmlContent = storedPageHtml ? JSON.parse(storedPageHtml) : '';
+          pageStringContent = storedPageString ? JSON.parse(storedPageString) : '';
+          pageHtmlContent = storedPageHtml ? JSON.parse(storedPageHtml) : '';
         } catch (e) {
             console.error("Error parsing page content from storage:", e);
         }
