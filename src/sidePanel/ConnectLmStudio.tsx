@@ -48,7 +48,7 @@ export const ConnectLmStudio = () => {
       });
   };
 
-  const isConnected = config?.lmStudioConnected && config?.lmStudioUrl === url;
+  const isConnected = config?.lmStudioConnected;
 
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>

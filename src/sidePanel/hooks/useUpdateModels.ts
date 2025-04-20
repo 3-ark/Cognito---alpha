@@ -1,7 +1,7 @@
 import {
  useCallback,useEffect, useState 
 } from 'react';
-
+import storage from 'src/util/storageUtil';
 import { useConfig } from '../ConfigContext';
 import {
  GEMINI_URL, GROQ_URL, OPENAI_URL 
@@ -23,6 +23,9 @@ export const useUpdateModels = () => {
   const { config, updateConfig } = useConfig();
 
   const fetchModels = useCallback(async () => {
+    const panelOpen = await storage.getItem('panelOpen'); // Add storage import
+    if (!panelOpen) return;
+
     let models = [];
 
     if (config?.ollamaUrl) {
@@ -109,7 +112,7 @@ export const useUpdateModels = () => {
         selectedModel: isSelectedAvailable ? config?.selectedModel : models[0]?.id 
       });
     }
-  }, [config, updateConfig]);
+  }, [config, updateConfig, storage.getItem]); // Add storage dependency
 
   // Only fetch models when dependencies change
   useEffect(() => {
@@ -122,13 +125,6 @@ export const useUpdateModels = () => {
     config?.openAiApiKey,
     fetchModels
   ]);
-
-  // Optionally refresh every 30 seconds instead of 5 seconds
-  useEffect(() => {
-    const interval = setInterval(fetchModels, 30000);
-
-    return () => clearInterval(interval);
-  }, [fetchModels]);
 
   return { chatTitle, setChatTitle };
 };

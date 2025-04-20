@@ -40,7 +40,7 @@ export const ConnectOllama = () => {
       });
   };
 
-  const isConnected = config?.ollamaConnected && config?.ollamaUrl === url;
+  const isConnected = config?.ollamaConnected;
 
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>

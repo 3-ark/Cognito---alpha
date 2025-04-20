@@ -41,7 +41,7 @@ export const ConnectOpenAI = () => {
   };
 
   const disabled = config?.openAiApiKey === apiKey;
-  const isConnected = config?.openAiConnected && config?.openAiApiKey === apiKey;
+  const isConnected = config?.openAiConnected;
 
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>

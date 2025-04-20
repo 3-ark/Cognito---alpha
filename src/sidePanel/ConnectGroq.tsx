@@ -39,7 +39,7 @@ export const ConnectGroq = () => {
   };
 
   const disabled = config?.groqApiKey === apiKey;
-  const isConnected = config?.groqConnected && config?.groqApiKey === apiKey;
+  const isConnected = config?.groqConnected;
 
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>
