@@ -204,6 +204,13 @@ const PersonaSelect = ({
   <Select
     _focus={{ borderColor: 'var(--text)', boxShadow: 'none !important' }}
     _hover={{ borderColor: 'var(--text)', boxShadow: 'none !important' }}
+    sx={{
+     '> option': {
+      background: 'var(--bg)',
+      color: 'var(--text)',
+      '--option-bg-contrast': 'color-mix(in srgb, var(--text) 20%, var(--bg))'
+     },
+    }}
     border="2px"
     borderColor="var(--text)"
     borderRadius={16}
