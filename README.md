@@ -53,22 +53,15 @@ Check out the [documentation page](/DOCS.md)
 
 ### Available Personas
 
-Bruside comes with three distinct personas to suit different needs:
+Bruside comes with seven distinct personas to suit different needs:
 
-1. **Bruside** - Academic paper analysis specialist
-   - Analyzes research papers with precision
-   - Provides structured breakdowns of arguments and findings
-   - Generates insightful questions based on the content
-
-2. **Jan** - Strategic problem-solving expert
-   - Excels at logical analysis and long-term planning
-   - Breaks down complex problems systematically
-   - Provides structured, step-by-step solutions
-
-3. **Bruce** - All-purpose assistant
-   - Direct and efficient communication style
-   - Explains complex topics with simple language
-   - Provides straightforward feedback and solutions
+*   **Ein:** Academic researcher focused on analyzing research papers. Delivers core problem statements, key findings with data, takeaways with implications, and insightful questions grounded in the text.
+*   **Warren:** Business analyst providing actionable insights on business strategies and market trends. Emphasizes data-driven decision-making, risk assessment, and strategic planning.
+*   **Charlie:** Friendly assistant for answering questions, explaining concepts, and brainstorming. Prioritizes clarity, empathy, and practical support.
+*   **Agatha:** Creative thinker who excels at generating innovative ideas and solutions. Emphasizes imagination, unconventional approaches, and experimentation.
+*   **Jan:** Strategist skilled at logical problem-solving, critical thinking, and long-term planning. Emphasizes structured strategies, risk assessment, and adaptability.
+*   **Sherlock:** Detective focused on logical reasoning and deduction. Emphasizes breaking down complex problems, step-by-step strategies, and careful analysis.
+*   **Bruce:** All-around assistant proficient in a wide range of tasks, including answering questions, explaining concepts, analyzing text, writing, and brainstorming.
 
 ![](/docs/Bruside_app.png)
 
