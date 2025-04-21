@@ -11,6 +11,19 @@ interface ApiMessage {
 
 const generateTitle = 'Create a short 2-4 word title for this chat. Only respond with the title. Example: "Trade War Analysis"';
 
+// Add helper function to extract title from COT response
+const extractTitle = (response: string): string => {
+  // First remove any thinking blocks
+  const titleOnly = response
+    .replace(/<think>[\s\S]*?<\/think>/g, '') // Use [\s\S] to match any char including newlines
+    .replace(/"/g, '')
+    .replace(/#/g, '')
+    .trim();
+    
+  // If we have content after removing thinking blocks, use it
+  return titleOnly || "New Chat";
+};
+
 export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: string) => {
   const [chatTitle, setChatTitle] = useState('');
   const [titleGenerated, setTitleGenerated] = useState(false);
@@ -38,7 +51,10 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
           content: turn.rawContent || '', // Use rawContent from the turn
           role: turn.role // Use the actual role from the turn
         })),
-        { role: 'user', content: generateTitle } // Add the specific instruction
+        { 
+          role: 'user', 
+          content: 'Create a short 2-4 word title for this chat. Keep it concise. No explanations or thinking steps needed.' 
+        }
       ];
 
       // Define API endpoints for each provider (OpenAI-compatible)
@@ -46,8 +62,9 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
         const baseConfig = {
           body: { 
             model: currentModel.id, 
-            messages: messagesForTitle, 
-            stream: true 
+            messages: messagesForTitle,
+            // Set stream false for local models
+            stream: !['ollama', 'lmStudio'].includes(currentModel.host || '')
           },
           headers: {} as Record<string, string>
         };
@@ -96,27 +113,48 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
       
       if (!apiConfig) return;
 
-      let accumulatedTitle = '';
-      fetchDataAsStream(
-        apiConfig.url,
-        apiConfig.body,
-        (part: string, isFinished?: boolean) => {
-          accumulatedTitle = part; // Update with the latest part
-          if (isFinished) { // Only set the title once the stream is finished
-              const cleanTitle = accumulatedTitle
-                  .replace(/"/g, '')
-                  .replace(/#/g, '')
-                  .trim();
-              if (cleanTitle) {
-                  console.log("Setting chat title:", cleanTitle);
-                  setChatTitle(cleanTitle);
-                  setTitleGenerated(true); // Mark as generated
-              }
+      if (['ollama', 'lmStudio'].includes(currentModel.host || '')) {
+        // Handle local models with regular fetch
+        fetch(apiConfig.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...apiConfig.headers
+          },
+          body: JSON.stringify(apiConfig.body)
+        })
+        .then(res => res.json())
+        .then(data => {
+          const rawTitle = data.choices?.[0]?.message?.content || '';
+          const cleanTitle = extractTitle(rawTitle);
+          if (cleanTitle) {
+            console.log("Setting chat title (local):", cleanTitle);
+            setChatTitle(cleanTitle);
+            setTitleGenerated(true);
           }
-        },
-        apiConfig.headers,
-        currentModel.host
-      );
+        })
+        .catch(err => console.error('Title generation failed:', err));
+      } else {
+        // Handle streaming API models
+        let accumulatedTitle = '';
+        fetchDataAsStream(
+          apiConfig.url,
+          apiConfig.body,
+          (part: string, isFinished?: boolean) => {
+            accumulatedTitle = part;
+            if (isFinished) {
+              const cleanTitle = extractTitle(accumulatedTitle);
+              if (cleanTitle) {
+                console.log("Setting chat title (streaming):", cleanTitle);
+                setChatTitle(cleanTitle);
+                setTitleGenerated(true);
+              }
+            }
+          },
+          apiConfig.headers,
+          currentModel.host
+        );
+      }
     }
   }, [isLoading, turns, message, config, chatTitle, titleGenerated]); // Add titleGenerated to deps
 
