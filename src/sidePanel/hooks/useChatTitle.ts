@@ -13,12 +13,23 @@ const generateTitle = 'Create a short 2-4 word title for this chat. Only respond
 
 export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: string) => {
   const [chatTitle, setChatTitle] = useState('');
+  const [titleGenerated, setTitleGenerated] = useState(false);
   const { config } = useConfig();
 
   useEffect(() => {
-    if (!isLoading && turns.length >= 2 && !chatTitle && config?.generateTitle) {
+    // Only run if:
+    // 1. Not already loading
+    // 2. Have enough messages
+    // 3. No title yet
+    // 4. Title generation is enabled
+    // 5. Title hasn't been generated yet for this chat
+    if (!isLoading && 
+        turns.length >= 2 && 
+        !chatTitle && 
+        config?.generateTitle && 
+        !titleGenerated) {
+
       const currentModel = config?.models?.find((model) => model.id === config.selectedModel);
-      
       if (!currentModel) return;
 
       // Prepare messages for title generation (first 2 messages + instruction)
@@ -99,6 +110,7 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
               if (cleanTitle) {
                   console.log("Setting chat title:", cleanTitle);
                   setChatTitle(cleanTitle);
+                  setTitleGenerated(true); // Mark as generated
               }
           }
         },
@@ -106,7 +118,7 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
         currentModel.host
       );
     }
-  }, [isLoading, turns, message, config, chatTitle]);
+  }, [isLoading, turns, message, config, chatTitle, titleGenerated]); // Add titleGenerated to deps
 
   return { chatTitle, setChatTitle };
 };
