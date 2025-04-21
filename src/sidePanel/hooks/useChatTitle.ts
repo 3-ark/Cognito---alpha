@@ -9,8 +9,6 @@ interface ApiMessage {
   content: string;
 }
 
-const generateTitle = 'Create a short 2-4 word title for this chat. Only respond with the title. Example: "Trade War Analysis"';
-
 // Add helper function to extract title from COT response
 const extractTitle = (response: string): string => {
   // First remove any thinking blocks
@@ -50,7 +48,7 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
         })),
         { 
           role: 'user', 
-          content: 'Create a short 2-4 word title for this chat. Keep it concise. No explanations or thinking steps needed.' 
+          content: 'Create a short 2-4 word title for this chat. Keep it concise, just give me the best one, just one. No explanations or thinking steps needed.' 
         }
       ];
 
