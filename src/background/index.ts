@@ -3,58 +3,56 @@ import buildStoreWithDefaults from 'src/state/store';
 import storage from 'src/util/storageUtil';
 import PortNames from '../types/PortNames';
 
+// Initialize store but don't start any processes yet
 buildStoreWithDefaults({ portName: PortNames.ContentPort });
 
+// Set initial panel state
 storage.setItem('panelOpen', false);
 
+// Configure panel behavior
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error: unknown) => console.error(error));
 
-chrome.tabs.onActivated.addListener(async activeInfo => {
-  const tabId = activeInfo.tabId;
+// Only handle tab events when panel is open
+chrome.runtime.onConnect.addListener(port => {
+  let tabListenersActive = false;
 
-  console.log('tab activated: ', tabId);
-  injectContentScript(tabId);
-});
-
-chrome.tabs.onUpdated
-  .addListener(async (tabId, changeInfo, tab) => {
-    if (!(tab.id && changeInfo.status === 'complete')) return;
-
-    console.log('tab connected: ', tab.url, changeInfo);
-
+  const handleTabActivated = async (activeInfo) => {
     if (await storage.getItem('panelOpen')) {
-      console.log('panel open');
+      console.log('tab activated with panel open: ', activeInfo.tabId);
+      injectContentScript(activeInfo.tabId);
+    }
+  };
+
+  const handleTabUpdated = async (tabId, changeInfo, tab) => {
+    if (!(tab.id && changeInfo.status === 'complete')) return;
+    
+    if (await storage.getItem('panelOpen') && changeInfo.url) {
+      console.log('tab updated with panel open:', tab.url);
       injectContentScript(tabId);
     }
-  });
+  };
 
-chrome.runtime.onConnect.addListener(port => {
   const handleMessage = async msg => {
     try {
       if (port.name === PortNames.SidePanelPort) {
         if (msg.type === 'init') {
           console.log('panel opened');
-  
           await storage.setItem('panelOpen', true);
-  
-          port.onDisconnect.addListener(async () => {
-            await storage.setItem('panelOpen', false);
-            console.log('panel closed');
-            console.log('port disconnected: ', port.name);
-          });
-  
-          const tab = await getCurrentTab();
-  
-          if (!tab?.id) {
-            console.error("Couldn't get current tab");
 
-            return;
+          // Add tab listeners when panel opens
+          if (!tabListenersActive) {
+            chrome.tabs.onActivated.addListener(handleTabActivated);
+            chrome.tabs.onUpdated.addListener(handleTabUpdated);
+            tabListenersActive = true;
           }
-  
-          injectContentScript(tab.id);
-  
+
+          const tab = await getCurrentTab();
+          if (tab?.id) {
+            injectContentScript(tab.id);
+          }
+
           port.postMessage({
             type: 'handle-init',
             message: 'panel open'
@@ -67,9 +65,20 @@ chrome.runtime.onConnect.addListener(port => {
   };
 
   port.onMessage.addListener(handleMessage);
-  port.onDisconnect.addListener(() => {
-    console.debug('Port disconnected:', port.name);
+  
+  // Clean up when panel closes
+  port.onDisconnect.addListener(async () => {
+    await storage.setItem('panelOpen', false);
+    
+    // Remove tab listeners when panel closes
+    if (tabListenersActive) {
+      chrome.tabs.onActivated.removeListener(handleTabActivated);
+      chrome.tabs.onUpdated.removeListener(handleTabUpdated);
+      tabListenersActive = false;
+    }
+    
     port.onMessage.removeListener(handleMessage);
+    console.log('panel closed, listeners removed');
   });
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "Bruside",
-  "version": "7.2",
+  "version": "7.3",
   "description": "Bruside is a Chrome extension that allows you to communicate with your browser.",
   "main": "index.js",
   "scripts": {

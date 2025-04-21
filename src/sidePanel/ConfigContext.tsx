@@ -75,8 +75,8 @@ const defaultConfig: Config = {
   lmStudioConnected: false,
   ollamaUrl: 'http://localhost:11434',
   ollamaConnected: false,
-  fontSize: 14 // Add this line to set base font size
-  
+  fontSize: 14, // Add this line to set base font size
+  panelOpen: false,
   // ... add defaults for groq, gemini, openai etc.
 };
 

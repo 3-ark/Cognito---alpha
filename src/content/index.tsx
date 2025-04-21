@@ -26,9 +26,36 @@ import CursorController from './controllers/CursorController';
       controllers?.forEach(controller => controller.cleanup?.());
     });
 
-    const controllers = [
-      new CursorController()
-    ];
+    const controllers: ContentProvider[] = [];
+
+    store.ready().then(() => {
+      const currentState = store.getState();
+      const panelOpen = currentState.config?.panelOpen;
+
+      if (panelOpen) {
+        const cursorCtrl = new CursorController();
+        controllers.push(cursorCtrl);
+        cursorCtrl.register();
+      }
+    });
+
+    // Add store subscription to dynamically manage cursor tracking
+    store.subscribe(() => {
+      const currentState = store.getState();
+      const panelOpen = currentState.config?.panelOpen;
+
+      if (panelOpen && !controllers.some(c => c instanceof CursorController)) {
+        const cursorCtrl = new CursorController();
+        controllers.push(cursorCtrl);
+        cursorCtrl.register();
+      } else if (!panelOpen && controllers.some(c => c instanceof CursorController)) {
+        const cursorCtrl = controllers.find(c => c instanceof CursorController);
+        if (cursorCtrl) {
+          cursorCtrl.cleanup();
+          controllers = controllers.filter(c => c !== cursorCtrl);
+        }
+      }
+    });
 
     try {
       await store.ready();

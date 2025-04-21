@@ -22,7 +22,7 @@ export const Docs = () => (
     onClick={() => window.open("https://github.com/3-ark/Bruside/blob/master/DOCS.md", "_blank")}
   >
     <Flex alignItems="center" justifyContent="space-between">
-      <Text>V7.2</Text>
+      <Text>V7.3</Text>
     </Flex>
   </Box>
 );
