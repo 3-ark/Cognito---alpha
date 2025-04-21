@@ -138,12 +138,45 @@ const Bruside = () => {
   const [settingsMode, setSettingsMode] = useState(false);
   const [historyMode, setHistoryMode] = useState(false);
   const { config, updateConfig } = useConfig();
+  const [currentTabInfo, setCurrentTabInfo] = useState({ id: null, url: '' });
 
-  useInterval(async () => {
-    if (config?.chatMode === 'page') {
-      await injectBridge(); // Re-injects content script periodically
-    }
-  }, 2000);
+  useEffect(() => {
+    if (!config?.chatMode === 'page') return;
+
+    // Function to check and inject if needed
+    const checkAndInject = async () => {
+      const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+      
+      // Only inject if tab or URL changed
+      if (tab?.id && tab.url && (tab.id !== currentTabInfo.id || tab.url !== currentTabInfo.url)) {
+        setCurrentTabInfo({ id: tab.id, url: tab.url });
+        await injectBridge();
+      }
+    };
+
+    // Initial check
+    checkAndInject();
+
+    // Set up tab change listeners
+    const handleTabActivated = (activeInfo) => {
+      checkAndInject();
+    };
+
+    const handleTabUpdated = (tabId, changeInfo, tab) => {
+      if (changeInfo.status === 'complete' || changeInfo.url) {
+        checkAndInject();
+      }
+    };
+
+    chrome.tabs.onActivated.addListener(handleTabActivated);
+    chrome.tabs.onUpdated.addListener(handleTabUpdated);
+
+    // Cleanup listeners
+    return () => {
+      chrome.tabs.onActivated.removeListener(handleTabActivated);
+      chrome.tabs.onUpdated.removeListener(handleTabUpdated);
+    };
+  }, [config?.chatMode]); // Only re-run if chatMode changes
 
   const { chatTitle, setChatTitle } = useChatTitle(isLoading, turns, message);
 
