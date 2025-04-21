@@ -11,7 +11,7 @@ export const Background = () => (
 }}
   >
     <Image
-      src="assets/images/Bruside.png"
+      src="assets/images/Cognito.png"
       style={{ 
         filter: 'opacity(0.03)', 
         position: 'fixed', 

@@ -19,7 +19,7 @@ export const Docs = () => (
     pl={3}
     pr={3}
     pt={0.5}
-    onClick={() => window.open("https://github.com/3-ark/Bruside/blob/master/DOCS.md", "_blank")}
+    onClick={() => window.open("https://github.com/3-ark/Cognito/blob/master/DOCS.md", "_blank")}
   >
     <Flex alignItems="center" justifyContent="space-between">
       <Text>0.8.1</Text>

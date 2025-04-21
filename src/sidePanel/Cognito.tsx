@@ -128,7 +128,7 @@ const MessageTemplate = ({ children, onClick }) => (
   </Box>
 );
 
-const Bruside = () => {
+const Cognito = () => {
   const [turns, setTurns] = useState<MessageTurn[]>([]);
   const [message, setMessage] = useState('');
   const [chatId, setChatId] = useState(generateChatId());
@@ -248,7 +248,7 @@ const Bruside = () => {
         last_updated: Date.now(),
         model: config?.selectedModel
       };
-      console.log(`[${Date.now()}] Bruside: Saving chat ${chatId}`, savedChat); // Debug log
+      console.log(`[${Date.now()}] Cognito: Saving chat ${chatId}`, savedChat); // Debug log
 
       localforage.setItem(chatId, savedChat);
     }
@@ -424,4 +424,4 @@ const Bruside = () => {
   );
 };
 
-export default Bruside;
+export default Cognito;

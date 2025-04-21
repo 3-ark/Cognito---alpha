@@ -299,9 +299,9 @@ const Persona = () => {
   const [name, setName] = useState('');
   const { config, updateConfig } = useConfig();
   const personas = config?.personas || {};
-  const persona = config?.persona || 'Bruside';
+  const persona = config?.persona || 'Cognito';
 
-  const defaultPrompt = personas?.[persona] || personas?.Bruside;
+  const defaultPrompt = personas?.[persona] || personas?.Cognito;
   const [personaPrompt, setPersonaPrompt] = useState(defaultPrompt);
   const hasChange = personaPrompt !== defaultPrompt;
 

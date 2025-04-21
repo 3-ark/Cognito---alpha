@@ -1,4 +1,4 @@
-# Comprehensive UI Customization Guide for Bruside Extension
+# Comprehensive UI Customization Guide for Cognito Extension
 
 ## Expanded Theme System Documentation
 
@@ -76,7 +76,7 @@ Structure and styling:
 </Accordion>
 ```
 
-### 2. Main App Container (Bruside.tsx)
+### 2. Main App Container (Cognito.tsx)
 Key layout components:
 ```tsx
 <Container
@@ -143,7 +143,7 @@ Complete implementation:
 
 ## UI Behavior Customization
 
-### 1. Chat Mode Selection (Bruside.tsx)
+### 1. Chat Mode Selection (Cognito.tsx)
 Initial state buttons:
 ```tsx
 <Box bottom="4rem" left="0.5rem" position="absolute">
@@ -156,7 +156,7 @@ Initial state buttons:
 </Box>
 ```
 
-### 2. Page Interaction Buttons (Bruside.tsx)
+### 2. Page Interaction Buttons (Cognito.tsx)
 Contextual actions:
 ```tsx
 <Box bottom="4rem" left="0.5rem" position="absolute">
@@ -182,7 +182,7 @@ const updateConfig = (newConfig: Partial<Config>) => {
 };
 ```
 
-### 2. Reset Functionality (Bruside.tsx)
+### 2. Reset Functionality (Cognito.tsx)
 ```tsx
 const reset = () => {
   setMessages([]);
@@ -211,7 +211,7 @@ sx={{
 ### 2. Background Image (Background.tsx)
 ```tsx
 <Image
-  src="assets/images/Bruside.png"
+  src="assets/images/Cognito.png"
   style={{ 
     filter: 'opacity(0.03)',
     zoom: '1.2'

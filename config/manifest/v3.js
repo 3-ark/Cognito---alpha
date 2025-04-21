@@ -13,9 +13,9 @@ module.exports = {
   action: { default_title: 'Click to open panel' },
   side_panel: { default_path: 'assets/sidePanel.html' },
   icons: {
-    16: 'assets/images/Bruside.png',
-    48: 'assets/images/Bruside.png',
-    128: 'assets/images/Bruside.png'
+    16: 'assets/images/Cognito.png',
+    48: 'assets/images/Cognito.png',
+    128: 'assets/images/Cognito.png'
   },
   background: { service_worker: 'background.js' },
   web_accessible_resources: [{

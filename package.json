@@ -1,7 +1,7 @@
 {
-  "name": "Bruside",
+  "name": "Cognito",
   "version": "0.8.1",
-  "description": "Bruside is a Chrome extension that allows you to communicate with your browser.",
+  "description": "Cognito is a Chrome extension that allows you to communicate with your browser.",
   "main": "index.js",
   "scripts": {
     "start": "npm run clear && webpack -w --config config/webpack.config.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/3-ark/Bruside"
+    "url": "https://github.com/3-ark/Cognito"
   },
   "keywords": [
     "sidepanel",
@@ -18,10 +18,10 @@
     "chrome",
     "extension"
   ],
-  "author": "Bruce",
+  "author": "3-ark",
   "license": "Apache-2.0",
   "bugs": {
-  "url": "https://github.com/3-ark/Bruside"
+  "url": "https://github.com/3-ark/Cognito"
   },
   "homepage": "",
   "dependencies": {

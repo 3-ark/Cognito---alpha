@@ -1,13 +1,13 @@
-# Bruside
+# Cognito
 
-- [Bruside](#bruside)
+- [Cognito](#Cognito)
   * [connections](#connections)
   * [persona](#persona)
   * [page context](#page-context)
   * [web search](#web-search)
   * [File Structure](#file-structure)
   * [Advanced Tweaks](#advanced-tweaks)
-    + [UI Customization Guide for Bruside Extension](#ui-customization-guide-for-bruside-extension)
+    + [UI Customization Guide for Cognito Extension](#ui-customization-guide-for-Cognito-extension)
       - [Theme System Overview](#theme-system-overview)
       - [Customizing Colors](#customizing-colors)
         * [1. Preset Themes](#1-preset-themes)
@@ -84,7 +84,7 @@ Augment your conversation with the content of your (currently visited) web page.
 
 The chat history includes **all previous messages** in the conversation by default, but context limits apply for AI processing:
 
-1. **Full History Storage** in Bruside.tsx:
+1. **Full History Storage** in Cognito.tsx:
 ```tsx
 const [messages, setMessages] = useState<ChatMessage[]>([]); // Stores all messages
 ```
@@ -132,7 +132,7 @@ only for development purposes)
 
 ## web search
 
-~Basic~ web augmentation for your chats. Enter your web search query, and Bruside will load up an async web search to answer your questions based on live public data.
+~Basic~ web augmentation for your chats. Enter your web search query, and Cognito will load up an async web search to answer your questions based on live public data.
 
 Context awareness
 ```ts
@@ -192,7 +192,7 @@ This is a showcase of how this content-awareness web search works.
 Key project structure with implementation details:
 
 ```
-Bruside/
+Cognito/
 ├── config/                # Build configuration and manifest definitions
 │   ├── manifest/          # Browser extension manifests per platform
 │   └── webpack.config.js  # Bundle configuration for Chrome extension
@@ -223,9 +223,9 @@ npm start      # Development watch mode
 
 ## Advanced Tweaks
 
-### UI Customization Guide for Bruside Extension
+### UI Customization Guide for Cognito Extension
 
-This explains how to customize various UI elements in the Bruside Chrome extension, which uses Chakra UI as its primary component library.
+This explains how to customize various UI elements in the Cognito Chrome extension, which uses Chakra UI as its primary component library.
 
 #### Theme System Overview
 
@@ -412,7 +412,7 @@ const theme = extendTheme({
 ```
 
 For further tweaks:
-[Comprehensive UI Customization Guide for Bruside Extension.md](https://github.com/3-ark/Bruside/blob/main/Comprehensive%20UI%20Customization%20Guide%20for%20Bruside%20Extension.md)
+[Comprehensive UI Customization Guide for Cognito Extension.md](https://github.com/3-ark/Cognito/blob/main/Comprehensive%20UI%20Customization%20Guide%20for%20Cognito%20Extension.md)
 Remember that most visual styling should be done through the theme system and CSS variables rather than direct component overrides for maintainability.
 
 ### Others
