@@ -1,4 +1,4 @@
- import {
+import {
   DeleteIcon,
   SettingsIcon,
   SmallCloseIcon
@@ -11,6 +11,7 @@ import {
   DrawerContent,
   DrawerOverlay,
   IconButton,
+  Input,
   Modal,
   ModalBody,
   ModalContent,
@@ -21,7 +22,7 @@ import {
   useDisclosure
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-
+import React from 'react';
 interface Model {
   id: string;
   active: boolean;
@@ -144,130 +145,160 @@ const DrawerLinkSection = ({ title, onClick }) => (
  
 const SettingsDrawer = ({
  isOpen, onClose, config, updateConfig, availableModelNames, setSettingsMode, downloadText, downloadJson, downloadImage, setHistoryMode 
-}) => (
-  <Drawer isOpen={isOpen} placement="left" size="xs" onClose={onClose}>
-    <DrawerOverlay />
-    <DrawerContent 
-      background="var(--bg)" 
-      borderRadius={8} 
-      borderRight="2px solid var(--text)"
-      sx={{
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: 'url(assets/images/paper-texture.png)',
-          backgroundSize: '512px',
-          opacity: 0.5,
-          pointerEvents: 'none',
-          mixBlendMode: 'multiply',
-          zIndex: 0
-        }
-      }}
-    >
-      <DrawerBody padding={0}>
-        <DrawerHeader onClose={onClose} />
-        <DrawerSection title="persona">
-          <Select
-             sx={{
-              '> option': {
-                background: 'var(--bg)',
-                color: 'var(--text)',
-                '--option-bg-contrast': 'color-mix(in srgb, var(--text) 20%, var(--bg))'
-              },
-            }}
-            
-            _focus={{
- borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' 
-}}
-            _hover={{
- borderColor: 'var(--text)', boxShadow: 'none !important', background: 'var(--active)' 
-}}
-            background="transparent"
-            border="2px"
-            borderColor="var(--text)"
-            borderRadius={16}
-            color="var(--text)"
-            defaultValue="default"
-            fontSize="md"
-            fontWeight={600}
-            overflow="hidden"
-            size="sm"
-            value={config?.persona}
-            whiteSpace="nowrap"
-            onChange={e => updateConfig({ persona: e.target.value })}
-          >
-            {Object.keys(config.personas || {}).map(p => <option key={p} value={p}>{p}</option>)}
-          </Select>
-        </DrawerSection>
-        <DrawerSection title="model">
-          <Select
-            sx={{
-              '> option': {
-                background: 'var(--bg)',
-                color: 'var(--text)',
-                '--option-bg-contrast': 'color-mix(in srgb, var(--text) 20%, var(--bg))'
-              },
-            }}
-            _focus={{
- borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' 
-}}
-            _hover={{
- borderColor: 'var(--text)', boxShadow: 'none !important', background: 'var(--active)' 
-}}
-            background="transparent"
-            border="2px"
-            borderColor="var(--text)"
-            borderRadius={16}
-            color="var(--text)"
-            defaultValue="default"
-            fontSize="md"
-            fontWeight={600}
-            overflow="hidden"
-            size="sm"
-            value={config?.selectedModel || ''}
-            whiteSpace="nowrap"
-            onChange={e => updateConfig({ selectedModel: e.target.value })}
-          >
-            {!config?.models?.length ? (
-              <option value="default" disabled>loading models...</option>
-            ) : (
-              config.models.map((model: Model) => (
-                <option 
-                  key={model.id} 
-                  disabled={model.active === false}
-                  value={model.id}
+}) => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [inputFocused, setInputFocused] = React.useState(false);
+  
+  const filteredModels = config?.models?.filter(model => 
+    model.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    model.host?.toLowerCase()?.includes(searchQuery.toLowerCase())
+  ) || [];
+
+  return (
+    <Drawer isOpen={isOpen} placement="left" size="xs" onClose={onClose}>
+      <DrawerOverlay />
+      <DrawerContent 
+        background="var(--bg)" 
+        borderRadius={8} 
+        borderRight="2px solid var(--text)"
+        sx={{
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url(assets/images/paper-texture.png)',
+            backgroundSize: '512px',
+            opacity: 0.5,
+            pointerEvents: 'none',
+            mixBlendMode: 'multiply',
+            zIndex: 0
+          }
+        }}
+      >
+        <DrawerBody padding={0}>
+          <DrawerHeader onClose={onClose} />
+          <DrawerSection title="persona">
+            <Select
+               sx={{
+                '> option': {
+                  background: 'var(--bg)',
+                  color: 'var(--text)',
+                  '--option-bg-contrast': 'color-mix(in srgb, var(--text) 20%, var(--bg))'
+                },
+              }}
+              
+              _focus={{
+   borderColor: 'var(--text)', boxShadow: 'none !important', background: 'transparent' 
+  }}
+              _hover={{
+   borderColor: 'var(--text)', boxShadow: 'none !important', background: 'var(--active)' 
+  }}
+              background="transparent"
+              border="2px"
+              borderColor="var(--text)"
+              borderRadius={16}
+              color="var(--text)"
+              defaultValue="default"
+              fontSize="md"
+              fontWeight={600}
+              overflow="hidden"
+              size="sm"
+              value={config?.persona}
+              whiteSpace="nowrap"
+              onChange={e => updateConfig({ persona: e.target.value })}
+            >
+              {Object.keys(config.personas || {}).map(p => <option key={p} value={p}>{p}</option>)}
+            </Select>
+          </DrawerSection>
+          <DrawerSection title="model">
+            <Box position="relative">
+              <Input
+                value={inputFocused ? searchQuery : config?.selectedModel || ''}
+                placeholder={inputFocused ? "Search models..." : config?.selectedModel || "Select model..."} 
+                size="sm"
+                background="transparent"
+                border="2px"
+                borderColor="var(--text)"
+                borderRadius={16}
+                color="var(--text)"
+                fontSize="md"
+                fontWeight={600}
+                _focus={{
+                  borderColor: 'var(--text)',
+                  boxShadow: 'none',
+                  background: 'var(--active)'
+                }}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  setSearchQuery(''); // Clear search on focus to start fresh search
+                  setInputFocused(true);
+                }}
+                onBlur={() => setTimeout(() => setInputFocused(false), 150)}
+              />
+              {inputFocused && (
+                <Box
+                  position="absolute"
+                  width="100%"
+                  mt={1}
+                  maxH="200px"
+                  overflowY="auto"
+                  bg="var(--bg)"
+                  border="2px solid var(--text)"
+                  borderRadius={16}
+                  zIndex={2}
                 >
-                  {model.host ? `(${model.host}) ${model.id}` : model.id}
-                </option> 
-              ))
-            )}
-          </Select>
-        </DrawerSection>
-        <DrawerLinkSection title="configuration" onClick={() => { setSettingsMode(true); onClose(); }} />
-        <DrawerLinkSection
-          title="chat history"
-          onClick={() => { setHistoryMode(true); onClose(); }}
-        />
-        <DrawerLinkSection
-          title="export chat (text)"
-          onClick={() => { onClose(); downloadText(); }}
-        />
-        <DrawerLinkSection
-          title="export chat (json)"
-          onClick={() => { onClose(); downloadJson(); }}
-        />
-        <DrawerLinkSection
-          title="export chat (image)"
-          onClick={() => { downloadImage(); onClose(); }}
-        />
-      </DrawerBody>
-    </DrawerContent>
-  </Drawer>
-);
+                  {filteredModels.length > 0 ? (
+                    filteredModels.map(model => (
+                     <Box
+                      key={model.id}
+                      p={2}
+                      cursor={'pointer'} // Always pointer now
+                      opacity={1}        // Always fully opaque
+                      _hover={{ bg:'var(--active)'}}
+                      onMouseDown={() => { // <-- Use onMouseDown
+                        console.log("Selecting model:", model.id); // Debug log
+                        updateConfig({ selectedModel: model.id });
+                        setSearchQuery(''); // Clear search query
+                        setInputFocused(false); // Hide dropdown immediately
+                      }}
+                    >
+                      {model.host ? `(${model.host}) ${model.id}` : model.id}
+                    </Box>
+                  ))
+              ) : (
+                    <Box p={2} color="var(--text-disabled)" fontSize="sm">
+                      No models found
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
+          </DrawerSection>
+          <DrawerLinkSection title="configuration" onClick={() => { setSettingsMode(true); onClose(); }} />
+          <DrawerLinkSection
+            title="chat history"
+            onClick={() => { setHistoryMode(true); onClose(); }}
+          />
+          <DrawerLinkSection
+            title="export chat (text)"
+            onClick={() => { onClose(); downloadText(); }}
+          />
+          <DrawerLinkSection
+            title="export chat (json)"
+            onClick={() => { onClose(); downloadJson(); }}
+          />
+          <DrawerLinkSection
+            title="export chat (image)"
+            onClick={() => { downloadImage(); onClose(); }}
+          />
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
+  );
+};
 
 export const Header = ({ ...props }) => {
   const { config, updateConfig } = useConfig();

@@ -48,6 +48,7 @@ export interface Config {
     bg: string;
     text: string;
   };
+  panelOpen: boolean; // Add this property to Config interface
 }
 
 export interface ConfigContextType {
