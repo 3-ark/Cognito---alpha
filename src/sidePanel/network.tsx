@@ -29,6 +29,14 @@ interface Config {
   pageMode?: string;
 }
 
+// Add helper function to clean response from thinking blocks
+const cleanResponse = (response: string): string => {
+  return response
+    .replace(/<think>[\s\S]*?<\/think>/g, '') // Remove thinking blocks with content
+    .replace(/["']/g, '') // Remove quotes
+    .trim();
+};
+
 export const processQueryWithAI = async (
   query: string,
   config: Config,
@@ -122,8 +130,11 @@ Output:
     }
 
     const responseData = await response.json();
-    const optimizedContent = responseData?.choices?.[0]?.message?.content;
-    return typeof optimizedContent === 'string' ? optimizedContent.trim().replace(/["']/g, '') : query;
+    const rawContent = responseData?.choices?.[0]?.message?.content;
+    return typeof rawContent === 'string' 
+      ? cleanResponse(rawContent)
+      : query;
+
   } catch (error) {
     console.error('processQueryWithAI: Error during execution:', error);
     return query;
