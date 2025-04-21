@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
 import {
   Box,
@@ -140,6 +140,28 @@ const Bruside = () => {
   const { config, updateConfig } = useConfig();
   const [currentTabInfo, setCurrentTabInfo] = useState({ id: null, url: '' });
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      if (containerRef.current) {
+        // Force layout recalculation
+        containerRef.current.style.minHeight = '100dvh';
+        requestAnimationFrame(() => {
+          if (containerRef.current) {
+            containerRef.current.style.minHeight = '';
+          }
+        });
+      }
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
   useEffect(() => {
     if (!config?.chatMode === 'page') return;
 
@@ -268,10 +290,14 @@ const Bruside = () => {
 
   return (
     <Container
+      ref={containerRef}
       maxWidth="100%"
-      minHeight="100vh"
+      minHeight="100dvh" // Use dynamic viewport height
       padding={0}
-      textAlign="center"
+      position="relative" // Ensure proper stacking context
+      overflow="hidden" // Prevent layout shifts
+      display="flex"
+      flexDirection="column"
     >
       <Box
         display="flex"
