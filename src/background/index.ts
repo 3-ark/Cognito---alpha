@@ -11,24 +11,25 @@ chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error: unknown) => console.error(error));
 
+// Only inject on tab activation if panel is open
 chrome.tabs.onActivated.addListener(async activeInfo => {
-  const tabId = activeInfo.tabId;
-
-  console.log('tab activated: ', tabId);
-  injectContentScript(tabId);
+  if (await storage.getItem('panelOpen')) {
+    const tabId = activeInfo.tabId;
+    console.log('tab activated with panel open: ', tabId);
+    injectContentScript(tabId);
+  }
 });
 
-chrome.tabs.onUpdated
-  .addListener(async (tabId, changeInfo, tab) => {
-    if (!(tab.id && changeInfo.status === 'complete')) return;
-
-    console.log('tab connected: ', tab.url, changeInfo);
-
-    if (await storage.getItem('panelOpen')) {
-      console.log('panel open');
-      injectContentScript(tabId);
-    }
-  });
+// Only inject on tab updates if panel is open and URL changed
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (!(tab.id && changeInfo.status === 'complete')) return;
+  
+  // Only inject if panel is open AND URL changed
+  if (await storage.getItem('panelOpen') && changeInfo.url) {
+    console.log('tab updated with panel open:', tab.url);
+    injectContentScript(tabId);
+  }
+});
 
 chrome.runtime.onConnect.addListener(port => {
   const handleMessage = async msg => {
