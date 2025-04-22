@@ -2,7 +2,7 @@
 
 # Cognito
 
-All-around tiny browser-augmented chat client for open-source language models.
+All-around tiny browser-augmented chat client for open-source language models. Develop based on [sidellama](https://github.com/gyopak/sidellama)
 
 ## Plan
 
