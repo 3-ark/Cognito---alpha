@@ -21,7 +21,7 @@ All-around tiny browser-augmented chat client for open-source language models.
 - [X] Better web search
 - [X] Better web parsing
 - [X] Refine the Web Search, no query shows in the first search message, even with a connection. The prompt should include the messages as contexts.
-- [ ] Fix bugs (~searching title display~, border gets too wide sometimes, web search UI crash with developer tools)
+- [X] Fix bugs (~searching title display~, ~border gets too wide sometimes~, ~web search UI crash with developer tools~)
 - [X] Better parsing for Brave and DuckDuckGo
 - [ ] Add some extra buttons for page mode
 - [ ] Rewrite the API connection in openai compatible endpoint that allows custom API to be added freely
