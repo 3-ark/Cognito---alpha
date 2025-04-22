@@ -211,7 +211,7 @@ sx={{
 ### 2. Background Image (Background.tsx)
 ```tsx
 <Image
-  src="assets/images/Cognito.png"
+  src="assets/images/Cognito.jpg"
   style={{ 
     filter: 'opacity(0.03)',
     zoom: '1.2'

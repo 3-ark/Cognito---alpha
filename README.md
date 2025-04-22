@@ -1,4 +1,4 @@
-![](/public/images/Cognito.png)
+![](/public/images/ein.png)
 
 # Cognito
 
