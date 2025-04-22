@@ -159,7 +159,7 @@ export const urlRewriteRuntime = async function (domain: string) {
           requestHeaders: [
             {
               header: 'Origin',
-              operation: 'set',
+              operation: 'set' as chrome.declarativeNetRequest.HeaderOperation, // Explicitly type as HeaderOperation
               value: origin
             }
           ]
@@ -169,7 +169,7 @@ export const urlRewriteRuntime = async function (domain: string) {
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: rules.map(r => r.id),
-      addRules: rules
+      addRules: rules as chrome.declarativeNetRequest.Rule[] // Type assertion for addRules
     });
   } catch (error) {
     console.debug('URL rewrite skipped:', error);

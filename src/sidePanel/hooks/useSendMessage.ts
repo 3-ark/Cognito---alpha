@@ -220,7 +220,8 @@ const useSendMessage = (
       lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`,
       openai: 'https://api.openai.com/v1/chat/completions'
     };
-    const url = urlMap[currentModel.host];
+    const host = currentModel.host || '';
+    const url = urlMap[host];
 
     if (!url) {
       console.error("[${callId}] Could not determine API URL for host:", currentModel.host);

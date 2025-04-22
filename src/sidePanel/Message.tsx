@@ -231,11 +231,13 @@ const TBody = ({ children, ...rest }: TBodyProps) => (
 
 type TrProps = { children?: ReactNode } & HTMLAttributes<HTMLTableRowElement>;
 const Tr = ({ children, ...rest }: TrProps) => (
-  <tr style={{ 
-    '&:hover': {
-      background: 'rgba(0,0,0,0.05)'
-    }
-  }} {...rest}>{children}</tr>
+  <Box
+    as="tr"
+    _hover={{ background: 'rgba(0,0,0,0.05)' }}
+    {...rest}
+  >
+    {children}
+  </Box>
 );
 
 type ThProps = { children?: ReactNode } & HTMLAttributes<HTMLTableCellElement>;
