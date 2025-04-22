@@ -3,7 +3,6 @@ import { toast, Toaster } from 'react-hot-toast';
 import {
   Box,
   Container,
-  useInterval
 } from '@chakra-ui/react';
 import localforage from 'localforage';
 
@@ -241,7 +240,7 @@ const Cognito = () => {
 
   useEffect(() => {
     if (turns.length && !isLoading) {
-      const savedChat = ChatMessage = {
+      const savedChat: ChatMessage = {
         id: chatId,
         title: chatTitle,
         turns, // Already contains proper role info
