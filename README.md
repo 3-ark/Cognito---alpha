@@ -1,8 +1,8 @@
-![](/public/images/Bruside.png)
+![](/public/images/ein.png)
 
-# Bruside
+# Cognito
 
-All-around tiny browser-augmented chat client for open-source language models.
+All-around tiny browser-augmented chat client for open-source language models. Develop based on [sidellama](https://github.com/gyopak/sidellama)
 
 ## Plan
 
@@ -21,7 +21,7 @@ All-around tiny browser-augmented chat client for open-source language models.
 - [X] Better web search
 - [X] Better web parsing
 - [X] Refine the Web Search, no query shows in the first search message, even with a connection. The prompt should include the messages as contexts.
-- [ ] Fix bugs (~searching title display~, border gets too wide sometimes, web search UI crash with developer tools)
+- [X] Fix bugs (~searching title display~, ~border gets too wide sometimes~, ~web search UI crash with developer tools~)
 - [X] Better parsing for Brave and DuckDuckGo
 - [ ] Add some extra buttons for page mode
 - [ ] Rewrite the API connection in openai compatible endpoint that allows custom API to be added freely
@@ -36,7 +36,7 @@ Notes:
 
 ## installation
 
-- download the latest [release](https://github.com/3-ark/Bruside/releases)
+- download the latest [release](https://github.com/3-ark/Cognito/releases)
 - enable Chrome `Extensions > Developer mode`
 - load the content of the extracted zip with `Load unpacked` button
 
@@ -53,7 +53,7 @@ Check out the [documentation page](/DOCS.md)
 
 ### Available Personas
 
-Bruside comes with seven distinct personas to suit different needs:
+Cognito comes with seven distinct personas to suit different needs:
 
 *   **Ein:** Academic researcher focused on analyzing research papers. Delivers core problem statements, key findings with data, takeaways with implications, and insightful questions grounded in the text.
 *   **Warren:** Business analyst providing actionable insights on business strategies and market trends. Emphasizes data-driven decision-making, risk assessment, and strategic planning.
@@ -63,7 +63,7 @@ Bruside comes with seven distinct personas to suit different needs:
 *   **Sherlock:** Detective focused on logical reasoning and deduction. Emphasizes breaking down complex problems, step-by-step strategies, and careful analysis.
 *   **Bruce:** All-around assistant proficient in a wide range of tasks, including answering questions, explaining concepts, analyzing text, writing, and brainstorming.
 
-![](/docs/Bruside_app.png)
+![](/docs/Cognito_app.png)
 
 Web Search
 ![alt text](/docs/websearch.png)

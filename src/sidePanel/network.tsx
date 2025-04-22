@@ -29,6 +29,14 @@ interface Config {
   pageMode?: string;
 }
 
+// Add helper function to clean response from thinking blocks
+const cleanResponse = (response: string): string => {
+  return response
+    .replace(/<think>[\s\S]*?<\/think>/g, '') // Remove thinking blocks with content
+    .replace(/["']/g, '') // Remove quotes
+    .trim();
+};
+
 export const processQueryWithAI = async (
   query: string,
   config: Config,
@@ -122,8 +130,11 @@ Output:
     }
 
     const responseData = await response.json();
-    const optimizedContent = responseData?.choices?.[0]?.message?.content;
-    return typeof optimizedContent === 'string' ? optimizedContent.trim().replace(/["']/g, '') : query;
+    const rawContent = responseData?.choices?.[0]?.message?.content;
+    return typeof rawContent === 'string' 
+      ? cleanResponse(rawContent)
+      : query;
+
   } catch (error) {
     console.error('processQueryWithAI: Error during execution:', error);
     return query;
@@ -148,7 +159,7 @@ export const urlRewriteRuntime = async function (domain: string) {
           requestHeaders: [
             {
               header: 'Origin',
-              operation: 'set',
+              operation: 'set' as chrome.declarativeNetRequest.HeaderOperation, // Explicitly type as HeaderOperation
               value: origin
             }
           ]
@@ -158,7 +169,7 @@ export const urlRewriteRuntime = async function (domain: string) {
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: rules.map(r => r.id),
-      addRules: rules
+      addRules: rules as chrome.declarativeNetRequest.Rule[] // Type assertion for addRules
     });
   } catch (error) {
     console.debug('URL rewrite skipped:', error);
@@ -294,11 +305,18 @@ export async function fetchDataAsStream(
   let streamFinished = false; // Flag to prevent multiple final calls
 
   // Helper to call final message exactly once
-  const finishStream = (message: string, isError: boolean = false) => {
+  const finishStream = (message: unknown, isError: boolean = false) => {
     if (!streamFinished) {
       streamFinished = true;
       // Ensure message is a string, even if error object is passed accidentally
-      const finalMessage = typeof message === 'string' ? message : (message instanceof Error ? message.message : String(message));
+      let finalMessage: string;
+      if (typeof message === 'string') {
+        finalMessage = message;
+      } else if (message && typeof message === 'object' && 'message' in message && typeof (message as any).message === 'string') {
+        finalMessage = (message as any).message;
+      } else {
+        finalMessage = String(message);
+      }
       onMessage(finalMessage, true, isError); // Pass done=true and error status
     }
   };

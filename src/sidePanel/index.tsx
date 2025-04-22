@@ -6,7 +6,7 @@ import { extendTheme, type ThemeConfig } from '@chakra-ui/react';
 import { createStoreProxy } from 'src/state/store';
 import PortNames from 'src/types/PortNames';
 
-import Bruside from './Bruside';
+import Cognito from './Cognito';
 import { ConfigProvider } from './ConfigContext';
 
 const store = createStoreProxy(PortNames.ContentPort);
@@ -30,7 +30,7 @@ store.ready().then(() => {
     <Provider store={store}>
       <ChakraProvider theme={theme}>
         <ConfigProvider>
-          <Bruside />
+          <Cognito />
         </ConfigProvider>
       </ChakraProvider>
     </Provider>

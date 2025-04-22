@@ -14,7 +14,7 @@ export interface Model {
 
 export interface Config {
   personas: Record<string, string>;
-  persona?: string;
+  persona: string;
   generateTitle?: boolean;
   backgroundImage?: boolean;
   webMode?: 'duckduckgo' | 'brave' | 'google';

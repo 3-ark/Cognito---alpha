@@ -6,6 +6,7 @@ import { useConfig } from '../ConfigContext';
 import {
  GEMINI_URL, GROQ_URL, OPENAI_URL 
 } from '../constants';
+import type { Model } from 'src/types/config';
 
 const fetchDataSilently = async (url: string, params = {}) => {
   try {
@@ -23,10 +24,8 @@ export const useUpdateModels = () => {
   const { config, updateConfig } = useConfig();
 
   const fetchModels = useCallback(async () => {
-    const panelOpen = await storage.getItem('panelOpen'); // Add storage import
-    if (!panelOpen) return;
 
-    let models = [];
+    let models: Model[] = [];
 
     if (config?.ollamaUrl) {
       const ollamaModels = await fetchDataSilently(`${config?.ollamaUrl}/api/tags`);
@@ -34,9 +33,11 @@ export const useUpdateModels = () => {
       if (!ollamaModels) {
         updateConfig({ ollamaConnected: false, ollamaUrl: '' });
       } else {
-        const parsedModels = ollamaModels?.models?.map((m: unknown) => ({
- ...m, id: m.name, host: 'ollama' 
-})) || [];
+        const parsedModels = (ollamaModels?.models as Model[] ?? []).map(m => ({
+          ...m,
+          id: (m as any).name ?? m.id, // fallback if needed
+          host: 'ollama'
+        }));
 
         models = [...models, ...parsedModels];
       }
@@ -51,7 +52,11 @@ export const useUpdateModels = () => {
       if (!lmStudioModels) {
         updateConfig({ lmStudioConnected: false, lmStudioUrl: '' });
       } else {
-        const parsedModels = lmStudioModels?.data?.map((m: unknown) => ({ ...m, host: 'lmStudio' })) || [];
+        const parsedModels = (lmStudioModels?.data as Model[] ?? []).map(m => ({
+          ...m,
+          id: (m as any).name ?? m.id, // fallback if needed
+          host: 'lmStudio'
+        }));
 
         models = [...models, ...parsedModels];
       }
@@ -63,7 +68,11 @@ export const useUpdateModels = () => {
       if (!geminiModels) {
         updateConfig({ geminiConnected: false });
       } else {
-        const parsedModels = geminiModels?.data.map((m: unknown) => ({ ...m, host: 'gemini' })) || [];
+        const parsedModels = (geminiModels?.data as Model[] ?? []).map(m => ({
+          ...m,
+          id: (m as any).name ?? m.id, // fallback if needed
+          host: 'gemini'
+        }));
 
         models = [...models, ...parsedModels];
       }
@@ -75,7 +84,11 @@ export const useUpdateModels = () => {
       if (!groqModels) {
         updateConfig({ groqConnected: false });
       } else {
-        const parsedModels = groqModels?.data.map((m: unknown) => ({ ...m, host: 'groq' })) || [];
+        const parsedModels = (groqModels?.data as Model[] ?? []).map(m => ({
+          ...m,
+          id: (m as any).name ?? m.id, // fallback if needed
+          host: 'groq'
+        }));
 
         models = [...models, ...parsedModels];
       }
@@ -87,19 +100,23 @@ export const useUpdateModels = () => {
       if (!openAiModels) {
         updateConfig({ openAiConnected: false });
       } else {
-        const parsedModels = openAiModels?.data.filter((m: unknown) => m.id.startsWith('gpt-')).map((m: unknown) => ({ ...m, host: 'openai' })) || [];
+        const parsedModels = (openAiModels?.data as Model[] ?? []).filter(m => m.id.startsWith('gpt-')).map(m => ({
+          ...m,
+          id: (m as any).name ?? m.id, // fallback if needed
+          host: 'openai'
+        }));
 
         models = [...models, ...parsedModels];
       }
     }
 
-    const haveModelsChanged = (newModels: unknown[], existingModels: unknown[] = []) => {
+    const haveModelsChanged = (newModels: Model[], existingModels: Model[] = []) => {
       if (newModels.length !== existingModels.length) return true;
-      
-      const sortById = (a: unknown, b: unknown) => a.id.localeCompare(b.id);
+
+      const sortById = (a: Model, b: Model) => a.id.localeCompare(b.id);
       const sortedNew = [...newModels].sort(sortById);
       const sortedExisting = [...existingModels].sort(sortById);
-      
+
       return JSON.stringify(sortedNew) !== JSON.stringify(sortedExisting);
     };
 
@@ -112,7 +129,7 @@ export const useUpdateModels = () => {
         selectedModel: isSelectedAvailable ? config?.selectedModel : models[0]?.id 
       });
     }
-  }, [config, updateConfig, storage.getItem]); // Add storage dependency
+  }, [config, updateConfig, storage.getItem]);
 
   // Only fetch models when dependencies change
   useEffect(() => {

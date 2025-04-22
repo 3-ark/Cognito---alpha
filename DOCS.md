@@ -1,13 +1,13 @@
-# Bruside
+# Cognito
 
-- [Bruside](#bruside)
+- [Cognito](#Cognito)
   * [connections](#connections)
   * [persona](#persona)
   * [page context](#page-context)
   * [web search](#web-search)
   * [File Structure](#file-structure)
   * [Advanced Tweaks](#advanced-tweaks)
-    + [UI Customization Guide for Bruside Extension](#ui-customization-guide-for-bruside-extension)
+    + [UI Customization Guide for Cognito Extension](#ui-customization-guide-for-Cognito-extension)
       - [Theme System Overview](#theme-system-overview)
       - [Customizing Colors](#customizing-colors)
         * [1. Preset Themes](#1-preset-themes)
@@ -70,7 +70,7 @@ Groq offers a wide variety of models with a generous free tier.
 
 ## persona
 
-Create and modify your own personal assistants!
+> Create and modify your own personal assistants!
 
 Check out these collections for inspiration:
 - [0xeb/TheBigPromptLibrary](https://github.com/0xeb/TheBigPromptLibrary)
@@ -80,11 +80,89 @@ Check out these collections for inspiration:
 
 ## page context
 
-Augment your conversation with the content of your (currently visited) web page.
+> Augment your conversation with the content of your (currently visited) web page.
 
-The chat history includes **all previous messages** in the conversation by default, but context limits apply for AI processing:
+Tried a strict HTML parsing which will break the web page when sidepanel is open:
 
-1. **Full History Storage** in Bruside.tsx:
+```typescript
+function bridge() {
+  // Remove unwanted elements before extracting content
+  const selectorsToRemove = [
+    'header',
+    'footer',
+    'nav',
+    '.ad',
+    '.advertisement',
+    '.popup',
+    '.modal',
+    '.sidebar',
+    "script:not([type='application/ld+json'])",
+    'style',
+    'link',
+    "[aria-hidden='true']",
+    'noscript',
+    'iframe',
+    'svg',
+    'canvas',
+    'video',
+    'audio',
+    'button',
+    'input',
+    'select',
+    'textarea',
+    "meta:not([name])"
+  ].join(',');
+
+  // Remove all unwanted elements
+  document.querySelectorAll(selectorsToRemove).forEach(el => el.remove());
+
+  // Collect image alt texts
+  const altTexts = Array.from(document.images)
+    .map(img => img.alt)
+    .filter(alt => alt.trim().length > 0)
+    .join('. ');
+
+  // Extract table contents
+  const tableData = Array.from(document.querySelectorAll('table'))
+    .map(table => table.innerText.replace(/\s\s+/g, ' '))
+    .join('\n');
+
+  // Extract meta name content
+  const metaTags = Array.from(document.querySelectorAll('meta[name]'));
+  const meta: Record<string, string | null> = {};
+  metaTags.forEach(tag => {
+    const name = tag.getAttribute('name');
+    if (name) {
+      meta[name] = tag.getAttribute('content');
+    }
+  });
+
+  const response = JSON.stringify({
+    title: document.title,
+    text: document.body.innerText.replace(/\s\s+/g, ' '),
+    html: document.body.innerHTML.replace(/\s\s+/g, ' '),
+    altTexts,
+    tableData,
+    meta
+  });
+
+  return response;
+}
+```
+
+Result:
+
+[useSendMessage: Retrieved page content. Mode: undefined. String length: 10120, HTML length: 164091] (_Looks great, right?_)
+
+But this is from the same page just before this: [useSendMessage: Retrieved page content. Mode: undefined. String length: 10879, HTML length: 780071]
+
+Conclusion:
+
+**I will keep it simple.**
+
+The chat history includes **all previous messages** in current conversation by default, but context limits apply for AI processing:
+
+1. **Full History Storage** in Cognito.tsx:
 ```tsx
 const [messages, setMessages] = useState<ChatMessage[]>([]); // Stores all messages
 ```
@@ -132,7 +210,7 @@ only for development purposes)
 
 ## web search
 
-~Basic~ web augmentation for your chats. Enter your web search query, and Bruside will load up an async web search to answer your questions based on live public data.
+~Basic~ web augmentation for your chats. Enter your web search query, and Cognito will load up an async web search to answer your questions based on live public data.
 
 Context awareness
 ```ts
@@ -192,7 +270,7 @@ This is a showcase of how this content-awareness web search works.
 Key project structure with implementation details:
 
 ```
-Bruside/
+Cognito/
 ├── config/                # Build configuration and manifest definitions
 │   ├── manifest/          # Browser extension manifests per platform
 │   └── webpack.config.js  # Bundle configuration for Chrome extension
@@ -223,9 +301,9 @@ npm start      # Development watch mode
 
 ## Advanced Tweaks
 
-### UI Customization Guide for Bruside Extension
+### UI Customization Guide for Cognito Extension
 
-This explains how to customize various UI elements in the Bruside Chrome extension, which uses Chakra UI as its primary component library.
+This explains how to customize various UI elements in the Cognito Chrome extension, which uses Chakra UI as its primary component library.
 
 #### Theme System Overview
 
@@ -412,7 +490,7 @@ const theme = extendTheme({
 ```
 
 For further tweaks:
-[Comprehensive UI Customization Guide for Bruside Extension.md](https://github.com/3-ark/Bruside/blob/main/Comprehensive%20UI%20Customization%20Guide%20for%20Bruside%20Extension.md)
+[Comprehensive UI Customization Guide for Cognito Extension.md](https://github.com/3-ark/Cognito/blob/main/Comprehensive%20UI%20Customization%20Guide%20for%20Cognito%20Extension.md)
 Remember that most visual styling should be done through the theme system and CSS variables rather than direct component overrides for maintainability.
 
 ### Others

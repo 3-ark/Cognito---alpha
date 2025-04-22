@@ -9,8 +9,6 @@ interface ApiMessage {
   content: string;
 }
 
-const generateTitle = 'Create a short 2-4 word title for this chat. Only respond with the title. Example: "Trade War Analysis"';
-
 // Add helper function to extract title from COT response
 const extractTitle = (response: string): string => {
   // First remove any thinking blocks
@@ -26,21 +24,18 @@ const extractTitle = (response: string): string => {
 
 export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: string) => {
   const [chatTitle, setChatTitle] = useState('');
-  const [titleGenerated, setTitleGenerated] = useState(false);
   const { config } = useConfig();
 
   useEffect(() => {
-    // Only run if:
+    // Simplified conditions:
     // 1. Not already loading
-    // 2. Have enough messages
+    // 2. Have enough messages to generate a meaningful title
     // 3. No title yet
-    // 4. Title generation is enabled
-    // 5. Title hasn't been generated yet for this chat
+    // 4. Title generation is enabled in config
     if (!isLoading && 
         turns.length >= 2 && 
         !chatTitle && 
-        config?.generateTitle && 
-        !titleGenerated) {
+        config?.generateTitle) {
 
       const currentModel = config?.models?.find((model) => model.id === config.selectedModel);
       if (!currentModel) return;
@@ -53,7 +48,7 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
         })),
         { 
           role: 'user', 
-          content: 'Create a short 2-4 word title for this chat. Keep it concise. No explanations or thinking steps needed.' 
+          content: 'Create a short 2-4 word title for this chat. Keep it concise, just give me the best one, just one. No explanations or thinking steps needed.' 
         }
       ];
 
@@ -130,7 +125,6 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
           if (cleanTitle) {
             console.log("Setting chat title (local):", cleanTitle);
             setChatTitle(cleanTitle);
-            setTitleGenerated(true);
           }
         })
         .catch(err => console.error('Title generation failed:', err));
@@ -147,16 +141,15 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
               if (cleanTitle) {
                 console.log("Setting chat title (streaming):", cleanTitle);
                 setChatTitle(cleanTitle);
-                setTitleGenerated(true);
               }
             }
           },
           apiConfig.headers,
-          currentModel.host
+          currentModel.host || ''
         );
       }
     }
-  }, [isLoading, turns, message, config, chatTitle, titleGenerated]); // Add titleGenerated to deps
+  }, [isLoading, turns, message, config, chatTitle]);
 
   return { chatTitle, setChatTitle };
 };

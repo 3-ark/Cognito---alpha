@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
 import {
   Box,
   Container,
-  useInterval
 } from '@chakra-ui/react';
 import localforage from 'localforage';
 
@@ -128,7 +127,7 @@ const MessageTemplate = ({ children, onClick }) => (
   </Box>
 );
 
-const Bruside = () => {
+const Cognito = () => {
   const [turns, setTurns] = useState<MessageTurn[]>([]);
   const [message, setMessage] = useState('');
   const [chatId, setChatId] = useState(generateChatId());
@@ -138,10 +137,32 @@ const Bruside = () => {
   const [settingsMode, setSettingsMode] = useState(false);
   const [historyMode, setHistoryMode] = useState(false);
   const { config, updateConfig } = useConfig();
-  const [currentTabInfo, setCurrentTabInfo] = useState({ id: null, url: '' });
+  const [currentTabInfo, setCurrentTabInfo] = useState<{ id: number | null, url: string }>({ id: null, url: '' });
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!config?.chatMode === 'page') return;
+    const resizeObserver = new ResizeObserver(() => {
+      if (containerRef.current) {
+        // Force layout recalculation
+        containerRef.current.style.minHeight = '100dvh';
+        requestAnimationFrame(() => {
+          if (containerRef.current) {
+            containerRef.current.style.minHeight = '';
+          }
+        });
+      }
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (config?.chatMode !== 'page') return;
 
     // Function to check and inject if needed
     const checkAndInject = async () => {
@@ -210,7 +231,7 @@ const Bruside = () => {
     setLoading(false); // Ensure loading is reset
   };
 
-  const loadChat = (chat: { id: string, title: string, messages: ChatMessage[] }) => {
+  const loadChat = (chat: ChatMessage) => {
     setChatTitle(chat.title || '');
     setTurns(chat.turns);
     setChatId(chat.id);
@@ -219,14 +240,14 @@ const Bruside = () => {
 
   useEffect(() => {
     if (turns.length && !isLoading) {
-      const savedChat = ChatMessage = {
+      const savedChat: ChatMessage = {
         id: chatId,
         title: chatTitle,
         turns, // Already contains proper role info
         last_updated: Date.now(),
         model: config?.selectedModel
       };
-      console.log(`[${Date.now()}] Bruside: Saving chat ${chatId}`, savedChat); // Debug log
+      console.log(`[${Date.now()}] Cognito: Saving chat ${chatId}`, savedChat); // Debug log
 
       localforage.setItem(chatId, savedChat);
     }
@@ -268,10 +289,14 @@ const Bruside = () => {
 
   return (
     <Container
+      ref={containerRef}
       maxWidth="100%"
-      minHeight="100vh"
+      minHeight="100dvh" // Use dynamic viewport height
       padding={0}
-      textAlign="center"
+      position="relative" // Ensure proper stacking context
+      overflow="hidden" // Prevent layout shifts
+      display="flex"
+      flexDirection="column"
     >
       <Box
         display="flex"
@@ -398,4 +423,4 @@ const Bruside = () => {
   );
 };
 
-export default Bruside;
+export default Cognito;
