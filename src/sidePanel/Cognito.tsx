@@ -137,7 +137,7 @@ const Cognito = () => {
   const [settingsMode, setSettingsMode] = useState(false);
   const [historyMode, setHistoryMode] = useState(false);
   const { config, updateConfig } = useConfig();
-  const [currentTabInfo, setCurrentTabInfo] = useState({ id: null, url: '' });
+  const [currentTabInfo, setCurrentTabInfo] = useState<{ id: number | null, url: string }>({ id: null, url: '' });
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -231,7 +231,7 @@ const Cognito = () => {
     setLoading(false); // Ensure loading is reset
   };
 
-  const loadChat = (chat: { id: string, title: string, messages: ChatMessage[] }) => {
+  const loadChat = (chat: ChatMessage) => {
     setChatTitle(chat.title || '');
     setTurns(chat.turns);
     setChatId(chat.id);
