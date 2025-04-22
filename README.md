@@ -66,4 +66,4 @@ Cognito comes with seven distinct personas to suit different needs:
 ![](/docs/Cognito_app.png)
 
 Web Search
-![alt text](/docs/websearch.png)
+![alt text](/docs/googleparsing.png)
