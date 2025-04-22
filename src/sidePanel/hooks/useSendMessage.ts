@@ -279,7 +279,7 @@ const useSendMessage = (
         }
       },
       authHeader,
-      currentModel.host
+      currentModel.host || ''
     );
     console.log(`[${callId}] useSendMessage: fetchDataAsStream call INITIATED.`);
 

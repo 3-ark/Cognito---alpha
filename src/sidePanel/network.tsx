@@ -305,11 +305,18 @@ export async function fetchDataAsStream(
   let streamFinished = false; // Flag to prevent multiple final calls
 
   // Helper to call final message exactly once
-  const finishStream = (message: string, isError: boolean = false) => {
+  const finishStream = (message: unknown, isError: boolean = false) => {
     if (!streamFinished) {
       streamFinished = true;
       // Ensure message is a string, even if error object is passed accidentally
-      const finalMessage = typeof message === 'string' ? message : (message instanceof Error ? message.message : String(message));
+      let finalMessage: string;
+      if (typeof message === 'string') {
+        finalMessage = message;
+      } else if (message && typeof message === 'object' && 'message' in message && typeof (message as any).message === 'string') {
+        finalMessage = (message as any).message;
+      } else {
+        finalMessage = String(message);
+      }
       onMessage(finalMessage, true, isError); // Pass done=true and error status
     }
   };

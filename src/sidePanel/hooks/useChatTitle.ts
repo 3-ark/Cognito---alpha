@@ -145,7 +145,7 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
             }
           },
           apiConfig.headers,
-          currentModel.host
+          currentModel.host || ''
         );
       }
     }

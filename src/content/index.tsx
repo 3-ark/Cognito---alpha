@@ -1,6 +1,7 @@
 import { contentLoaded } from 'src/state/slices/content';
 import { createStoreProxy } from 'src/state/store';
 import PortNames from '../types/PortNames';
+import ContentProvider from './contracts/ContentProvider';
 
 import CursorController from './controllers/CursorController';
 
