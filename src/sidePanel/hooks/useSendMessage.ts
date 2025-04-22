@@ -41,6 +41,12 @@ export const getAuthHeader = (config: Config, currentModel: Model) => {
   if (currentModel?.host === 'openai' && config.openAiApiKey) {
     return { Authorization: `Bearer ${config.openAiApiKey}` };
   }
+  if (currentModel?.host === 'custom' && config.customApiKey) {
+    return { Authorization: `Bearer ${config.customApiKey}` };
+  }
+  if (currentModel?.host === 'custom2' && config.custom2ApiKey) {
+    return { Authorization: `Bearer ${config.custom2ApiKey}` };
+  }
   return undefined;
 };
 
@@ -218,7 +224,9 @@ const useSendMessage = (
       ollama: `${config?.ollamaUrl || ''}/api/chat`,
       gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
       lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`,
-      openai: 'https://api.openai.com/v1/chat/completions'
+      openai: 'https://api.openai.com/v1/chat/completions',
+      custom: 'https://your-custom-endpoint.com/v1/chat/completions',    // <-- Add this
+      custom2: 'https://your-second-custom-endpoint.com/v1/chat/completions' // <-- And this
     };
     const host = currentModel.host || '';
     const url = urlMap[host];

@@ -37,6 +37,12 @@ export interface Config {
   openAiApiKey?: string;
   openAiConnected?: boolean;
   openAiError?: string | unknown;
+  customApiKey?: string;
+  customConnected?: boolean;
+  customError?: string | unknown;
+  custom2ApiKey?: string;
+  custom2Connected?: boolean;
+  custom2Error?: string | unknown;
   visibleApiKeys?: boolean; // Maybe used somewhere?
   fontSize?: number;
   models?: Model[];
