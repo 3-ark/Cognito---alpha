@@ -162,7 +162,7 @@ const Cognito = () => {
   }, []);
 
   useEffect(() => {
-    if (!config?.chatMode === 'page') return;
+    if (config?.chatMode !== 'page') return;
 
     // Function to check and inject if needed
     const checkAndInject = async () => {
