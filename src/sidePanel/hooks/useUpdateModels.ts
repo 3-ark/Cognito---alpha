@@ -23,8 +23,6 @@ export const useUpdateModels = () => {
   const { config, updateConfig } = useConfig();
 
   const fetchModels = useCallback(async () => {
-    const panelOpen = await storage.getItem('panelOpen'); // Add storage import
-    if (!panelOpen) return;
 
     let models = [];
 
@@ -112,7 +110,7 @@ export const useUpdateModels = () => {
         selectedModel: isSelectedAvailable ? config?.selectedModel : models[0]?.id 
       });
     }
-  }, [config, updateConfig, storage.getItem]); // Add storage dependency
+  }, [config, updateConfig, storage.getItem]);
 
   // Only fetch models when dependencies change
   useEffect(() => {
