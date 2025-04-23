@@ -757,3 +757,5 @@ export const useChatTitle = (isLoading: boolean, messages: string[], message: st
    ```typescript
    newModelApiKey: '',  // Add this
    ```
+
+update: I put a custom endpoint and connectCustom.tsx, you can just use it or add your own. I don't want to add too much to mess the UI.  
