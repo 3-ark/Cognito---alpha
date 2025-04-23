@@ -2,35 +2,11 @@
 import { events } from 'fetch-event-stream';
 import { cleanUrl } from './WebSearch';
 import '../types/config.ts';
+import type { Config, Model } from 'src/types/config';
+// ...rest of your code...
 interface ApiMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
-}
-interface Model {
-  id: string;
-  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | 'openrouter' | 'custom' | string;
-  active?: boolean;
-  context_length?: number;
-}
-interface Config {
-  chatMode?: 'web' | 'page' | string;
-  webMode?: 'brave' | 'google' | 'duckduckgo' | string;
-  generateTitle?: boolean;
-  personas: Record<string, string>;
-  persona: string;
-  models?: Model[];
-  selectedModel?: string;
-  contextLimit?: number;
-  webLimit?: number;
-  ollamaUrl?: string;
-  lmStudioUrl?: string;
-  groqApiKey?: string;
-  geminiApiKey?: string;
-  openAiApiKey?: string;
-  customApiKey?: string;
-  openRouterApiKey?: string;
-  customEndpoint?: string;
-  pageMode?: string;
 }
 
 // Add helper function to clean response from thinking blocks

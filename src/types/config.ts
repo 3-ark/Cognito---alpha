@@ -10,7 +10,7 @@ export interface Persona {
 
 export interface Model {
   id: string;
-  host?: string; // e.g., 'ollama', 'lmStudio', 'openai', 'gemini', 'groq'
+  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | 'openrouter' | 'custom' | string;
   active?: boolean;
   context_length?: number;
   // Add other model-specific properties if needed
@@ -21,7 +21,7 @@ export interface Config {
   persona: string;
   generateTitle?: boolean;
   backgroundImage?: boolean;
-  webMode?: 'duckduckgo' | 'brave' | 'google';
+  webMode?: 'duckduckgo' | 'brave' | 'google' | string;
   webLimit?: number;
   pageMode?: 'text' | 'html';
   contextLimit?: number;
@@ -52,7 +52,7 @@ export interface Config {
   fontSize?: number;
   models?: Model[];
   selectedModel?: string;
-  chatMode?: 'web' | 'page' | 'chat';
+  chatMode?: 'web' | 'page' | 'chat' | string;
   theme?: string; // Add this line
   customTheme?: {
     active: string;

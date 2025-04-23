@@ -2,32 +2,8 @@ import { Dispatch, SetStateAction, useRef } from 'react';
 import { MessageTurn } from '../ChatHistory'; // Adjust path if needed
 import { fetchDataAsStream, webSearch, processQueryWithAI } from '../network';
 import storage from 'src/util/storageUtil';// --- Interfaces (Model, Config, ApiMessage) remain the same ---
-interface Model {
-  id: string;
-  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | string;
-  active?: boolean;
-  context_length?: number;
-}
-interface Config {
-  chatMode?: 'web' | 'page' | string;
-  webMode?: 'brave' | 'google' | 'duckduckgo' | string;
-  generateTitle?: boolean;
-  personas: Record<string, string>;
-  persona: string;
-  models?: Model[];
-  selectedModel?: string;
-  contextLimit?: number;
-  webLimit?: number;
-  ollamaUrl?: string;
-  lmStudioUrl?: string;
-  groqApiKey?: string;
-  geminiApiKey?: string;
-  openAiApiKey?: string;
-  openRouterApiKey?: string;
-  customApiKey?: string;
-  customEndpoint?: string;
-  pageMode?: string;
-}
+import type { Config, Model } from 'src/types/config';
+// ...rest of your code...
 interface ApiMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
