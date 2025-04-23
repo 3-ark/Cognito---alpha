@@ -35,7 +35,7 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (ollamaModels?.models as Model[] ?? []).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'ollama'
         }));
 
@@ -54,7 +54,7 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (lmStudioModels?.data as Model[] ?? []).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'lmStudio'
         }));
 
@@ -70,7 +70,7 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (geminiModels?.data as Model[] ?? []).filter(m => m.id.startsWith('models/gemini')).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'gemini'
         }));
 
@@ -86,7 +86,7 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (groqModels?.data as Model[] ?? []).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'groq'
         }));
 
@@ -102,7 +102,7 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (openAiModels?.data as Model[] ?? []).filter(m => m.id.startsWith('gpt-')).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'openai'
         }));
 
@@ -136,7 +136,7 @@ export const useUpdateModels = () => {
       if (customModels?.data) {
         const parsedModels = (customModels.data as Model[] ?? []).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id,
+          id: m.id,
           host: 'custom'
         }));
         models = [...models, ...parsedModels];
