@@ -1,7 +1,11 @@
 export interface Persona {
-  Researcher: string;
+  Ein: string;
   Jan: string;
   Bruce: string;
+  Sherlock: string;
+  Agatha: string;
+  Charlie: string;
+  Warren: string;
 }
 
 export interface Model {
