@@ -38,14 +38,18 @@ import {
       name: 'paper', active: '#dcc299', bg: '#F5E9D5', text: '#5B4636'
     },
     {
-      name: 'smoke', active: '#bab8b8', bg: '#dfdfdf', text: '#333333' 
+      name: 'smoke', active: '#939393', bg: '#dfdfdf', text: '#333333' 
     },
     {
       name: 'moss', active: '#a4b086', bg: '#EFD6AC', text: '#333333' 
     },
     {
-      name: 'custom', active: '#C2E7B5', bg: '#c2e7b5', text: '#333333' 
+      name: 'dark', active: '#7473af', bg: '#050505', text: '#e3e3e3' 
+    },
+    {
+      name: 'custom', active: '#7473af', bg: '#050505', text: '#e3e3e3' 
     }
+
   ];
   
   export const setTheme = (c: Theme) => {
@@ -175,7 +179,7 @@ import {
     return (
       <AccordionItem border="2px solid var(--text)" borderRadius={16} mb={4} mt={0}>
         <AccordionButton _hover={{ backgroundColor: 'transparent' }} paddingBottom={1} paddingRight={2}>
-          <SettingTitle icon="🎨" padding={0} text="appearance" />
+          <SettingTitle icon="🎨" padding={0} text="themes" />
         </AccordionButton>
         <AccordionPanel pb={4}>
           <Box>

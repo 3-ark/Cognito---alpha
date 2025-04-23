@@ -4,7 +4,7 @@ import {
 import storage from 'src/util/storageUtil';
 import { useConfig } from '../ConfigContext';
 import {
- GEMINI_URL, GROQ_URL, OPENAI_URL 
+ GEMINI_URL, GROQ_URL, OPENAI_URL, OPENROUTER_URL 
 } from '../constants';
 import type { Model } from 'src/types/config';
 
@@ -35,7 +35,7 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (ollamaModels?.models as Model[] ?? []).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'ollama'
         }));
 
@@ -54,7 +54,7 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (lmStudioModels?.data as Model[] ?? []).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'lmStudio'
         }));
 
@@ -68,9 +68,9 @@ export const useUpdateModels = () => {
       if (!geminiModels) {
         updateConfig({ geminiConnected: false });
       } else {
-        const parsedModels = (geminiModels?.data as Model[] ?? []).map(m => ({
+        const parsedModels = (geminiModels?.data as Model[] ?? []).filter(m => m.id.startsWith('models/gemini')).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'gemini'
         }));
 
@@ -86,7 +86,7 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (groqModels?.data as Model[] ?? []).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'groq'
         }));
 
@@ -102,10 +102,43 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (openAiModels?.data as Model[] ?? []).filter(m => m.id.startsWith('gpt-')).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
           host: 'openai'
         }));
 
+        models = [...models, ...parsedModels];
+      }
+    }
+
+    if (config?.openRouterApiKey) {
+      const openRouterModels = await fetchDataSilently(OPENROUTER_URL, { headers: { Authorization: `Bearer ${config?.openRouterApiKey}` } });
+
+      if (!openRouterModels) {
+        updateConfig({ openRouterConnected: false });
+      } else {
+        const parsedModels = (openRouterModels?.data as Model[] ?? []).map(m => ({
+          ...m,
+          id: m.id, // fallback if needed
+          context_length: m.context_length,
+          host: 'openrouter'
+        }));
+
+        models = [...models, ...parsedModels];
+      }
+    }
+
+    // Custom Endpoint
+    if (config?.customEndpoint && config?.customApiKey) {
+      const customModels = await fetchDataSilently(
+        `${config.customEndpoint.replace(/\/v1\/chat\/completions$/, '')}/v1/models`,
+        { headers: { Authorization: `Bearer ${config.customApiKey}` } }
+      );
+      if (customModels?.data) {
+        const parsedModels = (customModels.data as Model[] ?? []).map(m => ({
+          ...m,
+          id: m.id,
+          host: 'custom'
+        }));
         models = [...models, ...parsedModels];
       }
     }
@@ -139,7 +172,10 @@ export const useUpdateModels = () => {
     config?.lmStudioUrl,
     config?.geminiApiKey,
     config?.groqApiKey,
-    config?.openAiApiKey,
+    config?.openAiApiKey,      // <-- add this
+    config?.openRouterApiKey,         // <-- add this
+    config?.customEndpoint,      // <-- add this
+    config?.customApiKey,        // <-- add this
     fetchModels
   ]);
 

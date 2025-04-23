@@ -1,32 +1,12 @@
 // Fetching data using readable stream
 import { events } from 'fetch-event-stream';
 import { cleanUrl } from './WebSearch';
-
+import '../types/config.ts';
+import type { Config, Model } from 'src/types/config';
+// ...rest of your code...
 interface ApiMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
-}
-interface Model {
-  id: string;
-  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | string;
-  active?: boolean;
-}
-interface Config {
-  chatMode?: 'web' | 'page' | string;
-  webMode?: 'brave' | 'google' | 'duckduckgo' | string;
-  generateTitle?: boolean;
-  personas: Record<string, string>;
-  persona: string;
-  models?: Model[];
-  selectedModel?: string;
-  contextLimit?: number;
-  webLimit?: number;
-  ollamaUrl?: string;
-  lmStudioUrl?: string;
-  groqApiKey?: string;
-  geminiApiKey?: string;
-  openAiApiKey?: string;
-  pageMode?: string;
 }
 
 // Add helper function to clean response from thinking blocks
@@ -92,7 +72,9 @@ Output:
       ollama: `${config?.ollamaUrl || ''}/api/chat`, // Add default empty string
       gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
       lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`, // Add default empty string
-      openai: 'https://api.openai.com/v1/chat/completions'
+      openai: 'https://api.openai.com/v1/chat/completions',
+      openrouter: 'https://openrouter.ai/api/v1/chat/completions',    // <-- Add this
+      custom: '${config?.customEndpoint}/v1/chat/completions' // <-- And this
     };
     const apiUrl = urlMap[currentModel.host];
     if (!apiUrl) {
@@ -400,7 +382,7 @@ export async function fetchDataAsStream(
         // If loop finished naturally (done=true reading stream)
         finishStream(str);
 
-      } else if (["lmStudio", "groq", "gemini", "openai"].includes(host)) {
+      } else if (["lmStudio", "groq", "gemini", "openai", "openrouter", "custom"].includes(host)) {
         // Using fetch-event-stream for SSE
         const stream = events(response); // Assuming 'events' is correctly imported
         for await (const event of stream) {

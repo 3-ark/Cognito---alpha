@@ -186,7 +186,6 @@ const SettingsDrawer = ({
                 '> option': {
                   background: 'var(--bg)',
                   color: 'var(--text)',
-                  '--option-bg-contrast': 'color-mix(in srgb, var(--text) 20%, var(--bg))'
                 },
               }}
               
@@ -218,7 +217,7 @@ const SettingsDrawer = ({
               <Input
                 value={inputFocused ? searchQuery : config?.selectedModel || ''}
                 placeholder={inputFocused ? "Search models..." : config?.selectedModel || "Select model..."} 
-                size="sm"
+                //size="sm"
                 background="transparent"
                 border="2px"
                 borderColor="var(--text)"
@@ -247,7 +246,7 @@ const SettingsDrawer = ({
                   overflowY="auto"
                   bg="var(--bg)"
                   border="2px solid var(--text)"
-                  borderRadius={16}
+                  borderRadius={0}
                   zIndex={2}
                 >
                   {filteredModels.length > 0 ? (
@@ -257,6 +256,7 @@ const SettingsDrawer = ({
                       p={2}
                       cursor={'pointer'} // Always pointer now
                       opacity={1}        // Always fully opaque
+                      color="var(--text)"
                       _hover={{ bg:'var(--active)'}}
                       onMouseDown={() => { // <-- Use onMouseDown
                         console.log("Selecting model:", model.id); // Debug log
@@ -266,6 +266,7 @@ const SettingsDrawer = ({
                       }}
                     >
                       {model.host ? `(${model.host}) ${model.id}` : model.id}
+                      {model.context_length ? `  [ctx: ${model.context_length}]` : ''}
                     </Box>
                   ))
               ) : (

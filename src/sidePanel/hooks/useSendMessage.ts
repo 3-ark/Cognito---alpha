@@ -2,28 +2,8 @@ import { Dispatch, SetStateAction, useRef } from 'react';
 import { MessageTurn } from '../ChatHistory'; // Adjust path if needed
 import { fetchDataAsStream, webSearch, processQueryWithAI } from '../network';
 import storage from 'src/util/storageUtil';// --- Interfaces (Model, Config, ApiMessage) remain the same ---
-interface Model {
-  id: string;
-  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | string;
-  active?: boolean;
-}
-interface Config {
-  chatMode?: 'web' | 'page' | string;
-  webMode?: 'brave' | 'google' | 'duckduckgo' | string;
-  generateTitle?: boolean;
-  personas: Record<string, string>;
-  persona: string;
-  models?: Model[];
-  selectedModel?: string;
-  contextLimit?: number;
-  webLimit?: number;
-  ollamaUrl?: string;
-  lmStudioUrl?: string;
-  groqApiKey?: string;
-  geminiApiKey?: string;
-  openAiApiKey?: string;
-  pageMode?: string;
-}
+import type { Config, Model } from 'src/types/config';
+// ...rest of your code...
 interface ApiMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -40,6 +20,12 @@ export const getAuthHeader = (config: Config, currentModel: Model) => {
   }
   if (currentModel?.host === 'openai' && config.openAiApiKey) {
     return { Authorization: `Bearer ${config.openAiApiKey}` };
+  }
+  if (currentModel?.host === 'openrouter' && config.openRouterApiKey) {
+    return { Authorization: `Bearer ${config.openRouterApiKey}` };
+  }
+  if (currentModel?.host === 'custom' && config.customApiKey) {
+    return { Authorization: `Bearer ${config.customApiKey}` };
   }
   return undefined;
 };
@@ -218,7 +204,9 @@ const useSendMessage = (
       ollama: `${config?.ollamaUrl || ''}/api/chat`,
       gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
       lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`,
-      openai: 'https://api.openai.com/v1/chat/completions'
+      openai: 'https://api.openai.com/v1/chat/completions',
+      openrouter: 'https://openrouter.ai/api/v1/chat/completions',    // <-- Add this
+      custom: '${customEndpoint}/v1/chat/completions',
     };
     const host = currentModel.host || '';
     const url = urlMap[host];
