@@ -44,7 +44,7 @@ import {
       name: 'moss', active: '#a4b086', bg: '#EFD6AC', text: '#333333' 
     },
     {
-      name: 'custom', active: '#C2E7B5', bg: '#c2e7b5', text: '#333333' 
+      name: 'custom', active: '#7473af', bg: '#050505', text: '#e3e3e3' 
     }
   ];
   
