@@ -7,10 +7,10 @@ import {
 
 import { useConfig } from './ConfigContext';
 
-export const ConnectCustom2 = () => {
+export const ConnectCustom = () => {
   const { config, updateConfig } = useConfig();
-  const [apiKey, setApiKey] = useState(config?.custom2ApiKey || '');
-  const [endpoint, setEndpoint] = useState(config?.customEndpoint2 || '');
+  const [apiKey, setApiKey] = useState(config?.customApiKey || '');
+  const [endpoint, setEndpoint] = useState(config?.customEndpoint || '');
   const [visibleApiKeys, setVisibleApiKeys] = useState(false);
 
   const onConnect = async () => {
@@ -28,38 +28,38 @@ export const ConnectCustom2 = () => {
       const models = (modelsJson.data || []).map((m: any) => ({
         ...m,
         id: m.id || m.name,
-        host: 'custom2',
+        host: 'custom',
         active: false,
       }));
 
       updateConfig({
-        custom2ApiKey: apiKey,
-        customEndpoint2: endpoint,
-        custom2Connected: true,
-        custom2Error: undefined,
+        customApiKey: apiKey,
+        customEndpoint: endpoint,
+        customConnected: true,
+        customError: undefined,
         models: [
           ...(config?.models || []),
           ...models,
         ],
         selectedModel: models[0]?.id || '',
       });
-      toast.success('Custom endpoint 2 connected');
+      toast.success('Custom endpoint connected');
     } catch (e) {
       toast.error('Failed to fetch models from custom endpoint');
       updateConfig({
-        custom2Error: 'Failed to fetch models',
-        custom2Connected: false,
+        customError: 'Failed to fetch models',
+        customConnected: false,
       });
     }
   };
 
-  const disabled = config?.custom2ApiKey === apiKey && config?.customEndpoint2 === endpoint;
-  const isConnected = config?.custom2Connected;
+  const disabled = config?.customApiKey === apiKey && config?.customEndpoint === endpoint;
+  const isConnected = config?.customConnected;
 
   return (
     <Box display="flex" flexDirection="column" gap={2} mb={4} ml={4} mr={4}>
       <Input
-        placeholder="custom_endpoint2"
+        placeholder="custom_openai_endpoint"
         value={endpoint}
         onChange={e => setEndpoint(e.target.value)}
         mb={2}
@@ -92,7 +92,7 @@ export const ConnectCustom2 = () => {
           fontWeight={600}
           id="user-input"
           mr={4}
-          placeholder="CUSTOM2_API_KEY"
+          placeholder="CUSTOM_API_KEY"
           size="sm"
           type={!visibleApiKeys ? 'password' : undefined}
           value={apiKey}

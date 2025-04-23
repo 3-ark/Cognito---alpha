@@ -97,6 +97,20 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
               url: 'https://api.openai.com/v1/chat/completions',
               headers: { Authorization: `Bearer ${config.openAiApiKey}` }
             };
+          
+          case 'openrouter':
+            return {
+              ...baseConfig,
+              url: 'https://openrouter.ai/api/v1/chat/completions',
+              headers: { Authorization: `Bearer ${config.openRouterApiKey}` }
+            };
+
+          case 'custom':
+            return {
+              ...baseConfig,
+              url: '${customEndpoint}/v1/chat/completions',
+              headers: { Authorization: `Bearer ${config.customApiKey}` }
+            };
 
           default:
             console.warn(`useChatTitle: Unsupported host for title generation: ${currentModel.host}`);

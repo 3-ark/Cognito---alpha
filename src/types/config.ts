@@ -40,10 +40,10 @@ export interface Config {
   openRouterApiKey?: string;
   openRouterConnected?: boolean;
   openRouterError?: string | unknown;
-  customEndpoint2?: string;
-  custom2ApiKey?: string;
-  custom2Connected?: boolean;
-  custom2Error?: string | unknown;
+  customEndpoint?: string;
+  customApiKey?: string;
+  customConnected?: boolean;
+  customError?: string | unknown;
   visibleApiKeys?: boolean; // Maybe used somewhere?
   fontSize?: number;
   models?: Model[];

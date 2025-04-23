@@ -126,17 +126,17 @@ export const useUpdateModels = () => {
       }
     }
 
-    // Custom Endpoint 2
-    if (config?.customEndpoint2 && config?.custom2ApiKey) {
-      const custom2Models = await fetchDataSilently(
-        `${config.customEndpoint2.replace(/\/v1\/chat\/completions$/, '')}/v1/models`,
-        { headers: { Authorization: `Bearer ${config.custom2ApiKey}` } }
+    // Custom Endpoint
+    if (config?.customEndpoint && config?.customApiKey) {
+      const customModels = await fetchDataSilently(
+        `${config.customEndpoint.replace(/\/v1\/chat\/completions$/, '')}/v1/models`,
+        { headers: { Authorization: `Bearer ${config.customApiKey}` } }
       );
-      if (custom2Models?.data) {
-        const parsedModels = (custom2Models.data as Model[] ?? []).map(m => ({
+      if (customModels?.data) {
+        const parsedModels = (customModels.data as Model[] ?? []).map(m => ({
           ...m,
           id: (m as any).name ?? m.id,
-          host: 'custom2'
+          host: 'custom'
         }));
         models = [...models, ...parsedModels];
       }
@@ -173,8 +173,8 @@ export const useUpdateModels = () => {
     config?.groqApiKey,
     config?.openAiApiKey,      // <-- add this
     config?.openRouterApiKey,         // <-- add this
-    config?.customEndpoint2,      // <-- add this
-    config?.custom2ApiKey,        // <-- add this
+    config?.customEndpoint,      // <-- add this
+    config?.customApiKey,        // <-- add this
     fetchModels
   ]);
 

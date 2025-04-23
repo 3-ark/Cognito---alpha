@@ -23,8 +23,8 @@ interface Config {
   geminiApiKey?: string;
   openAiApiKey?: string;
   openRouterApiKey?: string;
-  custom2ApiKey?: string;
-  customEndpoint2?: string;
+  customApiKey?: string;
+  customEndpoint?: string;
   pageMode?: string;
 }
 interface ApiMessage {
@@ -47,8 +47,8 @@ export const getAuthHeader = (config: Config, currentModel: Model) => {
   if (currentModel?.host === 'openrouter' && config.openRouterApiKey) {
     return { Authorization: `Bearer ${config.openRouterApiKey}` };
   }
-  if (currentModel?.host === 'custom' && config.custom2ApiKey) {
-    return { Authorization: `Bearer ${config.custom2ApiKey}` };
+  if (currentModel?.host === 'custom' && config.customApiKey) {
+    return { Authorization: `Bearer ${config.customApiKey}` };
   }
   return undefined;
 };
@@ -229,7 +229,7 @@ const useSendMessage = (
       lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`,
       openai: 'https://api.openai.com/v1/chat/completions',
       openrouter: 'https://openrouter.ai/api/v1/chat/completions',    // <-- Add this
-      custom2: 'https://your-second-custom-endpoint.com/v1/chat/completions' // <-- And this
+      custom: '${customEndpoint}/v1/chat/completions',
     };
     const host = currentModel.host || '';
     const url = urlMap[host];

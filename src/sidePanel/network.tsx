@@ -8,7 +8,7 @@ interface ApiMessage {
 }
 interface Model {
   id: string;
-  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | string;
+  host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | 'openrouter' | 'custom' | string;
   active?: boolean;
 }
 interface Config {
@@ -26,6 +26,9 @@ interface Config {
   groqApiKey?: string;
   geminiApiKey?: string;
   openAiApiKey?: string;
+  customApiKey?: string;
+  openRouterApiKey?: string;
+  customEndpoint?: string;
   pageMode?: string;
 }
 
@@ -94,7 +97,7 @@ Output:
       lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`, // Add default empty string
       openai: 'https://api.openai.com/v1/chat/completions',
       openrouter: 'https://openrouter.ai/api/v1/chat/completions',    // <-- Add this
-      custom2: 'https://your-second-custom-endpoint.com/v1/chat/completions' // <-- And this
+      custom: '${config?.customEndpoint}/v1/chat/completions' // <-- And this
     };
     const apiUrl = urlMap[currentModel.host];
     if (!apiUrl) {
@@ -402,7 +405,7 @@ export async function fetchDataAsStream(
         // If loop finished naturally (done=true reading stream)
         finishStream(str);
 
-      } else if (["lmStudio", "groq", "gemini", "openai"].includes(host)) {
+      } else if (["lmStudio", "groq", "gemini", "openai", "openrouter", "custom"].includes(host)) {
         // Using fetch-event-stream for SSE
         const stream = events(response); // Assuming 'events' is correctly imported
         for await (const event of stream) {

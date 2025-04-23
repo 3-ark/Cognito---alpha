@@ -10,7 +10,7 @@ import { ConnectLmStudio } from './ConnectLmStudio';
 import { ConnectOllama } from './ConnectOllama';
 import { ConnectOpenAI } from './ConnectOpenAI';
 import { ConnectOpenRouter } from './ConnectOpenRouter';
-import { ConnectCustom2 } from './connectCustom2';
+import { ConnectCustom } from './ConnectCustom';
 import { SettingTitle } from './SettingsTitle';
 
 type ConnectionProps = {
@@ -60,7 +60,7 @@ export const Connect: React.FC = () => (
       <ConnectionSection Component={ConnectGemini} link="https://aistudio.google.com/app/apikey" title="gemini" /> 
       <ConnectionSection Component={ConnectOpenAI} link="https://platform.openai.com/api-keys" title="openai" />
       <ConnectionSection Component={ConnectOpenRouter} link="https://openrouter.ai/settings/keys" title="openrouter" />
-      <ConnectionSection Component={ConnectCustom2} title="custom endpoint" />
+      <ConnectionSection Component={ConnectCustom} title="openAI compatible endpoint" />
     </AccordionPanel>
   </AccordionItem>
 );
