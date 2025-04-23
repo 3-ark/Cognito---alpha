@@ -758,4 +758,4 @@ export const useChatTitle = (isLoading: boolean, messages: string[], message: st
    newModelApiKey: '',  // Add this
    ```
 
-update: I put a custom endpoint and connectCustom.tsx, you can just use it or add your own. I don't want to add too much to mess the UI.  
+update: I put a custom endpoint and connectCustom.tsx, for v3.js permission, I have added Perplexity, Mistral, TogetherAI, Cohere, Deepseek. For local, LM Studio should be able to change to other openai compatible clients, or those suit ollama's, just confirm it in the 'connectxxx.tsx'. You can just use it or add your own by yourself. I don't want to add too much to mess the UI.
