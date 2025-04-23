@@ -186,7 +186,6 @@ const SettingsDrawer = ({
                 '> option': {
                   background: 'var(--bg)',
                   color: 'var(--text)',
-                  _hover: {color: 'var(--text)', bg: 'var(--active)'}
                 },
               }}
               
@@ -247,7 +246,7 @@ const SettingsDrawer = ({
                   overflowY="auto"
                   bg="var(--bg)"
                   border="2px solid var(--text)"
-                  borderRadius={16}
+                  borderRadius={0}
                   zIndex={2}
                 >
                   {filteredModels.length > 0 ? (
