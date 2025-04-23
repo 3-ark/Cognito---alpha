@@ -38,7 +38,7 @@ import {
       name: 'paper', active: '#dcc299', bg: '#F5E9D5', text: '#5B4636'
     },
     {
-      name: 'smoke', active: '#bab8b8', bg: '#dfdfdf', text: '#333333' 
+      name: 'smoke', active: '#939393', bg: '#dfdfdf', text: '#333333' 
     },
     {
       name: 'moss', active: '#a4b086', bg: '#EFD6AC', text: '#333333' 
