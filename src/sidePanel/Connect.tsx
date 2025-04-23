@@ -9,7 +9,7 @@ import { ConnectGroq } from './ConnectGroq';
 import { ConnectLmStudio } from './ConnectLmStudio';
 import { ConnectOllama } from './ConnectOllama';
 import { ConnectOpenAI } from './ConnectOpenAI';
-import { ConnectCustom1 } from './ConnectCustom1';
+import { ConnectOpenRouter } from './ConnectOpenRouter';
 import { ConnectCustom2 } from './connectCustom2';
 import { SettingTitle } from './SettingsTitle';
 
@@ -59,8 +59,8 @@ export const Connect: React.FC = () => (
       <ConnectionSection Component={ConnectGroq} link="https://console.groq.com/keys" title="groq" />
       <ConnectionSection Component={ConnectGemini} link="https://aistudio.google.com/app/apikey" title="gemini" /> 
       <ConnectionSection Component={ConnectOpenAI} link="https://platform.openai.com/api-keys" title="openai" />
-      <ConnectionSection Component={ConnectCustom1} title="custom endpoint 1" />
-      <ConnectionSection Component={ConnectCustom2} title="custom endpoint 2" />
+      <ConnectionSection Component={ConnectOpenRouter} link="https://openrouter.ai/settings/keys" title="openrouter" />
+      <ConnectionSection Component={ConnectCustom2} title="custom endpoint" />
     </AccordionPanel>
   </AccordionItem>
 );

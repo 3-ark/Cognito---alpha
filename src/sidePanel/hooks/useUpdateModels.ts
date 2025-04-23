@@ -4,7 +4,7 @@ import {
 import storage from 'src/util/storageUtil';
 import { useConfig } from '../ConfigContext';
 import {
- GEMINI_URL, GROQ_URL, OPENAI_URL 
+ GEMINI_URL, GROQ_URL, OPENAI_URL, OPENROUTER_URL 
 } from '../constants';
 import type { Model } from 'src/types/config';
 
@@ -68,7 +68,7 @@ export const useUpdateModels = () => {
       if (!geminiModels) {
         updateConfig({ geminiConnected: false });
       } else {
-        const parsedModels = (geminiModels?.data as Model[] ?? []).map(m => ({
+        const parsedModels = (geminiModels?.data as Model[] ?? []).filter(m => m.id.startsWith('models/gemini')).map(m => ({
           ...m,
           id: (m as any).name ?? m.id, // fallback if needed
           host: 'gemini'
@@ -110,6 +110,38 @@ export const useUpdateModels = () => {
       }
     }
 
+    if (config?.openRouterApiKey) {
+      const openRouterModels = await fetchDataSilently(OPENROUTER_URL, { headers: { Authorization: `Bearer ${config?.openRouterApiKey}` } });
+
+      if (!openRouterModels) {
+        updateConfig({ openRouterConnected: false });
+      } else {
+        const parsedModels = (openRouterModels?.data as Model[] ?? []).map(m => ({
+          ...m,
+          id: (m as any).name ?? m.id, // fallback if needed
+          host: 'openrouter'
+        }));
+
+        models = [...models, ...parsedModels];
+      }
+    }
+
+    // Custom Endpoint 2
+    if (config?.customEndpoint2 && config?.custom2ApiKey) {
+      const custom2Models = await fetchDataSilently(
+        `${config.customEndpoint2.replace(/\/v1\/chat\/completions$/, '')}/v1/models`,
+        { headers: { Authorization: `Bearer ${config.custom2ApiKey}` } }
+      );
+      if (custom2Models?.data) {
+        const parsedModels = (custom2Models.data as Model[] ?? []).map(m => ({
+          ...m,
+          id: (m as any).name ?? m.id,
+          host: 'custom2'
+        }));
+        models = [...models, ...parsedModels];
+      }
+    }
+
     const haveModelsChanged = (newModels: Model[], existingModels: Model[] = []) => {
       if (newModels.length !== existingModels.length) return true;
 
@@ -139,7 +171,10 @@ export const useUpdateModels = () => {
     config?.lmStudioUrl,
     config?.geminiApiKey,
     config?.groqApiKey,
-    config?.openAiApiKey,
+    config?.openAiApiKey,      // <-- add this
+    config?.openRouterApiKey,         // <-- add this
+    config?.customEndpoint2,      // <-- add this
+    config?.custom2ApiKey,        // <-- add this
     fetchModels
   ]);
 

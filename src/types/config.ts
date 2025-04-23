@@ -37,9 +37,10 @@ export interface Config {
   openAiApiKey?: string;
   openAiConnected?: boolean;
   openAiError?: string | unknown;
-  customApiKey?: string;
-  customConnected?: boolean;
-  customError?: string | unknown;
+  openRouterApiKey?: string;
+  openRouterConnected?: boolean;
+  openRouterError?: string | unknown;
+  customEndpoint2?: string;
   custom2ApiKey?: string;
   custom2Connected?: boolean;
   custom2Error?: string | unknown;

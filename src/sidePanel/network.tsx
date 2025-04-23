@@ -1,7 +1,7 @@
 // Fetching data using readable stream
 import { events } from 'fetch-event-stream';
 import { cleanUrl } from './WebSearch';
-
+import '../types/config.ts';
 interface ApiMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -93,7 +93,7 @@ Output:
       gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
       lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`, // Add default empty string
       openai: 'https://api.openai.com/v1/chat/completions',
-      custom: 'https://your-custom-endpoint.com/v1/chat/completions',    // <-- Add this
+      openrouter: 'https://openrouter.ai/api/v1/chat/completions',    // <-- Add this
       custom2: 'https://your-second-custom-endpoint.com/v1/chat/completions' // <-- And this
     };
     const apiUrl = urlMap[currentModel.host];
