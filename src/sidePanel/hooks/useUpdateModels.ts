@@ -118,7 +118,8 @@ export const useUpdateModels = () => {
       } else {
         const parsedModels = (openRouterModels?.data as Model[] ?? []).map(m => ({
           ...m,
-          id: (m as any).name ?? m.id, // fallback if needed
+          id: m.id, // fallback if needed
+          context_length: m.context_length,
           host: 'openrouter'
         }));
 

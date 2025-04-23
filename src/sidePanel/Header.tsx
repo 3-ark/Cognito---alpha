@@ -266,6 +266,7 @@ const SettingsDrawer = ({
                       }}
                     >
                       {model.host ? `(${model.host}) ${model.id}` : model.id}
+                      {model.context_length ? `  [ctx: ${model.context_length}]` : ''}
                     </Box>
                   ))
               ) : (

@@ -10,6 +10,7 @@ interface Model {
   id: string;
   host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | 'openrouter' | 'custom' | string;
   active?: boolean;
+  context_length?: number;
 }
 interface Config {
   chatMode?: 'web' | 'page' | string;

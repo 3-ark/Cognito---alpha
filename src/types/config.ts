@@ -8,7 +8,7 @@ export interface Model {
   id: string;
   host?: string; // e.g., 'ollama', 'lmStudio', 'openai', 'gemini', 'groq'
   active?: boolean;
-
+  context_length?: number;
   // Add other model-specific properties if needed
 }
 
