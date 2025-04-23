@@ -44,8 +44,12 @@ import {
       name: 'moss', active: '#a4b086', bg: '#EFD6AC', text: '#333333' 
     },
     {
+      name: 'dark', active: '#7473af', bg: '#050505', text: '#e3e3e3' 
+    },
+    {
       name: 'custom', active: '#7473af', bg: '#050505', text: '#e3e3e3' 
     }
+
   ];
   
   export const setTheme = (c: Theme) => {
