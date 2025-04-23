@@ -26,8 +26,7 @@ export const ConnectCustom = () => {
       );
       const modelsJson = await modelsRes.json();
       const models = (modelsJson.data || []).map((m: any) => ({
-        ...m,
-        id: m.id || m.name,
+        id: m.id,
         host: 'custom',
         active: false,
       }));
