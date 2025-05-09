@@ -1,16 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
-
 import { ThunkType } from 'src/state/State';
-import Position from 'src/types/Position';
 
 export interface ContentState {
     isLoaded: boolean;
-    cursorPosition: Position;
 }
 
 export const contentDefaultState: ContentState = {
   isLoaded: false,
-  cursorPosition: { x: 0, y: 0 }
 };
 
 const slice = createSlice({
@@ -21,9 +17,6 @@ const slice = createSlice({
     contentLoaded: state => {
       state.isLoaded = true;
     },
-    setCursorPosition: (state, action) => {
-      state.cursorPosition = action.payload;
-    }
   }
 });
 
@@ -37,10 +30,6 @@ export const contentLoaded = (): ThunkType => async (dispatch, getState) => {
   if (isLoaded) return;
 
   await dispatch(slice.actions.contentLoaded());
-};
-
-export const setCursorPosition = (position: Position): ThunkType => async dispatch => {
-  await dispatch(slice.actions.setCursorPosition(position));
 };
 
 const { actions, reducer } = slice;

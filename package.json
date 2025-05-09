@@ -1,7 +1,7 @@
 {
   "name": "cognito",
-  "version": "0.8.5",
-  "description": "Cognito is a Chrome extension that allows you to communicate with your browser.",
+  "version": "2.7.1",
+  "description": "Cognito is a Chrome LLM extension that allows you to communicate with your browser.",
   "main": "index.js",
   "scripts": {
     "start": "npm run clear && webpack -w --config config/webpack.config.js",
@@ -13,26 +13,29 @@
   },
   "keywords": [
     "sidepanel",
-    "side",
-    "panel",
+    "AI",
+    "LLM",
+    "local",
+    "assistant",
     "chrome",
     "extension"
   ],
   "author": "3-ark",
   "license": "MIT",
   "bugs": {
-  "url": "https://github.com/3-ark/Cognito"
+    "url": "https://github.com/3-ark/Cognito"
   },
   "homepage": "",
   "dependencies": {
-    "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.7.1",
     "@emotion/react": "^11.11.4",
     "@reduxjs/toolkit": "^1.9.5",
+    "@types/dom-speech-recognition": "^0.0.6",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
     "@types/redux-logger": "^3.0.9",
     "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^7.1.2",
     "dotenv": "^16.3.1",
     "fetch-event-stream": "^0.1.5",
     "framer-motion": "^11.1.7",
@@ -45,11 +48,16 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
+    "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "react-redux": "^8.1.1",
     "react-textarea-autosize": "^8.5.3",
     "redux-thunk": "^2.4.2",
     "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-supersub": "^1.0.0",
+    "sass": "^1.87.0",
+    "sass-loader": "^16.0.5",
     "webext-redux": "^2.1.9"
   },
   "devDependencies": {

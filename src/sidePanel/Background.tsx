@@ -2,15 +2,15 @@ import { Box, Image } from '@chakra-ui/react';
 import { useConfig } from './ConfigContext';
 
 const personaImages = {
-  Agatha: 'assets/images/agatha.jpg',
-  Bruce: 'assets/images/bruce.jpg',
-  Warren: 'assets/images/Cognito.jpg',
-  Charlie: 'assets/images/bruce.jpg',
-  Jan: 'assets/images/jan.jpg',
-  Sherlock: 'assets/images/Cognito.jpg',
+  Agatha: 'assets/images/agatha.png',
+  Bruce: 'assets/images/bruce.png',
+  Warren: 'assets/images/Cognito.png',
+  Charlie: 'assets/images/bruce.png',
+  Jan: 'assets/images/jan.png',
+  Sherlock: 'assets/images/Cognito.png',
   Ein: 'assets/images/ein.png',
   // fallback/default
-  default: 'assets/images/Cognito.jpg'
+  default: 'assets/images/Cognito.png'
 };
 
 export const Background = () => {

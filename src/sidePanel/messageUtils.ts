@@ -81,14 +81,13 @@ export const downloadImage = (turns: MessageTurn[]) => {
 });
 
 function filter(node: Node): boolean {
-  // Add type check for safety, although className is usually on Element/HTMLElement
   if (node instanceof Element) {
-      const isIcon = node.className?.includes?.('chakra-button');
-      
-      return !isIcon;
+    // Exclude only the button element, not its children (like SVGs)
+    if (node.className?.includes?.('chakra-button')) {
+      return false;
+    }
   }
-  
-  return true; // Keep nodes that aren't Elements (like text nodes) if needed by html-to-image
+  return true;
 }
 
   document.body.appendChild(wrapper);

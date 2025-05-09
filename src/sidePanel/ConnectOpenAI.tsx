@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import React Icons
 import {
- Box, Button, IconButton, Input 
+  Box,
+  Button,
+  IconButton,
+  Input,
 } from '@chakra-ui/react';
 
 import { useConfig } from './ConfigContext';
@@ -72,39 +75,39 @@ export const ConnectOpenAI = () => {
         onChange={e => setApiKey(e.target.value)}
       />
       {!isConnected && (
-      <Button
-        _hover={{
-          background: 'var(--active)',
-          border: '2px solid var(--text)'
-        }}
-        background="var(--active)"
-        border="2px solid var(--text)"
-        borderRadius={16}
-        color="var(--text)"
-        disabled={disabled}
-        size="sm"
-        onClick={onConnect}
-      >
-        connect
-      </Button>
+        <Button
+          _hover={{
+            background: 'var(--active)',
+            border: '2px solid var(--text)'
+          }}
+          background="var(--active)"
+          border="2px solid var(--text)"
+          borderRadius={16}
+          color="var(--text)"
+          disabled={disabled}
+          size="sm"
+          onClick={onConnect}
+        >
+          connect
+        </Button>
       )}
       {isConnected && (
-      <IconButton
-        _hover={{
-          background: 'var(--active)',
-          border: '2px solid var(--text)'
-        }}
-        aria-label="Done"
-        background="var(--active)"
-        border="2px solid var(--text)"
-        color="var(--text)"
-        fontSize="19px"
-        icon={visibleApiKeys ? <ViewOffIcon /> : <ViewIcon />}
-        size="sm"
-        variant="solid"
-        isRound
-        onClick={() => setVisibleApiKeys(!visibleApiKeys)}
-      />
+        <IconButton
+          _hover={{
+            background: 'var(--active)',
+            border: '2px solid var(--text)'
+          }}
+          aria-label="Done"
+          background="var(--active)"
+          border="2px solid var(--text)"
+          color="var(--text)"
+          fontSize="19px"
+          icon={visibleApiKeys ? <FaEyeSlash /> : <FaEye />} // Use React Icons
+          size="sm"
+          variant="solid"
+          isRound
+          onClick={() => setVisibleApiKeys(!visibleApiKeys)}
+        />
       )}
 
     </Box>

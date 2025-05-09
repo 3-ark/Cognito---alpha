@@ -1,14 +1,15 @@
 import { Dispatch, SetStateAction, useRef } from 'react';
 import { MessageTurn } from '../ChatHistory'; // Adjust path if needed
 import { fetchDataAsStream, webSearch, processQueryWithAI } from '../network';
-import storage from 'src/util/storageUtil';// --- Interfaces (Model, Config, ApiMessage) remain the same ---
+import storage from 'src/background/storageUtil';// --- Interfaces (Model, Config, ApiMessage) remain the same ---
 import type { Config, Model } from 'src/types/config';
-// ...rest of your code...
+import { normalizeApiEndpoint } from 'src/background/util';
+import { handleHighCompute, handleMediumCompute } from './computeHandlers'; // Import handlers
+
 interface ApiMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
 }
-
 
 // getAuthHeader remains the same...
 export const getAuthHeader = (config: Config, currentModel: Model) => {
@@ -30,7 +31,6 @@ export const getAuthHeader = (config: Config, currentModel: Model) => {
   return undefined;
 };
 
-
 const useSendMessage = (
   isLoading: boolean,
   originalMessage: string,
@@ -44,7 +44,7 @@ const useSendMessage = (
   setLoading: Dispatch<SetStateAction<boolean>>
 ) => {
    // Use a ref to track if the completion logic for a specific call has run
-   const completionGuard = useRef<Record<number, boolean>>({});
+   const completionGuard = useRef<number | null>(null); // Store the callId being processed
   
    const onSend = async (overridedMessage?: string) => {
     // Generate a unique ID for this specific call to onSend
@@ -62,16 +62,23 @@ const useSendMessage = (
       return;
     }
 
+        // Prevent concurrent sends
+    if (completionGuard.current !== null) {
+        console.warn(`[${callId}] useSendMessage: Bailing out: Another send operation (ID: ${completionGuard.current}) is already in progress.`);
+        return;
+    }
+
     console.log(`[${callId}] useSendMessage: Setting loading true.`);
 
     setLoading(true);
     setWebContent(''); // Clear previous web content display
     setPageContent('');
     // Reset the guard for this new call
-    completionGuard.current[callId] = false;
+    completionGuard.current = callId; // Mark this callId as active
 
     const userTurn: MessageTurn = {
       role: 'user',
+      status: 'complete',
       rawContent: message,
       timestamp: Date.now()
     };
@@ -79,7 +86,7 @@ const useSendMessage = (
     setMessage(''); // Clear input field
     console.log(`[${callId}] useSendMessage: User turn added to state.`);
 
-    let finalQuery = message;
+    let queryForProcessing = message; // Use a different variable for the potentially optimized query
     let searchRes: string = '';
     let processedQueryDisplay = ''; // To store the query for display
 
@@ -110,22 +117,27 @@ const useSendMessage = (
         historyForQueryOptimization
       );
       // Only update finalQuery if optimization was successful and different
-      if (optimizedQuery && optimizedQuery !== message) {
-          finalQuery = optimizedQuery;
-          processedQueryDisplay = `**SUB:** [*${finalQuery}*]\n\n`; // Prepare for display
-          console.log(`[${callId}] useSendMessage: Query optimized to: "${finalQuery}"`);
-      } else {
-          processedQueryDisplay = `**ORG:** (${finalQuery})\n\n`;
-          console.log(`[${callId}] useSendMessage: Using original query: "${finalQuery}"`);
-      }
-    }
+      if (optimizedQuery && optimizedQuery.trim() && optimizedQuery !== message) {
+        queryForProcessing = optimizedQuery;
+        processedQueryDisplay = `**SUB:** [*${queryForProcessing}*]\n\n`; // Prepare for display
+        console.log(`[${callId}] useSendMessage: Query optimized to: "${queryForProcessing}"`);
+   } else {
+    processedQueryDisplay = `**ORG:** (${queryForProcessing})\n\n`;
+    console.log(`[${callId}] useSendMessage: Using original query: "${queryForProcessing}"`);
+ }
+}  else {
+  queryForProcessing = message;
+}
 
     // --- Step 2: Perform Web Search ---
     if (performSearch) {
       console.log(`[${callId}] useSendMessage: Performing web search...`);
-      searchRes = await webSearch(finalQuery, config.webMode || 'google').catch(/* ... */);
+      searchRes = await webSearch(queryForProcessing, config.webMode || 'google').catch(/* ... */);
       console.log(`[${callId}] useSendMessage: Web search done. Length: ${searchRes.length}`);
    }
+
+    // Use the potentially optimized query for subsequent steps if web search was done
+    const messageToUse = performSearch ? queryForProcessing : message;
 
     // *** This variable holds the string you want to prepend ***
     const webLimit = 1000 * (config?.webLimit || 1);
@@ -191,89 +203,161 @@ const useSendMessage = (
     const assistantTurnPlaceholder: MessageTurn = {
       role: 'assistant',
       rawContent: '', // Start empty
+      status: 'complete', // Set to complete initially
       webDisplayContent: combinedWebContentDisplay, // Store the prefix info here!
       timestamp: Date.now() + 1 // Ensure slightly later timestamp
     };
     setTurns(prevTurns => [...prevTurns, assistantTurnPlaceholder]);
     console.log(`[${callId}] useSendMessage: Assistant placeholder turn added.`);
 
-    // --- Step 4: Call LLM (Streaming) ---
-    const configBody = { stream: true };
-    const urlMap: Record<string, string> = {
-      groq: 'https://api.groq.com/openai/v1/chat/completions',
-      ollama: `${config?.ollamaUrl || ''}/api/chat`,
-      gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-      lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`,
-      openai: 'https://api.openai.com/v1/chat/completions',
-      openrouter: 'https://openrouter.ai/api/v1/chat/completions',    // <-- Add this
-      custom: '${customEndpoint}/v1/chat/completions',
-    };
-    const host = currentModel.host || '';
-    const url = urlMap[host];
-
-    if (!url) {
-      console.error("[${callId}] Could not determine API URL for host:", currentModel.host);
-      setLoading(false);
-      return;
-    }
-
-    console.log(`[${callId}] useSendMessage: Sending chat request to ${url}`);
-
-    fetchDataAsStream(
-      url,
-      {
-        ...configBody,
-        model: config?.selectedModel || '',
-        messages: [
-          { role: 'system', content: systemContent },
-          ...messageForApi
-        ]
-      },
-      (part: string, isFinished?: boolean, isError?: boolean) => {
-        console.log(`[${callId}] fetchDataAsStream Callback: isFinished=${isFinished}, part length=${part?.length ?? 0}`);
-        
-        setTurns(prevTurns => {
-          if (prevTurns.length === 0) return prevTurns; // Should not happen if placeholder added
-          const lastTurn = prevTurns[prevTurns.length - 1];
-          // Only update if it's the assistant placeholder we added
-          if (lastTurn.role === 'assistant') {
-              // Update content, potentially mark as error
-              const updatedContent = isError ? `Error: ${part}` : part;
-               // Create a new object for the last turn to ensure state update
-              const updatedLastTurn = { ...lastTurn, rawContent: updatedContent };
-              return [...prevTurns.slice(0, -1), updatedLastTurn]; // Replace last element
+    // --- Step 4: Execute based on Compute Level ---
+    try {
+      if (config?.computeLevel === 'high' && currentModel) { // Keep currentModel check
+        console.log(`[${callId}] useSendMessage: Starting HIGH compute level.`);
+        // Pass messageToUse (potentially optimized) to handleHighCompute
+        await handleHighCompute(
+          messageToUse,
+          currentTurns, // Pass history for context if needed inside handleHighCompute
+          config,
+          currentModel,
+          authHeader,
+          (update, isFinished) => {
+            // Update the last (assistant) turn
+            setTurns(prevTurns => {
+              if (prevTurns.length === 0 || prevTurns[prevTurns.length - 1].role !== 'assistant') return prevTurns;
+              const lastTurn = prevTurns[prevTurns.length - 1];
+              return [
+                ...prevTurns.slice(0, -1),
+                {
+                  ...lastTurn,
+                  rawContent: update, // Update with progress or final result
+                  status: isFinished ? 'complete' : 'streaming',
+                  timestamp: Date.now()
+                }
+              ];
+            });
           }
-          return prevTurns; // Return previous state if last turn wasn't assistant
-      });
-        
-      if (isFinished) {
-          console.log("[${callId}] fetchDataAsStream Callback: 'isFinished' block ENTERED.");
-          
-          if (completionGuard.current[callId]) {
-            console.warn(`[${callId}] fetchDataAsStream Callback: 'isFinished' block SKIPPED - already executed for this callId.`);
-            return; // Already processed the finish signal for this specific onSend invocation
+        );
+        console.log(`[${callId}] useSendMessage: HIGH compute level finished.`);
+      } else if (config?.computeLevel === 'medium' && currentModel) {
+        console.log(`[${callId}] useSendMessage: Starting MEDIUM compute level.`);
+        await handleMediumCompute(
+          messageToUse,
+          currentTurns,
+          config,
+          currentModel,
+          authHeader,
+          (update, isFinished) => {
+            // Update the last (assistant) turn (same logic as high)
+            setTurns(prevTurns => {
+              if (prevTurns.length === 0 || prevTurns[prevTurns.length - 1].role !== 'assistant') return prevTurns;
+              const lastTurn = prevTurns[prevTurns.length - 1];
+              return [
+                ...prevTurns.slice(0, -1),
+                {
+                  ...lastTurn,
+                  rawContent: update,
+                  status: isFinished ? 'complete' : 'streaming',
+                  timestamp: Date.now()
+                }
+              ];
+            });
           }
-          completionGuard.current[callId] = true; // Mark as executed for this callId
-          console.log(`[${callId}] fetchDataAsStream Callback: Completion guard SET for this callId.`);
-         
-          // Final check log (optional)
-          setTurns(prev => {
-          console.log(`[${callId}] FINAL state check: Last turn content length = ${prev[prev.length-1]?.rawContent?.length}, webDisplay length = ${prev[prev.length-1]?.webDisplayContent?.length}`);
-          return prev; // Just logging, no actual change here
-          });
-          console.log(`[${callId}] Preparing to call setLoading(false).`);
-          setLoading(false);
-          console.log(`[${callId}] --- Stream finished processing COMPLETE ---`);          // Optional: Clear the streaming response state if needed, though it gets overwritten on next send
+        );
+        console.log(`[${callId}] useSendMessage: MEDIUM compute level finished.`);
+      } else {
+        // --- Standard Streaming Call (Low Compute or Default) ---
+        console.log(`[${callId}] useSendMessage: Starting standard streaming.`);
+        const normalizedUrl = normalizeApiEndpoint(config?.customEndpoint);
+        const configBody = { stream: true };
+        const urlMap: Record<string, string> = {
+          groq: 'https://api.groq.com/openai/v1/chat/completions',
+          ollama: `${config?.ollamaUrl || ''}/api/chat`,
+          gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+          lmStudio: `${config?.lmStudioUrl || ''}/v1/chat/completions`,
+          openai: 'https://api.openai.com/v1/chat/completions',
+          openrouter: 'https://openrouter.ai/api/v1/chat/completions',
+          custom: config?.customEndpoint ? `${normalizedUrl}/v1/chat/completions` : '',
+        };
+        const host = currentModel.host || '';
+        const url = urlMap[host];
+
+        if (!url || !currentModel) { // Add currentModel check
+          throw new Error(`Could not determine API URL for host: ${currentModel.host}`);
         }
-      },
-      authHeader,
-      currentModel.host || ''
-    );
-    console.log(`[${callId}] useSendMessage: fetchDataAsStream call INITIATED.`);
 
-  };
+        console.log(`[${callId}] useSendMessage: Sending chat request to ${url}`);
+        await fetchDataAsStream(
+          url,
+          {
+            ...configBody,
+            model: config?.selectedModel || '',
+            messages: [
+              { role: 'system', content: systemContent },
+              ...messageForApi // Use the history + original user message
+            ],
+            temperature: config?.temperature ?? 0.7,
+            max_tokens: config?.maxTokens ?? 2048,
+            top_p: config?.topP ?? 1,
+            presence_penalty: config?.presencePenalty ?? 0,
+          },
+          (part: string, isFinished?: boolean, isError?: boolean) => {
+            // Only process if this is the active call
+            if (completionGuard.current !== callId) return;
+
+            setTurns(prevTurns => {
+              if (prevTurns.length === 0 || prevTurns[prevTurns.length - 1].role !== 'assistant') return prevTurns;
+              const lastTurn = prevTurns[prevTurns.length - 1];
+              const updatedContent = isError ? `Error: ${part || 'Unknown stream error'}` : part;
+              const updatedStatus = isError ? 'error' : (isFinished ? 'complete' : 'streaming');
+
+              return [
+                ...prevTurns.slice(0, -1),
+                { ...lastTurn, rawContent: updatedContent, status: updatedStatus }
+              ];
+            });
+
+            if (isFinished || isError) {
+              console.log(`[${callId}] fetchDataAsStream Callback: Stream finished/errored.`);
+              setLoading(false);
+              completionGuard.current = null; // Allow next send
+              console.log(`[${callId}] --- Stream finished processing COMPLETE ---`);
+            }
+          },
+          authHeader,
+          currentModel.host || ''
+        );
+        console.log(`[${callId}] useSendMessage: fetchDataAsStream call INITIATED.`);
+      }
+    } catch (error) {
+      console.error(`[${callId}] useSendMessage: Error during send operation:`, error);
+      // Update the last turn with error status
+      setTurns(prevTurns => {
+        if (prevTurns.length === 0 || prevTurns[prevTurns.length - 1].role !== 'assistant') return prevTurns;
+        const lastTurn = prevTurns[prevTurns.length - 1];
+        return [
+          ...prevTurns.slice(0, -1),
+          { ...lastTurn, rawContent: `Error: ${error instanceof Error ? error.message : String(error)}`, status: 'error' }
+        ];
+      });
+    } finally {
+      // Ensure loading is always set to false and guard is cleared if the process wasn't streaming
+      if (config?.computeLevel === 'high' || config?.computeLevel === 'medium') {
+        console.log(`[${callId}] useSendMessage: Finalizing HIGH compute level state.`);
+         setLoading(false);
+         completionGuard.current = null; // Allow next send
+      } else if (completionGuard.current === callId) {
+        // If it was a streaming call but finished abruptly or errored before the callback cleared it
+        // setLoading(false); // Should be handled by the callback's isFinished/isError
+        // completionGuard.current = null;
+        console.log(`[${callId}] useSendMessage: Stream completion/error should handle final state.`);
+      }
+     }
+   };
+ 
 
   return onSend;
-};
+}
+// --- Export the hook ---
 
 export default useSendMessage;

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { CheckIcon } from '@chakra-ui/icons';
 import {
  Box, Button, IconButton, Input 
 } from '@chakra-ui/react';
+import { FiCheck } from 'react-icons/fi'; // Import FiCheck
 
 import { useConfig } from './ConfigContext';
 
@@ -94,7 +94,7 @@ export const ConnectOllama = () => {
           border="2px solid var(--text)"
           color="var(--text)"
           fontSize="md"
-          icon={<CheckIcon />}
+          icon={<FiCheck />} // Use FiCheck here
           size="sm"
           variant="solid"
           isRound

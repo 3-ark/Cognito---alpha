@@ -1,9 +1,9 @@
-// Fetching data using readable stream
 import { events } from 'fetch-event-stream';
 import { cleanUrl } from './WebSearch';
 import '../types/config.ts';
 import type { Config, Model } from 'src/types/config';
-// ...rest of your code...
+import { speakMessage } from '../background/ttsUtils'
+
 interface ApiMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -22,7 +22,7 @@ export const processQueryWithAI = async (
   config: Config,
   currentModel: Model,
   authHeader?: Record<string, string>,
-  contextMessages: ApiMessage[] = []
+  contextMessages: ApiMessage[] = [],
 ): Promise<string> => {
   try {
    // Ensure currentModel and host exist before trying to get the URL
@@ -57,7 +57,7 @@ Output:
 \n
 Example 2:
 Context: {{user}}:today is a nice day in paris i want to have a walk and find a restaurant to have a nice meal. {{assistant}}: Bonjour, it's a nice day!
-Input from user ({{user}}): please choose me the best restaurant 
+Input from user ({{user}}): please choose me the best restarant 
 Output:
 'best restaurants Paris France'
 \n
@@ -436,3 +436,23 @@ export async function fetchDataAsStream(
     finishStream(error instanceof Error ? error.message : String(error), true); // Finish with error state
   }
 }
+
+//* --- Text-to-Speech (TTS) Functionality --- */
+
+export const localTTS = async (text: string) => {
+  try {
+    const response = await fetch('http://localhost:5002/api/tts', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ text, speaker_id: 'default' })
+    });
+    
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    new Audio(audioUrl).play();
+  } catch (error) {
+    console.error('Local TTS failed:', error);
+    // Fallback to Web Speech API
+    speakMessage(text);
+  }
+};

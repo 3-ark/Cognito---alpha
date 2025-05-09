@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { normalizeApiEndpoint } from 'src/background/util';
 import { useConfig } from '../ConfigContext';
 import { fetchDataAsStream } from '../network';
 import { MessageTurn } from '../ChatHistory';
@@ -106,16 +107,19 @@ export const useChatTitle = (isLoading: boolean, turns: MessageTurn[], message: 
             };
 
           case 'custom':
-            return {
-              ...baseConfig,
-              url: '${customEndpoint}/v1/chat/completions',
-              headers: { Authorization: `Bearer ${config.customApiKey}` }
-            };
+            const normalizedUrl = normalizeApiEndpoint(config?.customEndpoint);
 
-          default:
-            console.warn(`useChatTitle: Unsupported host for title generation: ${currentModel.host}`);
-            return null;
-        }
+            if (!normalizedUrl) {
+              console.error("Custom endpoint is invalid or empty.");
+              throw new Error("Invalid custom endpoint"); 
+           }
+   
+           return {
+             ...baseConfig,
+             url: `${normalizedUrl}/v1/chat/completions`, // Use the normalized URL
+             headers: { Authorization: `Bearer ${config.customApiKey}` }
+           };
+          }
       };
 
       const apiConfig = getApiConfig();

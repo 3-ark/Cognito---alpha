@@ -19,7 +19,7 @@ export const Automation = () => {
       <AccordionButton _hover={{ backgroundColor: 'transparent' }} paddingBottom={1} paddingRight={2}>
         <SettingTitle
           padding={0}
-          text="automation"
+          text="Automation"
           icon="🔨"
           widget={(
             <Grid alignItems="center" display="flex">

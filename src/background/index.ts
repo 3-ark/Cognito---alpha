@@ -1,6 +1,6 @@
 import { getCurrentTab, injectContentScript } from 'src/background/util';
 import buildStoreWithDefaults from 'src/state/store';
-import storage from 'src/util/storageUtil';
+import storage from 'src/background/storageUtil';
 import PortNames from '../types/PortNames';
 
 // Initialize store but don't start background processes

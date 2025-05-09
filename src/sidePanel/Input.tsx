@@ -1,10 +1,11 @@
 import React, {
- ForwardedRef, useEffect, useRef 
+ ForwardedRef, useEffect, useRef, useState, useCallback 
 } from 'react';
 import ResizeTextarea from 'react-textarea-autosize';
-import { Box, Textarea } from '@chakra-ui/react';
-
+import { Box, Textarea, IconButton, Tooltip, useToast } from '@chakra-ui/react';
+import { FaRegStopCircle } from 'react-icons/fa'; // Import mic icons
 import { useConfig } from './ConfigContext';
+import { SlMicrophone } from "react-icons/sl";
 
 export const AutoResizeTextarea = React.forwardRef((props, ref) => (
   <Textarea
@@ -17,42 +18,131 @@ export const AutoResizeTextarea = React.forwardRef((props, ref) => (
     resize="none"
     w="100%"
     {...props}
+    p={1}
   />
 ));
 AutoResizeTextarea.displayName = 'AutoResizeTextarea';
 
-export const Input = ({ ...props }) => {
-  const { config } = useConfig();
-  const ref = useRef(null);
+
+interface InputProps {
+    isLoading: boolean;
+    message: string;
+    setMessage: (message: string) => void;
+    onSend: () => void;
+    // Add any other props if needed
+}
+
+export const Input: React.FC<InputProps> = ({ isLoading, message, setMessage, onSend }) => {
+const { config } = useConfig();
+const ref = useRef<HTMLTextAreaElement>(null);
+const [isListening, setIsListening] = useState(false);
+const toast = useToast(); // For showing errors
+
+// Use a ref to ensure we always have the latest setMessage without causing effect re-runs
+const setMessageRef = useRef(setMessage);
+useEffect(() => {
+  setMessageRef.current = setMessage;
+}, [setMessage]);
+
 
   useEffect(() => {
-    // @ts-expect-error ref can be null
-    ref?.current?.focus();
-  }, [props.message, config?.chatMode]);
+    ref.current?.focus();
+  }, [message, config?.chatMode]);
 
-  const placeholder = config?.chatMode === 'web' ? 'what to search?' : config?.chatMode === 'page' ? 'about the page..' : '';
+const placeholder = config?.chatMode === 'web' ? 'what to search?' : config?.chatMode === 'page' ? 'about the page..' : '';
 
-  return (
-    <Box ml={2} position="relative" width="100%">
-      <Box
-        bottom={0}
-        left={0}
-        position="absolute"
-        right={0}
-        sx={{
-          backgroundImage: 'url(assets/images/paper-texture.png)',
-          backgroundSize: 'auto',
-          opacity: 0.3,
-          pointerEvents: 'none',
-          borderRadius: '14px',
-          mixBlendMode: 'multiply',
-          zIndex: 100,
-          margin: '0 auto'
-        }}
-        top={0}
-      />
+const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+const handleListen = useCallback(async () => {
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      setMessageRef.current(prev => prev + transcript);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      toast({
+        title: 'Speech Error',
+        description: event.error,
+        status: 'error',
+        duration: 2000,
+      });
+      setIsListening(false);
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+    setIsListening(true);
+  } catch (err) {
+    console.error('Mic access error:', err);
+    toast({
+      title: 'Microphone access needed',
+      description: 'Please allow access to the microphone in your browser settings.',
+      status: 'error',
+      duration: 2000
+    });
+  }
+}, []);
+
+// this function is not used in the current code, because this function is not functional well. but maybe later
+// const handleStop = () => {
+//   recognitionRef.current?.stop();
+//   recognitionRef.current = null;
+//   setIsListening(false);
+// };
+
+
+useEffect(() => {
+  return () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+  };
+}, []);
+
+  return (    
+  <Box ml={2} position="relative" width="100%" display="flex" alignItems="center">
+      <Tooltip
+        label={isListening ? "Stop Listening" : "Start Listening"}
+        placement="top"
+        hasArrow
+        bg="var(--bg)"      // Added style
+        color="var(--text)" // Added style
+      >
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            handleListen();
+          }}
+          aria-label={isListening ? "Stop Listening" : "Start Listening"}
+          icon={isListening ? <FaRegStopCircle /> : <SlMicrophone />}
+          variant="ghost"
+          size="sm"
+          borderRadius="md" // Added for consistency
+          mr={2}
+          color={isListening ? "red.500" : "var(--text)"} // Change color based on listening state
+          isDisabled={isLoading || !(window.SpeechRecognition || window.webkitSpeechRecognition)}
+          _hover={{ bg: 'rgba(0, 0, 0, 0.1)' }} // Unified hover effect
+        />
+      </Tooltip>
+
       <AutoResizeTextarea
-        {...props}
         ref={ref}
         _focus={{
           borderColor: 'var(--text)',
@@ -64,7 +154,7 @@ export const Input = ({ ...props }) => {
         }}
         autoComplete="off"
         background="var(--bg)"
-        border="2px"
+        border="1px"
         borderColor="var(--text)"
         borderRadius={16}
         color="var(--text)"
@@ -74,22 +164,26 @@ export const Input = ({ ...props }) => {
         id="user-input"
         placeholder={placeholder}
         position="relative"
-        pr={12}
-        size="sm"
-        value={props.message}
+        size="lg"
+        value={message}
         width="100%"
         zIndex={1}
         autoFocus
-        onChange={event => props.setMessage(event.target.value)}
+        onChange={event => setMessage(event.target.value)}
         onKeyDown={event => {
-          if (props.isLoading) return;
+          if (isLoading) return;
 
-          if (event.keyCode === 13 && props.message && !event.altKey && !event.metaKey && !event.shiftKey) {
+          if (event.keyCode === 13 && message && !event.altKey && !event.metaKey && !event.shiftKey) {
             event.preventDefault();
             event.stopPropagation();
-            props.onSend();
-            props.setMessage('');
+            onSend();
+            setMessage('');
           }
+        }}
+        sx={{
+          // Use a specific pixel value for precise control inside the textarea
+          paddingLeft: '3',
+          paddingRight: '3' // Adjust this value (e.g., '18px', '20px') as needed
         }}
       />
     </Box>

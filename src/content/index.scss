@@ -1,3 +1,192 @@
+:root {
+  --bg: #F5E9D5;
+  --active: #dcc299;
+  --text: #5B4636;
+  --bold: #af1b1b;
+  --italic: #09993e;
+  --link: #003bb9;
+
+  /* Markdown-specific */
+  --markdown-h1: var(--bold);
+  --markdown-h2: var(--italic);
+  --markdown-h3: var(--text);
+  --markdown-strong: var(--bold);
+  --markdown-em: var(--italic);
+  --markdown-link: var(--link);
+  --markdown-code-bg: var(--text);
+  --markdown-code-fg: var(--bg);
+  --markdown-pre-bg: var(--text);
+  --markdown-pre-fg: var(--bg);
+  --markdown-table-border: var(--text);
+}
+
+/* Markdown element styles */
+.markdown-body h1 {
+  color: var(--markdown-h1);
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 1rem 0 1rem;
+  border-bottom: 2px solid var(--markdown-h1);
+  padding-bottom: 0.5rem;
+}
+
+.markdown-body h2 {
+  color: var(--markdown-h2);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 1rem 0 0.75rem;
+  border-bottom: 1px solid var(--markdown-h2);
+  padding-bottom: 0.4rem;
+}
+
+.markdown-body h3 {
+  color: var(--markdown-h3);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+  border-bottom: 1px dashed var(--markdown-h3);
+  padding-bottom: 0.3rem;
+}
+
+.markdown-body strong {
+  color: var(--markdown-strong);
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+}
+
+.markdown-body em {
+  color: var(--markdown-em);
+  font-style: italic;
+}
+
+.markdown-body a {
+  color: var(--markdown-link);
+  text-decoration: underline;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 2rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.markdown-body ul {
+  list-style-type: disc;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+}
+
+.markdown-body p {
+  padding-top: 0;
+  padding-bottom: 0.2rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.markdown-body pre {
+  overflow: auto;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin: 1rem 0;
+  background: var(--markdown-pre-bg);
+  color: var(--markdown-pre-fg);
+  border-radius: 16px;
+  max-width: 80vw;
+  font-family: monospace;
+}
+
+.markdown-body code {
+  color: var(--markdown-code-fg);
+  background: var(--markdown-code-bg);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+/* Table styles */
+.markdown-body table {
+  border: 2px solid var(--markdown-table-border);
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.markdown-body thead {
+  background: var(--text); /* Example background color */
+  border-bottom: 2px solid var(--markdown-table-border);
+  color: var(--bg)
+}
+
+.markdown-body th,
+.markdown-body td {
+  padding: 0.5rem;
+  border: 1px solid var(--markdown-table-border);
+}
+
+.markdown-body tr:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+/* Blockquote */
+.markdown-body blockquote {
+  border-left: 4px solid var(--markdown-h2);
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  background: rgba(0,0,0,0.03);
+  color: var(--markdown-h2);
+}
+
+/* Horizontal rule */
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--markdown-h2);
+  margin: 1.5em 0;
+}
+
+/* Subscript and superscript */
+.markdown-body sub,
+.markdown-body sup {
+  font-size: 0.8em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.markdown-body sup {
+  top: -0.5em;
+}
+
+.markdown-body sub {
+  bottom: -0.2em;
+}
+
+/* Math rendering (KaTeX) */
+.markdown-body .katex {
+  font-size: 1em;
+  color: var(--markdown-h2);
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .markdown-body pre {
+    max-width: 98vw;
+    font-size: 0.95em;
+  }
+  .markdown-body table {
+    font-size: 0.95em;
+  }
+}
+
 #app-root {
   width: 400px;
   height: 75px;

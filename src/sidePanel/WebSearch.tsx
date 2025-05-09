@@ -3,7 +3,6 @@ import {
   AccordionItem,
   AccordionPanel,
   Box,
-  Button,
   Grid,
   Slider,
   SliderFilledTrack,
@@ -15,28 +14,6 @@ import {
 // Removed unused imports: processQueryWithAI, urlRewriteRuntime, cleanUrl
 import { useConfig } from './ConfigContext';
 import { SettingTitle } from './SettingsTitle';
-
-// WebSearchButton, WebSearchModeSelector, WebSearchSlider components remain unchanged...
-const WebSearchButton = ({ size, config }) => (
-  <Button
-    _hover={{
-      background: 'var(--active)',
-      border: '2px solid var(--active)'
-    }}
-    background="var(--active)"
-    border="2px solid var(--text)"
-    borderRadius={16}
-    color="var(--text)"
-    mb={1}
-    ml={4}
-    mt="2px"
-    pl={4}
-    pr={4}
-    size="sm"
-  >
-    {size === 128 ? '' : `${size}k`}
-  </Button>
-);
 
 const WebSearchModeSelector = ({ webMode, updateConfig }) => (
   <Grid width="50%">
@@ -106,7 +83,7 @@ export const WebSearch = () => {
         <SettingTitle
           icon="🌐"
           padding={0}
-          text="web search"
+          text="Web Search"
         />
       </AccordionButton>
       <AccordionPanel p={4} pt={2}>

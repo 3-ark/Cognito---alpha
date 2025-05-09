@@ -3,43 +3,52 @@ import { Box, Text } from '@chakra-ui/react';
 interface SettingTitleProps {
   text?: string;
   widget?: React.ReactNode;
-  padding?: number;
+  // padding?: number; // Removed padding prop, handled by AccordionButton
   icon?: string;
 }
 
 export const SettingTitle = ({
- text = '', widget = <></>, padding = 4, icon = '' 
+ text = '', widget = <></>, icon = ''
 }: SettingTitleProps) => (
-  <Text
-    color="var(--text)"
+  // This Text component now represents the content *inside* the AccordionButton
+  <Box // Changed outer element to Box for better flex control
     display="flex"
-    fontSize="xl"
-    fontWeight={600}
+    alignItems="center" // Align icon, text, and widget vertically
     justifyContent="space-between"
-    padding={padding}
-    textAlign="left"
     width="100%"
+    // Removed padding, fontSize, fontWeight - these are now controlled by AccordionButton styles
   >
-    <Box alignItems="center" display="flex" pb={1}>
+    {/* Left side: Icon + Text */}
+    <Box display="flex" alignItems="center">
       {icon && (
-      <Text
-        color="var(--text)"
-        display="flex"
-        fontSize="1.25rem"
-        fontWeight={600}
-        justifyContent="space-between"
-        lineHeight="2rem"
-        mr={3}
-        padding={padding}
-        textAlign="left"
-      >
-        {icon}
-      </Text>
+        <Text
+          as="span" // Use span for inline display
+          color="var(--text)"
+          fontSize="1.25rem" // Keep icon size distinct if needed
+          lineHeight="1" // Adjust line height for better alignment
+          mr={3} // Keep margin-right
+          // Removed padding, fontWeight, etc.
+        >
+          {icon}
+        </Text>
       )}
-      {text}
+      {/* Apply drawer title styles here */}
+      <Text
+        as="span" // Use span for inline display
+        color="var(--text)"
+        opacity={0.9} // Slightly less opaque than drawer titles for hierarchy
+        fontSize="md" // Slightly smaller than drawer section titles
+        fontWeight="medium" // Match drawer button weight
+        textTransform="none" // Keep original case for accordion titles
+        // Removed padding, width, textAlign, etc.
+      >
+        {text}
+      </Text>
     </Box>
-    <Box>
+
+    {/* Right side: Widget */}
+    <Box ml={2}> {/* Add some margin if widget exists */}
       {widget}
     </Box>
-  </Text>
+  </Box>
 );

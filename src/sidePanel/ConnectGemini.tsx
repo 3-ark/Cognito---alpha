@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import React Icons
 import {
- Box, Button, IconButton, Input 
+  Box,
+  Button,
+  IconButton,
+  Input,
 } from '@chakra-ui/react';
 
 import { useConfig } from './ConfigContext';
@@ -23,14 +26,14 @@ export const ConnectGemini = () => {
           toast.success('connected to Gemini');
           updateConfig({
             geminiApiKey: apiKey,
-            geminiConnected: true, 
+            geminiConnected: true,
             geminiError: undefined,
             models: [
               ...(config?.models || []),
-              { id: 'gemini', host: 'gemini', active: true } 
+              { id: 'gemini', host: 'gemini', active: true }
             ],
             selectedModel: 'gemini'
-});
+          });
         }
       })
       .catch(err => {
@@ -88,7 +91,7 @@ export const ConnectGemini = () => {
           border="2px solid var(--text)"
           color="var(--text)"
           fontSize="19px"
-          icon={visibleApiKeys ? <ViewOffIcon /> : <ViewIcon />}
+          icon={visibleApiKeys ? <FaEyeSlash /> : <FaEye />} // Use React Icons
           size="sm"
           variant="solid"
           isRound

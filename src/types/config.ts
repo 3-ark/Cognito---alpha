@@ -13,7 +13,16 @@ export interface Model {
   host?: 'groq' | 'ollama' | 'gemini' | 'lmStudio' | 'openai' | 'openrouter' | 'custom' | string;
   active?: boolean;
   context_length?: number;
+  name?: string; // Make name optional
   // Add other model-specific properties if needed
+}
+
+// Add TTS Settings interface
+export interface TtsSettings {
+  selectedVoice?: string; // Store the name of the selected voice
+  rate?:number;
+  pitch?:number;
+  volume?:number; // Add other TTS settings like rate, pitch later if needed
 }
 
 export interface Config {
@@ -25,7 +34,11 @@ export interface Config {
   webLimit?: number;
   pageMode?: 'text' | 'html';
   contextLimit?: number;
-  params?: Record<string, unknown>; // For model parameters like temperature
+  ModelSettingsPanel?: Record<string, unknown>; // For model parameters like temperature
+  temperature?: number;
+  maxTokens?: number;
+  topP?: number;
+  presencePenalty?: number;
   lmStudioUrl?: string;
   lmStudioConnected?: boolean;
   lmStudioError?: string | unknown;
@@ -53,13 +66,28 @@ export interface Config {
   models?: Model[];
   selectedModel?: string;
   chatMode?: 'web' | 'page' | 'chat' | string;
-  theme?: string; // Add this line
+  theme?: string;
   customTheme?: {
-    active: string;
-    bg: string;
-    text: string;
-  };
-  panelOpen: boolean; // Add this property to Config interface
+    active?: string;
+    bg?: string;
+    text?: string;
+    bold?: string;
+    italic?: string;
+    link?: string;
+    codeBg?: string;
+    codeFg?: string;
+    preBg?: string;
+    preFg?: string;
+    tableBorder?: string;
+    error?: string;
+    success?: string;
+    warning?: string;
+    name?: string;
+  }; // Add the TTS settings object here
+  computeLevel: 'low' | 'medium' | 'high' | string;
+  paperTexture?: boolean;
+  panelOpen: boolean;
+  tts?: TtsSettings; // Add the TTS settings object here
 }
 
 export interface ConfigContextType {

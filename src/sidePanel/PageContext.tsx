@@ -20,36 +20,9 @@ export const PageContext = () => {
     >
       <AccordionButton _hover={{ backgroundColor: 'transparent' }} paddingBottom={1} paddingRight={2}>
         <SettingTitle
-          icon="📜"
+          icon="📄"
           padding={0}
-          text="page context"
-          widget={(
-            <Grid alignItems="center" display="flex">
-              {config?.host
-                && (
-                  <Button
-                    _hover={{
-                      background: 'var(--active)',
-                      border: '2px solid var(--active)'
-                    }}
-                    background="var(--active)"
-                    border="2px solid var(--text)"
-                    borderRadius={16}
-                    color="var(--text)"
-                    mb={1}
-                    ml={4}
-                    mt="2px"
-                    pl={4}
-                    pr={4}
-                    size="sm"
-                  >
-                    {isTextMode ? 'text' : 'html'}
-                    {' '}
-                    {size === 128 ? '' : `${size}k`}
-                  </Button>
-                )}
-            </Grid>
-          )}
+          text="Page Context"
         />
       </AccordionButton>
       <AccordionPanel p={4} pt={2}>
